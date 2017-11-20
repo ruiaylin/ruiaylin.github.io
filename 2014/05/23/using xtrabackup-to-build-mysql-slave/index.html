@@ -1,0 +1,646 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>使用XtraBackup搭建Slave | ruiaylin&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="ruichao.lin">
+    
+
+    
+    <meta name="description" content="使用Percona XtraBackup搭建slave数据库 下载安装XtraBackup1.在http://www.percona.com/downloads/XtraBackup/LATEST/    2.解压安装，并配置path路径 export PATH=$JAVA_HOME/bin:/usr/local/xx">
+<meta name="keywords" content="Xtrabackup">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用XtraBackup搭建Slave">
+<meta property="og:url" content="http://ruiaylin.github.io/2014/05/23/using xtrabackup-to-build-mysql-slave/index.html">
+<meta property="og:site_name" content="ruiaylin&#39;s Blog">
+<meta property="og:description" content="使用Percona XtraBackup搭建slave数据库 下载安装XtraBackup1.在http://www.percona.com/downloads/XtraBackup/LATEST/    2.解压安装，并配置path路径 export PATH=$JAVA_HOME/bin:/usr/local/xxx:$PATH   3.我的mysql的配置文件是/xx/my.cnf，如果不指">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2017-11-20T07:21:56.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用XtraBackup搭建Slave">
+<meta name="twitter:description" content="使用Percona XtraBackup搭建slave数据库 下载安装XtraBackup1.在http://www.percona.com/downloads/XtraBackup/LATEST/    2.解压安装，并配置path路径 export PATH=$JAVA_HOME/bin:/usr/local/xxx:$PATH   3.我的mysql的配置文件是/xx/my.cnf，如果不指">
+<meta name="twitter:creator" content="@ruiaylin">
+
+    
+    <link rel="alternative" href="/atom.xml" title="ruiaylin&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.jpeg" alt="ruiaylin&#39;s Blog" title="ruiaylin&#39;s Blog"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="ruiaylin&#39;s Blog">ruiaylin&#39;s Blog</a></h1>
+				<h2 class="blog-motto">蹈之而弗悔 ,  慎思而笃行  ...</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:ruiaylin.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2014/05/23/using xtrabackup-to-build-mysql-slave/" title="使用XtraBackup搭建Slave" itemprop="url">使用XtraBackup搭建Slave</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="ruichao.lin" target="_blank" itemprop="author">ruichao.lin</a>
+		
+  <p class="article-time">
+    <time datetime="2014-05-22T20:55:27.000Z" itemprop="datePublished"> 发表于 2014-05-23</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#下载安装XtraBackup"><span class="toc-number">1.</span> <span class="toc-text">下载安装XtraBackup</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#配置ssh-信任通道"><span class="toc-number">2.</span> <span class="toc-text">配置ssh 信任通道</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#全量备份并传输到slave机器："><span class="toc-number">3.</span> <span class="toc-text">全量备份并传输到slave机器：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#登录机器恢复"><span class="toc-number">4.</span> <span class="toc-text">登录机器恢复</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#只读启动mysql数据库"><span class="toc-number">5.</span> <span class="toc-text">只读启动mysql数据库</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#登录mysql-设置复制结构"><span class="toc-number">6.</span> <span class="toc-text">登录mysql 设置复制结构</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#启动恢复"><span class="toc-number">7.</span> <span class="toc-text">启动恢复</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#其他知识-："><span class="toc-number">8.</span> <span class="toc-text">其他知识 ：</span></a></li></ol>
+		
+		</div>
+		
+		<p>使用Percona XtraBackup搭建slave数据库</p>
+<h4 id="下载安装XtraBackup"><a href="#下载安装XtraBackup" class="headerlink" title="下载安装XtraBackup"></a>下载安装XtraBackup</h4><pre><code>1.在http://www.percona.com/downloads/XtraBackup/LATEST/   
+2.解压安装，并配置path路径 export PATH=$JAVA_HOME/bin:/usr/local/xxx:$PATH  
+3.我的mysql的配置文件是/xx/my.cnf，如果不指定，XtraBackup默认使用此文
+  件识别mysql安装目录，数据文件目录等信息
+</code></pre><h4 id="配置ssh-信任通道"><a href="#配置ssh-信任通道" class="headerlink" title="配置ssh 信任通道"></a>配置ssh 信任通道</h4><h4 id="全量备份并传输到slave机器："><a href="#全量备份并传输到slave机器：" class="headerlink" title="全量备份并传输到slave机器："></a>全量备份并传输到slave机器：</h4><p>备份数据库，直接传输到对应的机器 ，节省空间</p>
+<pre><code>innobackupex --user=root --password=xxxx --stream=tar /data/tmp/ --slave-info | ssh slaveip &quot;tar xfi - -C /data/tmp&quot;
+</code></pre><blockquote>
+<p>备份完成之后会提示日志：<br>日志</p>
+</blockquote>
+<pre><code>innobackupex: Backup created in directory &apos;/data/tmp&apos;
+innobackupex: MySQL binlog position: filename &apos;binlog.000755&apos;, position 95778375
+innobackupex: MySQL slave binlog position: master host &apos;10.209.140.22&apos;, filename &apos;binlog.001217&apos;, position 352370216
+innobackupex: You must use -i (--ignore-zeros) option for extraction of the tar stream.
+140313 12:56:53  innobackupex: completed OK!
+</code></pre><h4 id="登录机器恢复"><a href="#登录机器恢复" class="headerlink" title="登录机器恢复"></a>登录机器恢复</h4><pre><code>innobackupex --apply-log --ibbackup=xtrabackup /data/tmp/
+</code></pre><blockquote>
+<p>日志</p>
+</blockquote>
+<pre><code>140313 13:53:30 InnoDB: Completed initialization of buffer pool
+140313 13:53:30 InnoDB: highest supported file format is Barracuda.
+140313 13:53:34  InnoDB: Waiting for the background threads to start
+140313 13:53:35 Percona XtraDB (http://www.percona.com) 1.1.8-20.1 started; log sequence number 6528792620044
+140313 13:53:35 [Note] Event Scheduler: Loaded 0 events
+140313 13:53:35 [Note] /home/oracle/mysql/bin/mysqld: ready for connections.
+Version: &apos;5.5.18-log&apos;  socket: &apos;/data/mysql3306/run/mysql.sock&apos;  port: 3306  Source distribution
+</code></pre><blockquote>
+<p>####注 ：innobackupex –copy-back /data/tmp/　目录下面的<br> 可以把 /data/tmp/　目录下面的 ib*  copy 到 日志中的iblog目录下。 /data/tmp/下面的其他文件全部导入到 对于的datadir 目录下面。<br>修改conf文件， 配置service_id=xxx </p>
+</blockquote>
+<h4 id="只读启动mysql数据库"><a href="#只读启动mysql数据库" class="headerlink" title="只读启动mysql数据库"></a>只读启动mysql数据库</h4><pre><code>mysqld_safe --read-only=1 &amp;
+</code></pre><p>   　  </p>
+<h4 id="登录mysql-设置复制结构"><a href="#登录mysql-设置复制结构" class="headerlink" title="登录mysql 设置复制结构"></a>登录mysql 设置复制结构</h4><blockquote>
+<p> 在 master 上,需要创建一个复制的帐号:</p>
+</blockquote>
+<pre><code>grant replication slave, replication client on *.* to repl@&apos;219.32.22.%&apos; identified by &apos;password&apos;;
+FLUSH PRIVILEGES;
+</code></pre><blockquote>
+<p>根据备份的日志<br>innobackupex: MySQL binlog position: filename ‘binlog.000755’, position 95778375</p>
+</blockquote>
+<pre><code>--- reality like this bellow : 
+change master to master_host=&apos;xxx&apos;,master_user=&apos;repl&apos;,
+master_password=&apos;xxxx&apos;, master_port=3306,
+master_connect_retry=60,
+master_log_file=&apos;binlog.000755&apos;,
+master_log_pos=95778375; 
+</code></pre><h4 id="启动恢复"><a href="#启动恢复" class="headerlink" title="启动恢复"></a>启动恢复</h4><pre><code>start slave ; 
+show slave status \G
+</code></pre><blockquote>
+<p>到此完成备库搭建</p>
+</blockquote>
+<h4 id="其他知识-："><a href="#其他知识-：" class="headerlink" title="其他知识 ："></a>其他知识 ：</h4><blockquote>
+<p>待续</p>
+</blockquote>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/MySQL/">MySQL</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Xtrabackup/">Xtrabackup</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://ruiaylin.github.io/2014/05/23/using xtrabackup-to-build-mysql-slave/" data-title="使用XtraBackup搭建Slave | ruiaylin&#39;s Blog" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2014/05/31/mysql-auto-failover/" title="MySQL5.6自动Failover">
+  <strong>上一篇：</strong><br/>
+  <span>
+  MySQL5.6自动Failover</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2014/05/22/xtrabackup-for-mysql/"  title="Xtrabackup 备份原理">
+ <strong>下一篇：</strong><br/> 
+ <span>Xtrabackup 备份原理
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#下载安装XtraBackup"><span class="toc-number">1.</span> <span class="toc-text">下载安装XtraBackup</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#配置ssh-信任通道"><span class="toc-number">2.</span> <span class="toc-text">配置ssh 信任通道</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#全量备份并传输到slave机器："><span class="toc-number">3.</span> <span class="toc-text">全量备份并传输到slave机器：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#登录机器恢复"><span class="toc-number">4.</span> <span class="toc-text">登录机器恢复</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#只读启动mysql数据库"><span class="toc-number">5.</span> <span class="toc-text">只读启动mysql数据库</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#登录mysql-设置复制结构"><span class="toc-number">6.</span> <span class="toc-text">登录mysql 设置复制结构</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#启动恢复"><span class="toc-number">7.</span> <span class="toc-text">启动恢复</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#其他知识-："><span class="toc-number">8.</span> <span class="toc-text">其他知识 ：</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Docker/" title="Docker">Docker<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Go/" title="Go">Go<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MySQL/" title="MySQL">MySQL<sup>17</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/NewSQL/" title="NewSQL">NewSQL<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Oracle/" title="Oracle">Oracle<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Python/" title="Python">Python<sup>7</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/MySQL/" title="MySQL">MySQL<sup>10</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OPS/" title="OPS">OPS<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Fabric/" title="Fabric">Fabric<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Go/" title="Go">Go<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Replicaiton/" title="Replicaiton">Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Python/" title="Python">Python<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Group-Replicaiton/" title="Group Replicaiton">Group Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MGR/" title="MGR">MGR<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Xtrabackup/" title="Xtrabackup">Xtrabackup<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MHA/" title="MHA">MHA<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Sharding/" title="Sharding">Sharding<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DNS/" title="DNS">DNS<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/BIND/" title="BIND">BIND<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Shell/" title="Shell">Shell<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Discourse/" title="Discourse">Discourse<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forum/" title="Forum">Forum<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Multi-Instance/" title="Multi Instance">Multi Instance<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://flask.pocoo.org/" target="_blank" title="Flask Documentation">Flask Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://blog.miguelgrinberg.com/index " target="_blank" title=" Flask man">Miguel Grinberg</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://tympanus.net/codrops/ " target="_blank" title=" front end development">Codrops front</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://mysqlhighavailability.com/ " target="_blank" title=" MySQL HA">MySQL High Availability</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="http://lefred.be/ " target="_blank" title=" MySQL Expert">Lefred&#39;s blog</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> I&#39;m ruiayLin, Senior Database Expert at AUTOHOME.COM.CN   <br/>
+			Previous: Senior database engineer at Alipay.com for three years </p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		<a href="https://twitter.com/ruiaylin" target="_blank" class="icon-twitter" title="twitter"></a>
+		
+		
+		<a href="https://www.facebook.com/ruiayLin" target="_blank" class="icon-facebook" title="facebook"></a>
+		
+		
+		<a href="https://www.linkedin.com/in/ruichao-lin-5713624a" target="_blank" class="icon-linkedin" title="linkedin"></a>
+		
+		
+		
+		
+		
+		<a href="mailto:ruiaylin@gmail.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2017 
+		
+		<a href="/about" target="_blank" title="ruichao.lin">ruichao.lin</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?e6d1f421bbc9962127a50488f9ed37d1";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
