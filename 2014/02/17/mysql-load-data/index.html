@@ -1,0 +1,804 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>MySQL load data 操纵数据 | ruiayLin&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="ruichao.lin">
+    
+
+    
+    <meta name="description" content="Load Data 作为数据库工程师，跟数据打交道是常见的事情，数据导入导出也是常遇到的事情。下面对mysql的load data 作一些学习和总结。通过对5.1官方文档学习，并记录一下  工具使用语法LOAD DATA [LOW_PRIORITY | CONCURRENT] [LOCAL] INFILE &#39;file_name.txt&#39; [REPLACE | IGNORE] INT">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL load data 操纵数据">
+<meta property="og:url" content="http://ruiaylin.github.io/2014/02/17/mysql-load-data/index.html">
+<meta property="og:site_name" content="ruiayLin&#39;s Blog">
+<meta property="og:description" content="Load Data 作为数据库工程师，跟数据打交道是常见的事情，数据导入导出也是常遇到的事情。下面对mysql的load data 作一些学习和总结。通过对5.1官方文档学习，并记录一下  工具使用语法LOAD DATA [LOW_PRIORITY | CONCURRENT] [LOCAL] INFILE &#39;file_name.txt&#39; [REPLACE | IGNORE] INT">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2014-02-16T22:34:52.000Z">
+<meta property="article:modified_time" content="2024-03-02T09:18:29.295Z">
+<meta property="article:author" content="ruichao.lin">
+<meta property="article:tag" content="load-data">
+<meta property="article:tag" content="Load">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="ruiayLin&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.jpeg" alt="ruiayLin&#39;s Blog" title="ruiayLin&#39;s Blog"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="ruiayLin&#39;s Blog">ruiayLin&#39;s Blog</a></h1>
+				<h2 class="blog-motto">蹈之而弗悔 , 慎思而笃行 ...</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:ruiaylin.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2014/02/17/mysql-load-data/" title="MySQL load data 操纵数据" itemprop="url">MySQL load data 操纵数据</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="ruichao.lin" target="_blank" itemprop="author">ruichao.lin</a>
+		
+  <p class="article-time">
+    <time datetime="2014-02-16T22:34:52.000Z" itemprop="datePublished"> 发表于 2014-02-17</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#Load-Data"><span class="toc-number">1.</span> <span class="toc-text">Load Data</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B7%A5%E5%85%B7%E4%BD%BF%E7%94%A8%E8%AF%AD%E6%B3%95"><span class="toc-number">2.</span> <span class="toc-text">工具使用语法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#LOW-PRIORITY-CONCURRENT"><span class="toc-number">3.</span> <span class="toc-text">LOW_PRIORITY &amp; CONCURRENT</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%B3%A8%E9%87%8A"><span class="toc-number">3.1.</span> <span class="toc-text">注释</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A6%82%E6%9E%9C%E6%82%A8%E5%B8%8C%E6%9C%9B%E5%9C%A8%E8%BD%BD%E5%85%A5%E8%BF%90%E8%A1%8C%E8%BF%87%E7%A8%8B%E4%B8%AD%E5%BF%BD%E7%95%A5%E5%A4%96%E9%94%AE%E7%9A%84%E9%99%90%E5%88%B6%EF%BC%8C%E6%82%A8%E5%8F%AF%E4%BB%A5%E5%9C%A8%E6%89%A7%E8%A1%8CLOAD-DATA%E5%89%8D%E5%8F%91%E9%80%81%E4%B8%80%E4%B8%AASET-FOREIGN-KEY-CHECKS-0%E8%AF%AD%E5%8F%A5"><span class="toc-number">4.</span> <span class="toc-text">如果您希望在载入运行过程中忽略外键的限制，您可以在执行LOAD DATA前发送一个SET FOREIGN_KEY_CHECKS&#x3D;0语句</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%B3%A8%E9%87%8A-1"><span class="toc-number">4.1.</span> <span class="toc-text">注释</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#LOAD-DATA-INFILE-SELECT%E2%80%A6INTO-OUTFILE"><span class="toc-number">5.</span> <span class="toc-text">LOAD DATA INFILE &amp;SELECT…INTO OUTFILE</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%A8%E4%BE%8B%E5%A6%82%E4%B8%8B%EF%BC%9A"><span class="toc-number">6.</span> <span class="toc-text">用例如下：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E7%94%9F%E4%BA%A7%E4%B8%AD%E7%94%A8%E5%88%B0-%E7%9A%84%E5%92%8C%E5%AD%97%E6%AE%B5%E5%AF%B9%E5%BA%94%E5%85%B3%E7%B3%BB"><span class="toc-number">7.</span> <span class="toc-text">实际生产中用到 的和字段对应关系</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number"></span> <span class="toc-text">总结</span></a>
+		
+		</div>
+		
+		<h4 id="Load-Data"><a href="#Load-Data" class="headerlink" title="Load Data"></a>Load Data</h4><blockquote>
+<p>作为数据库工程师，跟数据打交道是常见的事情，数据导入导出<br>也是常遇到的事情。下面对mysql的load data 作一些学习和总结。<br>通过对5.1官方文档学习，并记录一下</p>
+</blockquote>
+<h4 id="工具使用语法"><a href="#工具使用语法" class="headerlink" title="工具使用语法"></a>工具使用语法</h4><pre><code>LOAD DATA [LOW_PRIORITY | CONCURRENT] [LOCAL] INFILE &#39;file_name.txt&#39;
+[REPLACE | IGNORE]
+INTO TABLE tbl_name
+[FIELDS
+    [TERMINATED BY &#39;string&#39;]
+    [[OPTIONALLY] ENCLOSED BY &#39;char&#39;]
+    [ESCAPED BY &#39;char&#39; ]
+]
+[LINES
+    [STARTING BY &#39;string&#39;]
+    [TERMINATED BY &#39;string&#39;]
+]
+[IGNORE number LINES]
+[(col_name_or_user_var,...)]
+[SET col_name = expr,...)]
+</code></pre>
+<p>LOAD DATA INFILE语句用于高速地从一个文本文件中读取行，并装入一个表中。文件名称必须为一个文字字符串</p>
+<h4 id="LOW-PRIORITY-CONCURRENT"><a href="#LOW-PRIORITY-CONCURRENT" class="headerlink" title="LOW_PRIORITY &amp; CONCURRENT"></a>LOW_PRIORITY &amp; CONCURRENT</h4><blockquote>
+<p>LOW_PRIORITY:  LOAD DATA语句的执行被延迟，直到没有其它的客户端从表中读取为止.<br>CONCURRENT  :如果一个MyISAM表满足同时插入的条件（即该表在中间有空闲块），LOAD<br>DATA正在执行时，其它线程会从表中重新获取数据。即使没有其它线程在同时使用本表格<br>使用本选项也会略微影响LOAD DATA的性能</p>
+</blockquote>
+<blockquote>
+<p>LOCAL : 如果指定了LOCAL，则被认为与连接的客户端有关,如果指定了LOCAL，则文件会被客户主机上的客户端读取，并被发送到服务器。文件会被给予一个完整的路径名称，以指定确切的位置。如果给定的是一个相对的路径名称，则此名称会被理解为相对于启动客户端时所在的目录<br> 如果LOCAL没有被指定，则文件必须位于服务器主机上，并且被服务器直接读取。<br>当在服务器主机上为文件定位时，服务器使用以下规则：</p>
+</blockquote>
+<pre><code>1. 如果给定了一个绝对的路径名称，则服务器使用此路径名称。
+2. 如果给定了带有一个或多个引导组件的相对路径名称，则服务器会搜索相对于服务器数据目录的文件。 
+3. 如果给定了一个不带引导组件的文件名称，则服务器会在默认数据库的数据库目录中寻找文件。
+</code></pre>
+<blockquote>
+<h5 id="注释"><a href="#注释" class="headerlink" title="注释"></a>注释</h5><p>如果使用了LOCAL 参数，其实会比直接操作数据库文件慢，毕竟每次都会通过mysql客户<br>端来处理文件，再发送给sever 处理。</p>
+</blockquote>
+<p>####REPLACE &amp; IGNORE</p>
+<blockquote>
+<p>如果您指定了REPLACE，则输入行会替换原有行（换句话说，与原有行一样，对一个主索引或唯一索引具有相同值的行）</p>
+</blockquote>
+<blockquote>
+<p>如果您指定IGNORE，则把原有行复制到唯一关键字值的输入行被跳过</p>
+</blockquote>
+<blockquote>
+<p>如果您这两个选项都不指定，则运行情况根据LOCAL关键词是否被指定而定。不使用LOCAL<br>时，当出现重复关键字值时，会发生错误，并且剩下的文本文件被忽略。使用LOCAL时，<br>默认的运行情况和IGNORE被指定时的情况相同；这是因为在运行中间，服务器没有办法中<br>止文件的传输。</p>
+</blockquote>
+<blockquote>
+<h4 id="如果您希望在载入运行过程中忽略外键的限制，您可以在执行LOAD-DATA前发送一个SET-FOREIGN-KEY-CHECKS-0语句"><a href="#如果您希望在载入运行过程中忽略外键的限制，您可以在执行LOAD-DATA前发送一个SET-FOREIGN-KEY-CHECKS-0语句" class="headerlink" title="如果您希望在载入运行过程中忽略外键的限制，您可以在执行LOAD DATA前发送一个SET FOREIGN_KEY_CHECKS&#x3D;0语句"></a>如果您希望在载入运行过程中忽略外键的限制，您可以在执行LOAD DATA前发送一个SET FOREIGN_KEY_CHECKS&#x3D;0语句</h4></blockquote>
+<h5 id="注释-1"><a href="#注释-1" class="headerlink" title="注释"></a>注释</h5><pre><code>当您有许多索引时，这通常会使LOAD DATA INFILE大大加快。通常，LOAD DATA INFILE的速度会非常快，但是在某些极端情况下，您可以在把文件载入到表中之前使用ALTER TABLE...DISABLE KEYS关闭LOAD DATA INFILE，或者在载入文件之后使用ALTER TABLE...ENABLE KEYS再次创建索引，使创建索引的速度更快
+</code></pre>
+<h4 id="LOAD-DATA-INFILE-SELECT…INTO-OUTFILE"><a href="#LOAD-DATA-INFILE-SELECT…INTO-OUTFILE" class="headerlink" title="LOAD DATA INFILE &amp;SELECT…INTO OUTFILE"></a>LOAD DATA INFILE &amp;SELECT…INTO OUTFILE</h4><blockquote>
+<p>LOAD DATA INFILE是SELECT…INTO OUTFILE的补语,要从一个表中把数据<br>写入一个文件中，应使用SELECT…INTO OUTFILE。要读取文件，放回到表中，<br>应使用LOAD DATA INFILE。FIELDS和LINES子句的语法对于两个语句是一样的。<br>两个子句都是自选的，但是如果两个都被指定了，FIELDS必须位于LINES的前面。</p>
+</blockquote>
+<p>如果您指定了一个FIELDS子句，则每个亚子句（TERMINATED BY, [OPTIONALLY] ENCLOSED BY和ESCAPED BY）也是自选的。不过，您必须指定其中至少一个。如果您不指定FIELDS<br>子句，则默认值为假设您写下如下语句时的值：</p>
+<pre><code>FIELDS TERMINATED BY &#39;\t&#39; ENCLOSED BY &#39;&#39; ESCAPED BY &#39;\\&#39;
+</code></pre>
+<p>如果您不指定LINES子句，则默认值为假设您写下如下语句时的值：</p>
+<pre><code>LINES TERMINATED BY &#39;\n&#39; STARTING BY &#39;
+</code></pre>
+<p>换句话说，当读取输入值时，默认值会使LOAD DATA INFILE按如下方式运行：</p>
+<h4 id="用例如下："><a href="#用例如下：" class="headerlink" title="用例如下："></a>用例如下：</h4><blockquote>
+<p>示例１：</p>
+</blockquote>
+<pre><code>mysql&gt; LOAD DATA INFILE &#39;/tmp/test.txt&#39;
+     -&gt; INTO TABLE test LINES STARTING BY &quot;xxx&quot;;
+</code></pre>
+<p>使用此语句，您可以读入包含有如下内容的文件：</p>
+<pre><code>xxx&quot;row&quot;,1
+something xxx&quot;row&quot;,2
+并只得到数据(&quot;row&quot;,1)和(&quot;row&quot;,2)。
+</code></pre>
+<blockquote>
+<p>示例 2 ：<br> IGNORE number LINES选项可以被用于在文件的开始处忽略行。例如，您可以使用IGNORE 1 LINES来跳过一个包含列名称的起始标题行<br>    mysql&gt; LOAD DATA INFILE ‘&#x2F;tmp&#x2F;test.txt’<br>        -&gt; INTO TABLE test IGNORE 1 LINES;</p>
+</blockquote>
+<blockquote>
+<p>示例 3 ：当您联合使用SELECT…INTO OUTFILE和LOAD DATA INFILE来从一个数据库中把数据写入一个文件中，然后再读取文件，返回到数据库中时，用于两个语句的field-和line-handling 选项必须匹配。否则，LOAD DATA INFILE不会正确地理解文件的内容。<br>假设您使用SELECT…INTO OUTFILE来编写一个的文件，字段由逗号分隔：</p>
+</blockquote>
+<pre><code>mysql&gt; SELECT * INTO OUTFILE &#39;data.txt&#39;
+    -&gt;          FIELDS TERMINATED BY &#39;,&#39;
+    -&gt;          FROM table2;
+</code></pre>
+<p>要读取由逗号分隔的文件并返回，则正确的语句应该是：</p>
+<pre><code>mysql&gt; LOAD DATA INFILE &#39;data.txt&#39; INTO TABLE table2
+    -&gt;   FIELDS TERMINATED BY &#39;,&#39;;
+</code></pre>
+<p>如果您尝试使用以下所示的语句读入文件，则不会运行，因为该语句命令LOAD DATA INFILE寻找位于字段之间的制表符：</p>
+<pre><code>mysql&gt; LOAD DATA INFILE &#39;data.txt&#39; INTO TABLE table2
+    -&gt;           FIELDS TERMINATED BY &#39;\t&#39;;
+</code></pre>
+<p>结果很可能是，每个输入行被理解为一个单一字段。</p>
+<blockquote>
+<p>###LOAD DATA INFILE也可以被用于读取从外源中获取的文件。</p>
+</blockquote>
+<blockquote>
+<p>示例 4 ：一个dBASE格式的文件具有以逗号分隔并且包含在双引号中的字段。如果文件中的各行以新行为结尾，则此处所示的语句描述了您可以用于载入文件的field-和line-handling选项：</p>
+</blockquote>
+<pre><code>mysql&gt; LOAD DATA INFILE &#39;data.txt&#39; INTO TABLE tbl_name
+    -&gt;           FIELDS TERMINATED BY &#39;,&#39; ENCLOSED BY &#39;&quot;&#39;
+    -&gt;           LINES TERMINATED BY &#39;\n&#39;;
+</code></pre>
+<p>所有field-或line-handling选项都可以指定一个空字符串(‘’) 如果字符串不是空的，<br>则FIELDS [OPTIONALLY] ENCLOSED BY和FIELDS ESCAPED BY值必须为单一字符。FIELDS TERMINATED BY, LINES STARTING BY和LINES TERMINATED BY值可以超过一个字符。例如，要编写由回车&#x2F;换行成对字符作为结尾的行，或读取包含这类行的文件，则应指定一个LINES TERMINATED BY ‘\r\n’子句。</p>
+<blockquote>
+<p>FIELDS [OPTIONALLY] ENCLOSED BY用于控制字段的引号。对于（SELECT…INTO OUTFILE），如果您忽略了词语OPTIONALLY，则所有的字段都被包含在ENCLOSED BY字符串中。此处展示了此类输出的一个示例（使用逗号作为字段分隔符）：</p>
+</blockquote>
+<pre><code>&quot;1&quot;,&quot;a string&quot;,&quot;100.20&quot;
+&quot;2&quot;,&quot;a string containing a , comma&quot;,&quot;102.20&quot;
+&quot;3&quot;,&quot;a string containing a \&quot; quote&quot;,&quot;102.20&quot;
+&quot;4&quot;,&quot;a string containing a \&quot;, quote and comma&quot;,&quot;102.20&quot;
+</code></pre>
+<p>如果您指定了OPTINALLY，则ENCLOSED BY字符只被用于包含具有字符串数据类型<br>（比如CHAR, BINARY, TEXT或ENUM）的列中的值：</p>
+<pre><code>1,&quot;a string&quot;,100.20
+2,&quot;a string containing a , comma&quot;,102.20
+3,&quot;a string containing a \&quot; quote&quot;,102.20
+4,&quot;a string containing a \&quot;, quote and comma&quot;,102.20
+
+...
+</code></pre>
+<h4 id="实际生产中用到-的和字段对应关系"><a href="#实际生产中用到-的和字段对应关系" class="headerlink" title="实际生产中用到 的和字段对应关系"></a>实际生产中用到 的和字段对应关系</h4><pre><code>load data infile &#39;/data/tmp/load/test.vp&#39; replace into table mdm_biz_list_interface fields terminated by &#39;,&#39; LINES TERMINATED BY &#39;\n&#39;  ( $cols ) ;
+</code></pre>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><pre><code>load data 对于mysql 来讲 就相当于oracle的 sql loader ，这些都是作为一个DBA
+的基本工作技能。 mark一下，记做笔记  ... 
+</code></pre>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/MySQL/">MySQL</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/load-data/">load-data</a><a href="/tags/Load/">Load</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://ruiaylin.github.io/2014/02/17/mysql-load-data/" data-title="MySQL load data 操纵数据 | ruiayLin&#39;s Blog" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2014/02/27/mult-instance-mysql/" title="Mysql Multi Instance">
+  <strong>上一篇：</strong><br/>
+  <span>
+  Mysql Multi Instance</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2014/01/01/fabric/"  title="批量部署 自动化之 - [fabric]">
+ <strong>下一篇：</strong><br/> 
+ <span>批量部署 自动化之 - [fabric]
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#Load-Data"><span class="toc-number">1.</span> <span class="toc-text">Load Data</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B7%A5%E5%85%B7%E4%BD%BF%E7%94%A8%E8%AF%AD%E6%B3%95"><span class="toc-number">2.</span> <span class="toc-text">工具使用语法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#LOW-PRIORITY-CONCURRENT"><span class="toc-number">3.</span> <span class="toc-text">LOW_PRIORITY &amp; CONCURRENT</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%B3%A8%E9%87%8A"><span class="toc-number">3.1.</span> <span class="toc-text">注释</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A6%82%E6%9E%9C%E6%82%A8%E5%B8%8C%E6%9C%9B%E5%9C%A8%E8%BD%BD%E5%85%A5%E8%BF%90%E8%A1%8C%E8%BF%87%E7%A8%8B%E4%B8%AD%E5%BF%BD%E7%95%A5%E5%A4%96%E9%94%AE%E7%9A%84%E9%99%90%E5%88%B6%EF%BC%8C%E6%82%A8%E5%8F%AF%E4%BB%A5%E5%9C%A8%E6%89%A7%E8%A1%8CLOAD-DATA%E5%89%8D%E5%8F%91%E9%80%81%E4%B8%80%E4%B8%AASET-FOREIGN-KEY-CHECKS-0%E8%AF%AD%E5%8F%A5"><span class="toc-number">4.</span> <span class="toc-text">如果您希望在载入运行过程中忽略外键的限制，您可以在执行LOAD DATA前发送一个SET FOREIGN_KEY_CHECKS&#x3D;0语句</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%B3%A8%E9%87%8A-1"><span class="toc-number">4.1.</span> <span class="toc-text">注释</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#LOAD-DATA-INFILE-SELECT%E2%80%A6INTO-OUTFILE"><span class="toc-number">5.</span> <span class="toc-text">LOAD DATA INFILE &amp;SELECT…INTO OUTFILE</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%A8%E4%BE%8B%E5%A6%82%E4%B8%8B%EF%BC%9A"><span class="toc-number">6.</span> <span class="toc-text">用例如下：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E7%94%9F%E4%BA%A7%E4%B8%AD%E7%94%A8%E5%88%B0-%E7%9A%84%E5%92%8C%E5%AD%97%E6%AE%B5%E5%AF%B9%E5%BA%94%E5%85%B3%E7%B3%BB"><span class="toc-number">7.</span> <span class="toc-text">实际生产中用到 的和字段对应关系</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number"></span> <span class="toc-text">总结</span></a>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Docker/" title="Docker">Docker<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Go/" title="Go">Go<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MySQL/" title="MySQL">MySQL<sup>18</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/NewSQL/" title="NewSQL">NewSQL<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Oracle/" title="Oracle">Oracle<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Python/" title="Python">Python<sup>7</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/MySQL/" title="MySQL">MySQL<sup>11</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OPS/" title="OPS">OPS<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Fabric/" title="Fabric">Fabric<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Go/" title="Go">Go<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Group-Replicaiton/" title="Group Replicaiton">Group Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MGR/" title="MGR">MGR<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Replicaiton/" title="Replicaiton">Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MHA/" title="MHA">MHA<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Python/" title="Python">Python<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Xtrabackup/" title="Xtrabackup">Xtrabackup<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DNS/" title="DNS">DNS<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Sharding/" title="Sharding">Sharding<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Discourse/" title="Discourse">Discourse<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forum/" title="Forum">Forum<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">知识链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/org/polardb-x" target="_blank" title="PloarDB-X专栏">PloarDB-X专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://cn.pingcap.com/blog/" target="_blank" title="TiDB 博客">TiDB 博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/doc/refman/8.0/en/" target="_blank" title="MySQL 8.0 Docs">MySQL 8.0 Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/blog-archive/" target="_blank" title="MySQL Server Blog">MySQL Server Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://lefred.be/" target="_blank" title="Lefred&#39;s blog">Lefred&#39;s blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/people/wen-zheng-hu" target="_blank" title="温正湖专栏">温正湖专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.percona.com/blog/" target="_blank" title="Percona Blog">Percona Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://engineering.fb.com/" target="_blank" title="Meta Engineering">Meta Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.uber.com/en-US/blog/engineering/" target="_blank" title="Uber Engineering">Uber Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.blog/category/engineering/" target="_blank" title="Github Engineering">Github Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://medium.com/pinterest-engineering" target="_blank" title="Pinterest Engineering">Pinterest Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://flask.palletsprojects.com/" target="_blank" title="Flask Docs">Flask Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://tympanus.net/codrops/" target="_blank" title="Codrops front">Codrops front</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
+			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
+		
+		<a href="/about" target="_blank" title="ruichao.lin">ruichao.lin</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+        getSize();
+        if (myWidth >= 1024) {
+          c.click();
+        }
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?e6d1f421bbc9962127a50488f9ed37d1";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

@@ -1,0 +1,1039 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>批量部署 自动化之 - [fabric] | ruiayLin&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="ruichao.lin">
+    
+
+    
+    <meta name="description" content="如何使用fabric 自动化日常管理任务和部署 所谓工欲善其事，必先利其器  自动化，批量化是作为管理员，或者运维人员必须面临的问题。自动化和批量化也有很多方式，可以用单一工具也可以自己写shell脚本，甚至可以开发出来一套完备的任务管理系统。其实我们大多时候可以在一台主机上面通过ssh来控制所有机器，来完成我们的任务工作。是否有这样的工具来支持我们呢？ 答案是肯定的。下面就切入今天的主题 FAB">
+<meta property="og:type" content="article">
+<meta property="og:title" content="批量部署 自动化之 - [fabric]">
+<meta property="og:url" content="http://ruiaylin.github.io/2014/01/01/fabric/index.html">
+<meta property="og:site_name" content="ruiayLin&#39;s Blog">
+<meta property="og:description" content="如何使用fabric 自动化日常管理任务和部署 所谓工欲善其事，必先利其器  自动化，批量化是作为管理员，或者运维人员必须面临的问题。自动化和批量化也有很多方式，可以用单一工具也可以自己写shell脚本，甚至可以开发出来一套完备的任务管理系统。其实我们大多时候可以在一台主机上面通过ssh来控制所有机器，来完成我们的任务工作。是否有这样的工具来支持我们呢？ 答案是肯定的。下面就切入今天的主题 FAB">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2013-12-31T22:40:53.000Z">
+<meta property="article:modified_time" content="2024-03-02T09:18:29.288Z">
+<meta property="article:author" content="ruichao.lin">
+<meta property="article:tag" content="OPS">
+<meta property="article:tag" content="Fabric">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="ruiayLin&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.jpeg" alt="ruiayLin&#39;s Blog" title="ruiayLin&#39;s Blog"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="ruiayLin&#39;s Blog">ruiayLin&#39;s Blog</a></h1>
+				<h2 class="blog-motto">蹈之而弗悔 , 慎思而笃行 ...</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:ruiaylin.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2014/01/01/fabric/" title="批量部署 自动化之 - [fabric]" itemprop="url">批量部署 自动化之 - [fabric]</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="ruichao.lin" target="_blank" itemprop="author">ruichao.lin</a>
+		
+  <p class="article-time">
+    <time datetime="2013-12-31T22:40:53.000Z" itemprop="datePublished"> 发表于 2014-01-01</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8fabric-%E8%87%AA%E5%8A%A8%E5%8C%96%E6%97%A5%E5%B8%B8%E7%AE%A1%E7%90%86%E4%BB%BB%E5%8A%A1%E5%92%8C%E9%83%A8%E7%BD%B2"><span class="toc-number">1.</span> <span class="toc-text">如何使用fabric 自动化日常管理任务和部署</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#fabric%E7%9A%84%E5%AE%98%E6%96%B9%E4%BB%8B%E7%BB%8D%EF%BC%9A"><span class="toc-number">2.</span> <span class="toc-text">fabric的官方介绍：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#fabric-%E5%8F%AF%E4%BB%A5%E4%B8%BA%E5%93%AA%E4%BA%9B%E4%BA%BA%E6%9C%8D%E5%8A%A1"><span class="toc-number">2.0.1.</span> <span class="toc-text">fabric 可以为哪些人服务</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#fabric-%E5%B8%B8%E7%94%A8%E6%8E%A5%E5%8F%A3"><span class="toc-number">2.0.2.</span> <span class="toc-text">fabric 常用接口</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#fabric-%E8%BF%98%E6%8F%90%E4%BE%9B%E4%BA%86%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AE%A1%E7%90%86%E5%99%A8"><span class="toc-number">2.0.3.</span> <span class="toc-text">fabric 还提供了上下文管理器</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#fabric-%E5%AE%89%E8%A3%85"><span class="toc-number">2.1.</span> <span class="toc-text">fabric 安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#fabric-%E7%BC%96%E7%A8%8B%E6%A8%A1%E5%9E%8B%E4%BB%8B%E7%BB%8D"><span class="toc-number">2.2.</span> <span class="toc-text">fabric 编程模型介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#fabric%E4%B8%BB%E8%A6%81%E6%8E%A5%E5%8F%A3%E6%96%B9%E6%B3%95"><span class="toc-number">2.2.1.</span> <span class="toc-text">fabric主要接口方法</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#run-fabric-operations-run"><span class="toc-number">2.2.1.1.</span> <span class="toc-text">run (fabric.operations.run)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#sudo-fabric-operations-sudo"><span class="toc-number">2.2.1.2.</span> <span class="toc-text">sudo (fabric.operations.sudo)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#local-fabric-operations-local"><span class="toc-number">2.2.1.3.</span> <span class="toc-text">local (fabric.operations.local)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#get-fabric-operations-get"><span class="toc-number">2.2.1.4.</span> <span class="toc-text">get (fabric.operations.get)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#put-fabric-operations-put"><span class="toc-number">2.2.1.5.</span> <span class="toc-text">put (fabric.operations.put)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%B9%B6%E8%A1%8C%E6%89%A7%E8%A1%8C"><span class="toc-number">2.2.1.6.</span> <span class="toc-text">并行执行</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MySQL-%E5%AE%89%E8%A3%85%E5%AE%9E%E4%BE%8B"><span class="toc-number">3.</span> <span class="toc-text">MySQL 安装实例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<h2 id="如何使用fabric-自动化日常管理任务和部署"><a href="#如何使用fabric-自动化日常管理任务和部署" class="headerlink" title="如何使用fabric 自动化日常管理任务和部署"></a>如何使用fabric 自动化日常管理任务和部署</h2><blockquote>
+<p>所谓工欲善其事，必先利其器</p>
+</blockquote>
+<p>自动化，批量化是作为管理员，或者运维人员必须面临的问题。自动化和批量化也有很多方式，可以用单一工具也可以自己写shell脚本，甚至可以开发出来一套完备的任务管理系统。其实我们大多时候可以在一台主机上面通过ssh来控制所有机器，来完成我们的任务工作。是否有这样的工具来支持我们呢？ 答案是肯定的。<br>下面就切入今天的主题 FABRIC</p>
+<h2 id="fabric的官方介绍："><a href="#fabric的官方介绍：" class="headerlink" title="fabric的官方介绍："></a>fabric的官方介绍：</h2><p>看一下官方介绍，来一个清晰的认识 </p>
+<pre><code>Fabric is a Python (2.5-2.7) library and command-line tool for streamlining the use of SSH 
+for application deployment or systems administration tasks.
+    More specifically, Fabric is: A tool that lets you execute arbitrary Python functions via 
+the command line;A library of subroutines (built on top of a lower-level library) to make 
+executing shell commands over SSH easy and Pythonic. Naturally, most users combine these 
+two things, using Fabric to write and execute Python functions, or tasks, to automate
+interactions with remote servers. 
+</code></pre>
+<h4 id="fabric-可以为哪些人服务"><a href="#fabric-可以为哪些人服务" class="headerlink" title="fabric 可以为哪些人服务"></a>fabric 可以为哪些人服务</h4><pre><code>Python 开发者
+系统管理员 [ SA , ASA, DBA ...]
+应用开发者
+</code></pre>
+<h4 id="fabric-常用接口"><a href="#fabric-常用接口" class="headerlink" title="fabric 常用接口"></a>fabric 常用接口</h4><p>fabric是对ssh的一个集成工具，对我们而言只需要使用相应的接口，来高效的完成工作，我们常用到的功能基本是 ： 本地或者远端执行命令， 分发文件，收集文件，还有一些权限相关的操作。 这些fabric都给我们提供了对应的接口。<br>如下所示： </p>
+<pre><code>run (fabric.operations.run)
+sudo (fabric.operations.sudo)
+local (fabric.operations.local)
+get (fabric.operations.get)
+put (fabric.operations.put)
+prompt (fabric.operations.prompt)
+reboot (fabric.operations.reboot)
+</code></pre>
+<h4 id="fabric-还提供了上下文管理器"><a href="#fabric-还提供了上下文管理器" class="headerlink" title="fabric 还提供了上下文管理器"></a>fabric 还提供了上下文管理器</h4><p>接口部分提供了命令运行的方式，不过都无法保持上下文关系，为了解决这个问题，fabric的context manager 就派上了用场： </p>
+<pre><code>cd (fabric.context_managers.cd)
+lcd (fabric.context_managers.lcd)
+path (fabric.context_managers.path)
+settings (fabric.context_managers.settings)
+prefix (fabric.context_managers.prefix)
+</code></pre>
+<h3 id="fabric-安装"><a href="#fabric-安装" class="headerlink" title="fabric 安装"></a>fabric 安装</h3><pre><code>easy_install fabric 
+</code></pre>
+<h3 id="fabric-编程模型介绍"><a href="#fabric-编程模型介绍" class="headerlink" title="fabric 编程模型介绍"></a>fabric 编程模型介绍</h3><blockquote>
+<p>由于fabric是基于python的，所以写fabric脚本就是写python脚本，你可以像写python脚本一样，可以依赖其他模块或者其他工具来完成工作。Fabric 脚本，通过fab工具运行fabric python脚本。fab工具默认执行fabfile.py ,也可以通过-f 参数指定 脚本文件名。fabric优势多多，简单，方便，日志输出清晰，命令<br>中可以使用AWK 命令 下面我们看一个 hello world 程序。 </p>
+</blockquote>
+<pre><code>from fabric.api import *
+def helloworld(who=&#39;world&#39;):
+    print  &quot;Hello &#123;0&#125;!&quot;.format(who) 
+def helloworld1(you=&#39;world&#39;,me=&#39;ruiaylin&#39;):
+    print  &quot;Hello &#123;0&#125;! i am &#123;1&#125; ! &quot;.format(you,me)
+</code></pre>
+<p>执行命令(其中参数的传递直接跟在任务后跟变量名和参数)：</p>
+<pre><code>➜  fabric  fab -f helloword.py  helloworld
+Hello world! 
+Done.
+➜  fabric  fab -f helloword.py  helloworld1:you=&#39;ruichao&#39;,me=&#39;ruiaylin&#39;
+Hello ruichao! i am ruiaylin ! 
+Done.
+</code></pre>
+<h4 id="fabric主要接口方法"><a href="#fabric主要接口方法" class="headerlink" title="fabric主要接口方法"></a>fabric主要接口方法</h4><blockquote>
+<p>我们已经看了一个简单例子下面我们来看一下fabric的主要接口。</p>
+</blockquote>
+<h5 id="run-fabric-operations-run"><a href="#run-fabric-operations-run" class="headerlink" title="run (fabric.operations.run)"></a>run (fabric.operations.run)</h5><p>Fabric 中使用最多的就是 run 方法了。run是用来在一台或者多台远程主机上面执行shell 命令。</p>
+<ul>
+<li>方法的返回值是可以通过变量来进行捕获</li>
+<li>可以通过变量的.failed 和 .succeeded 来检查命令是否执行成功</li>
+<li>还有一个很赞的就是 run 方法中执行命令的时候，可以支持awk 很给力</li>
+</ul>
+<p>使用方法： </p>
+<pre><code># creat a directory
+run(&quot; mkdir /tmp/testdir/ -p &quot;)
+# check process
+result = run(&quot;ps -ef |grep mysqld|grep -v safe |grep -v grep  | wc -l &quot;
+#Check if command
+result.failed
+</code></pre>
+<h5 id="sudo-fabric-operations-sudo"><a href="#sudo-fabric-operations-sudo" class="headerlink" title="sudo (fabric.operations.sudo)"></a>sudo (fabric.operations.sudo)</h5><p>使用 sudo 命令执行对顶的命令。使用方法与run 类似。 </p>
+<h5 id="local-fabric-operations-local"><a href="#local-fabric-operations-local" class="headerlink" title="local (fabric.operations.local)"></a>local (fabric.operations.local)</h5><p>local 命令是执行本机的命令或者脚本.使用方法和run 还有sudo类似，但是有一个区别<br>就是： 捕获结果的时候，是通过指定 capture&#x3D;False 或者capture&#x3D;True来确定。来看<br>实例：</p>
+<pre><code># example like this ： 
+def helloworld(who=&#39;world&#39;):
+    print  &quot;Hello &#123;0&#125;!&quot;.format(who) 
+    yy = local(&quot; pwd &quot;, capture=False)
+    print &#39;start :  yy = &#39; , yy , &#39; : ::  &#39;,yy.succeeded
+    zz = local(&quot; pwd &quot;, capture=True)
+    print &#39;start :  zz = &#39; , zz , &#39; : ::  &#39;,zz.succeeded
+#result ：
+➜  fabric  fab -f helloword.py  helloworld  -H 10.211.55.3 -u root
+[10.211.55.3] Executing task &#39;helloworld&#39;
+Hello world!
+[localhost] local:  pwd 
+/Users/ruiaylin/Documents/workpython/fabric
+start :  yy =    : ::   True
+[localhost] local:  pwd 
+start :  zz =  /Users/ruiaylin/Documents/workpython/fabric  : ::   True
+</code></pre>
+<h5 id="get-fabric-operations-get"><a href="#get-fabric-operations-get" class="headerlink" title="get (fabric.operations.get)"></a>get (fabric.operations.get)</h5><p>get 方法是从远程主机 copy file 到本地,功能跟scp一样。可以从远程主机下载<br>备份，或者日志文件等等。</p>
+<ul>
+<li>通过参数 remote_path 指定远程文件的路径</li>
+<li>通过参数 local_path 指定远程文件的路径</li>
+</ul>
+<p>使用方法如下： </p>
+<pre><code># Download some logs
+get(remote_path=&quot;/tmp/xxx.log&quot;, local_path=&quot;/tmp/xxx.log&quot;)  
+# Download a database back-up
+get(&quot;/backup/db.gz&quot;, &quot;./db.gz&quot;)
+</code></pre>
+<h5 id="put-fabric-operations-put"><a href="#put-fabric-operations-put" class="headerlink" title="put (fabric.operations.put)"></a>put (fabric.operations.put)</h5><p>某些需要上传和分发文件的时候，put命令就派上了用场，使用方式类似 get。也同样可以<br>通过.failed .succeeded进行命令是否执行成功的判断。 </p>
+<ul>
+<li>local_path  - 本地路径  </li>
+<li>remote_path - 远程路径  </li>
+<li>mode -        文件属性</li>
+</ul>
+<p>如下例子： </p>
+<pre><code>upload = put(&quot;requirements.txt&quot;, &quot;requirements.txt&quot;, mode=664)
+</code></pre>
+<h5 id="并行执行"><a href="#并行执行" class="headerlink" title="并行执行"></a>并行执行</h5><p>   目前官方来看 1.X 版本的fabric 并行执行的时候不是thread safe的。如果需要并行执行task。需要在方法上面使用注解 @parallel 为了防止管控机器上面过多的并发任务可以通过 @parallel(pool_size&#x3D;5)来设置. 并行的执行输出都会输出到一个终端上面，比较混乱。最好是写到日志，以task为维度。跟下面的代码类似。</p>
+<blockquote>
+<p>还有几个接口大家可以查阅fabric 文档 ： </p>
+</blockquote>
+<h2 id="MySQL-安装实例"><a href="#MySQL-安装实例" class="headerlink" title="MySQL 安装实例"></a>MySQL 安装实例</h2><p>安装步骤如下</p>
+<ul>
+<li>获取主机ip</li>
+<li>check主机可达性</li>
+<li>检查linux平台详情</li>
+<li>是否有运行的mysql实例</li>
+<li>如果有获取对应的端口</li>
+<li>检查是否和要安装的端口冲突</li>
+<li>处理mysql用户以及属组</li>
+<li>处理安装相关目录和权限</li>
+<li>copy 安装包到目标机</li>
+<li>解压处理，将主要软件工具软连接到path路径中</li>
+<li>生成对应标准配置文件并分发到目标机对应目录</li>
+<li>初始化数据库</li>
+<li>启动数据库</li>
+<li>基本步骤安装完毕</li>
+</ul>
+<p>基本脚本如下：</p>
+<p>script 1  sub task : </p>
+<pre><code>from fabric.api import *
+from fabric.colors import green,red,blue,cyan,yellow
+import os , sys
+import socket
+import datetime
+import logging
+import logging.handlers
+#get logger for logging 
+def initLoggerWithRotate():
+    logname=&#39;&#39;.join(env.host_string.split(&#39;.&#39;))+&#39;.log&#39;
+    logFileName=&quot;logs/%s&quot;%logname
+    logger = logging.getLogger(&quot;fabric&quot;)
+    formater = logging.Formatter(&quot;%(asctime)s %(name)s %(levelname)s %(message)s&quot;,&quot;%Y-%m-%d %H:%M:%S&quot;)
+    file_handler = logging.handlers.RotatingFileHandler(logFileName, maxBytes=104857600, backupCount=5)
+    file_handler.setFormatter(formater)
+    stream_handler = logging.StreamHandler(sys.stderr)
+    logger.addHandler(file_handler)
+    logger.addHandler(stream_handler)
+    logger.setLevel(logging.INFO)
+    return logger
+#mkdir
+def runmkdir(dir):
+    run(&#39;&#39;&#39; mkdir -p %s &#39;&#39;&#39;%dir)
+#stp 1 check host
+def checkhost(logger):
+     host = env.host_string 
+     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+     flag_c = 0
+     try:
+         s.connect((host, 22))
+         flag_c = 1
+         logger.info( green( &#39; --&gt; host %s can be reachable &#39; %host ) )
+     except socket.error as e: 
+         logger.warning( yellow( &#39; --&gt; Error on connect %s&#39; %e ) )
+     s.close()
+     return flag_c
+#stp 2 check alive instance on target host 
+def checkmysqlinstance(logger):
+    try:
+        wc = run(&#39;&#39;&#39; ps -ef |grep mysqld|grep  -v safe | grep -v grep | wc -l  &#39;&#39;&#39;) 
+        if int(wc) &gt; 0  : 
+            logger.warning(yellow( &#39; --&gt; %sinstance exist on the target host  &#39;%wc )) 
+            portraw = run(&#39;&#39;&#39;  ps -ef |grep mysqld|grep -v safe |grep -v grep  |awk &#39; &#123;for(i=1;i&lt;=NF;i++)&#123;if($i ~/--port/ )&#123;print $i&#125;&#125;&#125;&#39; |awk -F &#39;=&#39; &#39;&#123;print $2&#125;&#39;
+            &#39;&#39;&#39;)
+            ports = [x.strip() for x in portraw.split() ]
+            logger.warning( yellow( &#39; --&gt; existing instance port : [ %s ] &#39;%( &#39;,&#39;.join( ports ))))
+            if port in ports:
+                logger.error( red( &#39; --&gt; Install port %s exist , install failed &#39;%port))
+                logger.error( red( &#39; &lt;&lt;&lt;exit&gt;&gt;&gt;&gt;&gt;  task on host %s stop &amp; exit() &#39;%thost))
+                sys.exit()
+    except Exception, e:
+        logger.warning(yellow( &#39; --&gt; checkmysqlinstance() exception : %s &#39;%e )) 
+        raise e 
+#stp 3 initdir for installation
+def createUser(logger,user=&#39;mysql&#39;,group=&#39;dba&#39;):
+    try:
+        if int(run(&#39;grep &quot;^mysql&quot; /etc/passwd|wc -l&#39;)) == 0 :
+            run(&#39;groupadd dba &#39;)
+            run(&#39;useradd -c &quot;mysql software owner&quot; -g dba -G dba mysql&#39;)
+            run(&#39;mkdir -p /home/mysql ; chown -R mysql.dba /home/mysql &#39;)
+            logger.info(cyan( &#39; --&gt; create user [ mysql ] in group [ dba ]  success &#39; )) 
+        else : 
+            logger.info(yellow ( &#39; --&gt; user [ mysql ] in group [ dba ] exist &amp; skip  &#39; )) 
+    except Exception, e:
+        logger.warning(yellow( &#39; --&gt; createUser() exception : %s &#39;%e )) 
+        raise e
+#stp 4 initail directory for mysql        
+def initdir(logger,port=3306):  
+    try :
+        logger.info( green( &#39; --&gt; begin to create dirs for installation &#39;))
+        datadir=&#39;/data/&#39;
+        logdir =&#39;/log/&#39;
+        mandir = &#39;mysql%s&#39;%port
+        subddir =&#39;/data/mysql%s/&#123;data,log,run,tmp&#125;&#39;%(port)
+        subldir =&#39;/log/mysql%s/&#123;binlog,iblog&#125;&#39;%(port) 
+        #data
+        ck1 = run(&#39; df -vh  | grep  /data | wc -l &#39;)
+        if ck1  == 0 : 
+            logger.error(green(&#39; --&gt; no /data/ partition exist&#39; ) )
+            #sys.exit()
+        if int( run(&#39; ls /  | grep  /data | wc -l &#39;)) == 0 or int( run(&#39; ls /data/ | grep -w %s | wc -l &#39;%mandir) ) == 0 : 
+            runmkdir(subddir) 
+            logger.info(green(&#39; --&gt; /data/*** create Ok &#39; ) )
+        else : 
+            logger.info(green(&#39; --&gt; /data/mysql%s exsit &#39;%port ))
+            logger.info(green(&#39; --&gt; pls,handle it and restart this task &#39;))
+            sys.exit()
+        #log 
+        ck2 = run(&#39; df -vh | grep /log/  | wc -l  &#39;)
+        if int( run(&#39; df -vh | grep /log/  | wc -l  &#39;) ) == 0  and int( run(&#39; ls / | grep -w log  | wc -l  &#39;) ) == 0: 
+            logger.warning( yellow(&#39; --&gt; no /log/ partition exist&#39;) ) 
+            logger.warning( yellow(&#39; --&gt; create link for /log/ --&gt; /data/log/&#39;) ) 
+            runmkdir(&#39;/data/log&#39;)
+            run(&#39;ln -s /data/log  /log &#39;)
+            runmkdir(subldir) 
+            logger.info(green(&#39; --&gt; /log/*** create Ok &#39; ) )
+        else : 
+            if  int(run(&#39; ls /log/ | grep -w %s | wc -l &#39;%mandir)) == 0: 
+                runmkdir(subldir) 
+                logger.info(green(&#39; --&gt; /log/*** create Ok &#39; ) )
+            else : 
+                logger.info(yellow(&#39; --&gt; /log/mysql%s exsit &#39;%port ))
+                logger.error(red(&#39; --&gt; pls,handle it and restart this task &#39; ))
+                sys.exit() 
+        #change 
+        runmkdir(&#39;/data/tmp&#39;)
+        logger.info(green(&#39; --&gt; change dirs owner&amp;privs start&#39;))
+        run(&#39;chown -R mysql:dba /data/*&#39;)
+        run(&#39;chown -R mysql:dba /log&#39;) 
+        logger.info(green(&#39; --&gt; change dirs owner&amp;privs done&#39;))
+    except Exception, e:
+        logger.warning(yellow( &#39; --&gt; initdir() exception : %s &#39;%e )) 
+        raise e 
+#stp 5 put mysql install package
+def copymysql(logger,version=&#39;5.7&#39;): 
+    try:
+        dits = &#123;
+        &#39;ubuntu&#39;:&#39;mysql-server_5.6.21-1ubuntu12.04_amd64.deb-bundle.tar&#39;,
+        &#39;centos&#39;:&#39;mysql-server.tar.gz&#39;
+        &#125;
+        issue = run (&#39;cat /etc/issue&#39;) 
+        ss = issue.lower()
+        logger.info( green( &#39; %s &#39;%ss))
+        if int ( run( &#39; ls /usr/local/ | grep mysql | wc -l &#39;) ) &gt; 0 : 
+            logger.info( yellow( &#39; --&gt; mysql software installed , skip   &#39; )) 
+            return
+        plats = dits.keys()
+        for x in plats: 
+            if ss.find(x) != -1: 
+                logger.info( green( &#39; --&gt; the target host platform is %s&#39;% x ) )
+                put( local_path=&quot;configs/%s&quot;%dits[x],remote_path=&quot;/tmp/%s&quot;%dits[x] )
+                logger.info( green( &#39; --&gt; tar the ball to prop dir &#39;))
+                run( &#39;tar zxvf /tmp/%s -C /usr/local/ &#39;%dits[x] )
+                run( &#39;ln -s /usr/local/%s  /usr/local/mysql  &#39;%dits[x][:-7] )
+                break 
+    except Exception, e:
+        logger.warning(yellow( &#39; --&gt; copymysql() exception : %s &#39;%e )) 
+        raise e 
+#gen my.cnf file 
+def getnewServerId(logger,port):  
+    host = env.host_string
+    print &#39;getnewServerId : &#39;,host
+    pics = host.split(&#39;.&#39;)
+    a=int(pics[0])
+    b=int(pics[1])
+    c=int(pics[2])
+    d=int(pics[3])
+    suf = int(port) % 256
+    server_id =  b * 256 * 256 * 256 + c * 256 * 256 + d * 256 + suf
+    logger.info( cyan( &#39; --&gt; gen server_id done , %s %s is %s &#39;%( host , port , server_id) ) )
+    return server_id
+def genmycnf(logger,port=3306,itype=&#39;h&#39;):
+    host = env.host_string
+    bps=&#123;
+    &quot;a&quot;:&quot;48|32|3100|3000&quot;,
+    &quot;b&quot;:&quot;62|40|4600|4500&quot;,
+    &#39;c&#39;:&#39;94|64|7600|7500&#39;,
+    &#39;d&#39;:&#39;94|32|3100|3000&#39;,
+    &#39;e&#39;:&#39;125|75|10100|10000&#39;,
+    &#39;f&#39;:&#39;188|120|15100|15000&#39;,
+    &#39;g&#39;:&#39;188|60|7600|7500&#39;,
+    &#39;h&#39;:&#39;1|256M|800|750&#39;
+    &#125; 
+    try:
+        myfile=&#39;&#39;.join(host.split(&#39;.&#39;))+&#39;.cnf&#39;
+        cpmycnf=&quot;&quot;&quot;cp configs/my.cnf  tmp/%s &quot;&quot;&quot;%myfile 
+        local( &#39;rm -f  tmp/%s&#39;%myfile  )
+        local(&quot;cp configs/my.cnf tmp/%s &quot;%myfile )  
+        sid=getnewServerId(logger,port)
+        keys=bps.keys()
+        bpxs=bps[itype]
+        mem,bpsize,maxc,maxuc=bpxs.split(&#39;|&#39;)
+        if bpsize[-1] != &quot;M&quot;:
+            bpsize = bpsize +&#39;g&#39;
+        chrgcmd=&quot;&quot;&quot;  sed -i -e &quot;s/3306/%s/g&quot; -e &quot;s/server_id=10000/server_id=%s/g&quot; -e &quot;s/=32g/=%s/g&quot; -e &quot;s/max_connections=3100/max_connections=%s/g&quot; -e &quot;s/max_user_connections=3000/max_user_connections=%s/g&quot; tmp/%s &quot;&quot;&quot;
+        local( chrgcmd%(port,sid,bpsize,maxc,maxuc,myfile) ) 
+        logger.info( green( &#39; --&gt; gen my.cnf success  &#39;) )
+        logger.info( green( &#39; --&gt; copy my.cnf to dist host &#39;) )
+        put( local_path=&quot;tmp/%s&quot;%myfile, remote_path=&quot;/data/mysql%s/my.cnf&quot;%(port) )
+    except Exception, e:
+        logger.warning(yellow( &#39; --&gt; genmycnf() exception : %s &#39;%traceback.format_exc()  ) ) 
+        raise e 
+</code></pre>
+<p>script 2  whole task :</p>
+<pre><code>import inst_utils
+from inst_utils import *
+def install_mysql(port):
+    logger = initLoggerWithRotate()
+    thost = env.host_string
+    try:
+        logger.info(green( &#39;stp 1 get the host %s &#39;%thost ))
+        #check host reachable  
+        rs1 = checkhost(logger )
+        if int(rs1)== 0 :
+            logger.info(red( &#39;stp 2 check the host is reachable failed &#39; ))
+        logger.info(green( &#39;stp 2 check the host is reachable OK &#39; ))
+        plat_type = run(&#39;&#39;&#39; uname -o &#39;&#39;&#39;)
+        if plat_type !=  &#39;GNU/Linux&#39; :
+            logger.warning(yellow(&#39;stp 3 target platform is not GNU/Linux &amp; exit() &#39;))  
+            sys.exit()
+        logger.info(green(&#39;stp 3 target platform is GNU/Linux&#39;)) 
+        #check target host exsist mysql instance 
+        logger.info(green( &#39;stp 4 checkmysqlinstance  &#39; ))
+        checkmysqlinstance(logger)
+        #create MySQL user 
+        logger.info( green( &#39;stp 5 createUser &#39; ))
+        createUser(logger) 
+        put(local_path=&quot;configs/bash_profile&quot;, remote_path=&quot;/home/mysql/.bash_profile&quot;)  
+        #checking dir
+        logger.info( green( &#39;stp 6 initdir &#39; ))
+        initdir(logger,port) 
+        #copy file 
+        logger.info( green( &#39;stp 7 copymysql &#39; ))
+        copymysql(logger)
+        logger.info( green( &#39;stp 8  genmycnf  &#39;) ) 
+        genmycnf(logger,port,&#39;h&#39;)
+    except Exception, e:
+        print  &#39;main : exception : &#39; ,  e
+</code></pre>
+<p>如上脚本完成了，基本的安装，并没有启动mysql实例，和一些db初始化工作, 有兴趣的同学可以自己来完成，总之，fabric一定是一个运维利器 。。。 </p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><pre><code>对比pssh 和fabric 以及之前在阿里用的pgm,fabric真心是最强悍的,再加上有完备的文档库,
+用起来爽歪歪有没有？我这边任务型 ,自动化相关任务都已经用fabric来搞起来了,欢迎探讨...
+</code></pre>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Python/">Python</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/OPS/">OPS</a><a href="/tags/Fabric/">Fabric</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://ruiaylin.github.io/2014/01/01/fabric/" data-title="批量部署 自动化之 - [fabric] | ruiayLin&#39;s Blog" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2014/02/17/mysql-load-data/" title="MySQL load data 操纵数据">
+  <strong>上一篇：</strong><br/>
+  <span>
+  MySQL load data 操纵数据</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2014/01/01/hello-world/"  title="Hello World">
+ <strong>下一篇：</strong><br/> 
+ <span>Hello World
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8fabric-%E8%87%AA%E5%8A%A8%E5%8C%96%E6%97%A5%E5%B8%B8%E7%AE%A1%E7%90%86%E4%BB%BB%E5%8A%A1%E5%92%8C%E9%83%A8%E7%BD%B2"><span class="toc-number">1.</span> <span class="toc-text">如何使用fabric 自动化日常管理任务和部署</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#fabric%E7%9A%84%E5%AE%98%E6%96%B9%E4%BB%8B%E7%BB%8D%EF%BC%9A"><span class="toc-number">2.</span> <span class="toc-text">fabric的官方介绍：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#fabric-%E5%8F%AF%E4%BB%A5%E4%B8%BA%E5%93%AA%E4%BA%9B%E4%BA%BA%E6%9C%8D%E5%8A%A1"><span class="toc-number">2.0.1.</span> <span class="toc-text">fabric 可以为哪些人服务</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#fabric-%E5%B8%B8%E7%94%A8%E6%8E%A5%E5%8F%A3"><span class="toc-number">2.0.2.</span> <span class="toc-text">fabric 常用接口</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#fabric-%E8%BF%98%E6%8F%90%E4%BE%9B%E4%BA%86%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AE%A1%E7%90%86%E5%99%A8"><span class="toc-number">2.0.3.</span> <span class="toc-text">fabric 还提供了上下文管理器</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#fabric-%E5%AE%89%E8%A3%85"><span class="toc-number">2.1.</span> <span class="toc-text">fabric 安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#fabric-%E7%BC%96%E7%A8%8B%E6%A8%A1%E5%9E%8B%E4%BB%8B%E7%BB%8D"><span class="toc-number">2.2.</span> <span class="toc-text">fabric 编程模型介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#fabric%E4%B8%BB%E8%A6%81%E6%8E%A5%E5%8F%A3%E6%96%B9%E6%B3%95"><span class="toc-number">2.2.1.</span> <span class="toc-text">fabric主要接口方法</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#run-fabric-operations-run"><span class="toc-number">2.2.1.1.</span> <span class="toc-text">run (fabric.operations.run)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#sudo-fabric-operations-sudo"><span class="toc-number">2.2.1.2.</span> <span class="toc-text">sudo (fabric.operations.sudo)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#local-fabric-operations-local"><span class="toc-number">2.2.1.3.</span> <span class="toc-text">local (fabric.operations.local)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#get-fabric-operations-get"><span class="toc-number">2.2.1.4.</span> <span class="toc-text">get (fabric.operations.get)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#put-fabric-operations-put"><span class="toc-number">2.2.1.5.</span> <span class="toc-text">put (fabric.operations.put)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%B9%B6%E8%A1%8C%E6%89%A7%E8%A1%8C"><span class="toc-number">2.2.1.6.</span> <span class="toc-text">并行执行</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MySQL-%E5%AE%89%E8%A3%85%E5%AE%9E%E4%BE%8B"><span class="toc-number">3.</span> <span class="toc-text">MySQL 安装实例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Docker/" title="Docker">Docker<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Go/" title="Go">Go<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MySQL/" title="MySQL">MySQL<sup>18</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/NewSQL/" title="NewSQL">NewSQL<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Oracle/" title="Oracle">Oracle<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Python/" title="Python">Python<sup>7</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/MySQL/" title="MySQL">MySQL<sup>11</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OPS/" title="OPS">OPS<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Fabric/" title="Fabric">Fabric<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Go/" title="Go">Go<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Group-Replicaiton/" title="Group Replicaiton">Group Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MGR/" title="MGR">MGR<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Replicaiton/" title="Replicaiton">Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MHA/" title="MHA">MHA<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Python/" title="Python">Python<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Xtrabackup/" title="Xtrabackup">Xtrabackup<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DNS/" title="DNS">DNS<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Sharding/" title="Sharding">Sharding<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Discourse/" title="Discourse">Discourse<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forum/" title="Forum">Forum<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">知识链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/org/polardb-x" target="_blank" title="PloarDB-X专栏">PloarDB-X专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://cn.pingcap.com/blog/" target="_blank" title="TiDB 博客">TiDB 博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/doc/refman/8.0/en/" target="_blank" title="MySQL 8.0 Docs">MySQL 8.0 Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/blog-archive/" target="_blank" title="MySQL Server Blog">MySQL Server Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://lefred.be/" target="_blank" title="Lefred&#39;s blog">Lefred&#39;s blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/people/wen-zheng-hu" target="_blank" title="温正湖专栏">温正湖专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.percona.com/blog/" target="_blank" title="Percona Blog">Percona Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://engineering.fb.com/" target="_blank" title="Meta Engineering">Meta Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.uber.com/en-US/blog/engineering/" target="_blank" title="Uber Engineering">Uber Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.blog/category/engineering/" target="_blank" title="Github Engineering">Github Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://medium.com/pinterest-engineering" target="_blank" title="Pinterest Engineering">Pinterest Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://flask.palletsprojects.com/" target="_blank" title="Flask Docs">Flask Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://tympanus.net/codrops/" target="_blank" title="Codrops front">Codrops front</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
+			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
+		
+		<a href="/about" target="_blank" title="ruichao.lin">ruichao.lin</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+        getSize();
+        if (myWidth >= 1024) {
+          c.click();
+        }
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?e6d1f421bbc9962127a50488f9ed37d1";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

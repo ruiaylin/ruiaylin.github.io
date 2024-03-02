@@ -1,0 +1,735 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>Xtrabackup 备份原理 | ruiayLin&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="ruichao.lin">
+    
+
+    
+    <meta name="description" content="Xtrabackup 备份原理备份对任何系统来讲都是非常重要的一部分。作为一名DBA尤其如此，很多场景下必须要通过备份恢复数据，比如数据库升级，或者规模搭建备库等等。今天我们就谈谈备份恢复这个话题。众所周知备份分为冷备和热备，冷备:在数据库offline的情况下进行的备份，备份过程中是不可提供服务的；热备则是online的一种备份方式，热备过程中db对外正常提供服务 。今天主要是针对mysql数据">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Xtrabackup 备份原理">
+<meta property="og:url" content="http://ruiaylin.github.io/2014/05/22/xtrabackup-for-mysql/index.html">
+<meta property="og:site_name" content="ruiayLin&#39;s Blog">
+<meta property="og:description" content="Xtrabackup 备份原理备份对任何系统来讲都是非常重要的一部分。作为一名DBA尤其如此，很多场景下必须要通过备份恢复数据，比如数据库升级，或者规模搭建备库等等。今天我们就谈谈备份恢复这个话题。众所周知备份分为冷备和热备，冷备:在数据库offline的情况下进行的备份，备份过程中是不可提供服务的；热备则是online的一种备份方式，热备过程中db对外正常提供服务 。今天主要是针对mysql数据">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2014-05-22T08:39:15.000Z">
+<meta property="article:modified_time" content="2024-03-02T09:18:29.305Z">
+<meta property="article:author" content="ruichao.lin">
+<meta property="article:tag" content="Xtrabackup">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="ruiayLin&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.jpeg" alt="ruiayLin&#39;s Blog" title="ruiayLin&#39;s Blog"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="ruiayLin&#39;s Blog">ruiayLin&#39;s Blog</a></h1>
+				<h2 class="blog-motto">蹈之而弗悔 , 慎思而笃行 ...</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:ruiaylin.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2014/05/22/xtrabackup-for-mysql/" title="Xtrabackup 备份原理" itemprop="url">Xtrabackup 备份原理</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="ruichao.lin" target="_blank" itemprop="author">ruichao.lin</a>
+		
+  <p class="article-time">
+    <time datetime="2014-05-22T08:39:15.000Z" itemprop="datePublished"> 发表于 2014-05-22</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Xtrabackup-%E5%A4%87%E4%BB%BD%E5%8E%9F%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">Xtrabackup 备份原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Xtrabackup-%E6%98%AF%E4%BB%80%E4%B9%88-%EF%BC%9F"><span class="toc-number">2.</span> <span class="toc-text">Xtrabackup 是什么 ？</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Xtrabackup%E5%A4%87%E4%BB%BD%E7%BB%86%E8%8A%82"><span class="toc-number">2.1.</span> <span class="toc-text">Xtrabackup备份细节</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Xtrabackup-%E4%B8%BA%E4%BA%86%E5%AE%8C%E6%88%90%E5%A4%87%E4%BB%BD%E4%BC%9A%E5%81%9A%E4%B8%A4%E4%B8%AA%E4%B8%BB%E8%A6%81%E7%9A%84%E5%B7%A5%E4%BD%9C%EF%BC%9A"><span class="toc-number">2.1.1.</span> <span class="toc-text">Xtrabackup 为了完成备份会做两个主要的工作：</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#xtraback%E5%A4%87%E4%BB%BD%E7%BB%93%E5%B0%BE"><span class="toc-number">2.2.</span> <span class="toc-text">xtraback备份结尾</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E7%82%B9%E6%84%9F%E6%82%9F"><span class="toc-number">3.</span> <span class="toc-text">一点感悟</span></a></li></ol>
+		
+		</div>
+		
+		<h3 id="Xtrabackup-备份原理"><a href="#Xtrabackup-备份原理" class="headerlink" title="Xtrabackup 备份原理"></a>Xtrabackup 备份原理</h3><p>备份对任何系统来讲都是非常重要的一部分。作为一名DBA尤其如此，很多场景下必须要通过备份恢复数据，比如数据库升级，或者规模搭建备库等等。今天我们就谈谈备份恢复这个话题。众所周知备份分为冷备和热备，冷备:在数据库offline的情况下进行的备份，备份过程中是不可提供服务的；热备则是online的一种备份方式，热备过程中db对外正常提供服务 。今天主要是针对mysql数据库的用的热备工具xtrabackup来谈谈。使用mysql数据库我们基本上都会用到innodb存储引擎，支持事务。innobase官方有一套针对innodb备份的商业软件InnoDB Hot Backup,可以提供在线备份。percona官方提供了一个与之对应的开源版本的备份工具 — xtrabackup</p>
+<h3 id="Xtrabackup-是什么-？"><a href="#Xtrabackup-是什么-？" class="headerlink" title="Xtrabackup 是什么 ？"></a>Xtrabackup 是什么 ？</h3><p>先聊一下xtrabackup是什么，Percona XtraBackup 是一款开源的 MYSQL 热备份工具 ，可以不阻塞的备份innodb和Xtradb的数据库，xtrabackup的优点：可靠高效的备份DB;备份过程中不中断事务处理;快速进行恢复等。</p>
+<h4 id="Xtrabackup备份细节"><a href="#Xtrabackup备份细节" class="headerlink" title="Xtrabackup备份细节"></a>Xtrabackup备份细节</h4><blockquote>
+<p>Xtrabackup备份原理<br>InnoDB存储引擎是支持事务的，有对应的事务日志，也就是我们所讲的redo日志。每一个<br>事务对innodb数据进行的修改都会记录到对应的redo日志中。当InnoDB启动时，会使用最<br>近一次checkpoint开始到现在的所有redo日志进行恢复，对事务已经提交但数据还没有写<br>入的部分，进行redo重做，也就是所说的前滚；将已经写到数据文件，但未提交的事务通<br>过undo进行回滚。</p>
+</blockquote>
+<h5 id="Xtrabackup-为了完成备份会做两个主要的工作："><a href="#Xtrabackup-为了完成备份会做两个主要的工作：" class="headerlink" title="Xtrabackup 为了完成备份会做两个主要的工作："></a>Xtrabackup 为了完成备份会做两个主要的工作：</h5><blockquote>
+<p>任务一：</p>
+</blockquote>
+<p>xtrabackup会在后台开启一个log-copying的线程，该线程会对redo log file进行监视，并把从lsn1(lsn1是Xtrabackup在启动时会从redo log file中获取最近一次的checkpoint对应的log sequence number lsn1 )开始增加的数据块（日志记录）不断的复制到备份集中一个叫xtrabackup_logfile的文件里面。日志copy操作，会在整个备份过程中一直进行，因为备份集做恢复的时候需要从lsn1开始到备份结束时所有日志记录，恢复原理就是 crash recover 的过程。 </p>
+<pre><code>注：
+log-copying 线程每一秒都会去 check 事务日志，看是否有新写入的需要copy走的日志项.但是有种可能性：
+log-copying 线程的copy的速度比写入redofile 的速度慢，有可能事务日志循环一周，造成会有一部分日志
+还没有被读取就被覆盖了,此时 log—copying 线程会报错，备份失败。
+</code></pre>
+<p>… </p>
+<hr>
+<blockquote>
+<p>任务二：</p>
+</blockquote>
+<p>xtrabackup在进行copy redo 日志的同时会copy innodb的data file ， 当然这不是简单的复制，它使用了跟innodb类似的方式访问数据文件,访问数据字典，并以数据页为单位来进行copy。具体的细节如下：</p>
+<pre><code>  xtrabackup是以读写的方式打开数据文件的，尽管它不会修改数据。这是因为它使用内置的innodb的lib库
+来访问数据文件的，也隐含了你要用对数据文件有读写权限的用户来进行备份。innodb的lib库使用读写方式打
+开是因为正常情况下代开文件就预示着写数据。
+
+  在copy数据到备份目标目录的过程中，xtrabackup 每次读取1M数据（不可配置），copy日志文件的时候，
+每次读写512字节，同样不可以配置。数据读取之后，xtrabackup会对这1M的缓存数据块进行扫描，并对每一个
+数据页使用buf_page_is_corrupted()函数进行验证，看起是否损坏，如果page损坏了，对其重新读取并重新
+验证。如果重读10次都失败了，本次备份失败，那么备份失败。
+注 ： (It skips this check on the doublewrite buffer)
+</code></pre>
+<h4 id="xtraback备份结尾"><a href="#xtraback备份结尾" class="headerlink" title="xtraback备份结尾"></a>xtraback备份结尾</h4><p>当数据文件复制完成，xtrabackup 会停掉log-copying线程，并在备份目录下创建一个<br>xtrabackup_checkpoints 的文件，该文件包含备份的类型，还有备份开始时的log sequence number，还有结束时的log sequence number 。备份过程中，我们会看到数据文件copy信息，也会看到日志复制线程重复的扫描日志文件，并进程copy的信息，信息如下： </p>
+<pre><code>&gt;&gt; log scanned up to (3646475465483)
+&gt;&gt; log scanned up to (3646475517369)
+&gt;&gt; log scanned up to (3646475581716)
+&gt;&gt; log scanned up to (3646475636841)
+&gt;&gt; log scanned up to (3646475718082)
+&gt;&gt; log scanned up to (3646475988095)
+&gt;&gt; log scanned up to (3646476048286)
+&gt;&gt; log scanned up to (3646476102877)
+&gt;&gt; log scanned up to (3646476140854)
+[01] Copying /usr/local/mysql/var/ibdata1
+    to /usr/local/mysql/Backups/2011-04-18_21-11-15/ibdata1
+[01]        ...done
+the log file thread repeatedly scanning the log files and copying from it
+</code></pre>
+<blockquote>
+<p>注 ： xtrabackup 的使用方式见之前的blog，最好参看官方文档</p>
+</blockquote>
+<p>…</p>
+<h3 id="一点感悟"><a href="#一点感悟" class="headerlink" title="一点感悟"></a>一点感悟</h3><hr>
+<p>  本文主要分析了一下xtrabackup工具的备份原理，以及备份过程中的细节。很多时候，作为DBA，把项目做好，支持好<br>的同时，技术细节也要把控到位 … 加油， boy</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/MySQL/">MySQL</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Xtrabackup/">Xtrabackup</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://ruiaylin.github.io/2014/05/22/xtrabackup-for-mysql/" data-title="Xtrabackup 备份原理 | ruiayLin&#39;s Blog" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2014/05/23/using xtrabackup-to-build-mysql-slave/" title="使用XtraBackup搭建Slave">
+  <strong>上一篇：</strong><br/>
+  <span>
+  使用XtraBackup搭建Slave</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2014/04/27/linux-shell/"  title="Shell脚本常用">
+ <strong>下一篇：</strong><br/> 
+ <span>Shell脚本常用
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Xtrabackup-%E5%A4%87%E4%BB%BD%E5%8E%9F%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">Xtrabackup 备份原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Xtrabackup-%E6%98%AF%E4%BB%80%E4%B9%88-%EF%BC%9F"><span class="toc-number">2.</span> <span class="toc-text">Xtrabackup 是什么 ？</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Xtrabackup%E5%A4%87%E4%BB%BD%E7%BB%86%E8%8A%82"><span class="toc-number">2.1.</span> <span class="toc-text">Xtrabackup备份细节</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Xtrabackup-%E4%B8%BA%E4%BA%86%E5%AE%8C%E6%88%90%E5%A4%87%E4%BB%BD%E4%BC%9A%E5%81%9A%E4%B8%A4%E4%B8%AA%E4%B8%BB%E8%A6%81%E7%9A%84%E5%B7%A5%E4%BD%9C%EF%BC%9A"><span class="toc-number">2.1.1.</span> <span class="toc-text">Xtrabackup 为了完成备份会做两个主要的工作：</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#xtraback%E5%A4%87%E4%BB%BD%E7%BB%93%E5%B0%BE"><span class="toc-number">2.2.</span> <span class="toc-text">xtraback备份结尾</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E7%82%B9%E6%84%9F%E6%82%9F"><span class="toc-number">3.</span> <span class="toc-text">一点感悟</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Docker/" title="Docker">Docker<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Go/" title="Go">Go<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MySQL/" title="MySQL">MySQL<sup>18</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/NewSQL/" title="NewSQL">NewSQL<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Oracle/" title="Oracle">Oracle<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Python/" title="Python">Python<sup>7</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/MySQL/" title="MySQL">MySQL<sup>11</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OPS/" title="OPS">OPS<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Fabric/" title="Fabric">Fabric<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Go/" title="Go">Go<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Group-Replicaiton/" title="Group Replicaiton">Group Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MGR/" title="MGR">MGR<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Replicaiton/" title="Replicaiton">Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MHA/" title="MHA">MHA<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Python/" title="Python">Python<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Xtrabackup/" title="Xtrabackup">Xtrabackup<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DNS/" title="DNS">DNS<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Sharding/" title="Sharding">Sharding<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Discourse/" title="Discourse">Discourse<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forum/" title="Forum">Forum<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">知识链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/org/polardb-x" target="_blank" title="PloarDB-X专栏">PloarDB-X专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://cn.pingcap.com/blog/" target="_blank" title="TiDB 博客">TiDB 博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/doc/refman/8.0/en/" target="_blank" title="MySQL 8.0 Docs">MySQL 8.0 Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/blog-archive/" target="_blank" title="MySQL Server Blog">MySQL Server Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://lefred.be/" target="_blank" title="Lefred&#39;s blog">Lefred&#39;s blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/people/wen-zheng-hu" target="_blank" title="温正湖专栏">温正湖专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.percona.com/blog/" target="_blank" title="Percona Blog">Percona Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://engineering.fb.com/" target="_blank" title="Meta Engineering">Meta Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.uber.com/en-US/blog/engineering/" target="_blank" title="Uber Engineering">Uber Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.blog/category/engineering/" target="_blank" title="Github Engineering">Github Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://medium.com/pinterest-engineering" target="_blank" title="Pinterest Engineering">Pinterest Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://flask.palletsprojects.com/" target="_blank" title="Flask Docs">Flask Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://tympanus.net/codrops/" target="_blank" title="Codrops front">Codrops front</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
+			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
+		
+		<a href="/about" target="_blank" title="ruichao.lin">ruichao.lin</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+        getSize();
+        if (myWidth >= 1024) {
+          c.click();
+        }
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?e6d1f421bbc9962127a50488f9ed37d1";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

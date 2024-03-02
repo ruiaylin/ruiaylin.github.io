@@ -1,0 +1,819 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>【 MGR 】01 - Build a MGR cluster in ten minutes | ruiayLin&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="ruichao.lin">
+    
+
+    
+    <meta name="description" content="Introduction This is a series post about learning mysql group replication (including deployment ,operations, ha, performance testing, internals).This is the first post and i will share the way to buil">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【 MGR 】01 - Build a MGR cluster in ten minutes">
+<meta property="og:url" content="http://ruiaylin.github.io/2016/12/22/mgr-01-build-a-mysql-group-replication-cluster-in-10-minutes/index.html">
+<meta property="og:site_name" content="ruiayLin&#39;s Blog">
+<meta property="og:description" content="Introduction This is a series post about learning mysql group replication (including deployment ,operations, ha, performance testing, internals).This is the first post and i will share the way to buil">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://dev.mysql.com/doc/refman/5.7/en/images/gr-plugin-blocks.png">
+<meta property="article:published_time" content="2016-12-22T08:20:00.000Z">
+<meta property="article:modified_time" content="2024-03-02T09:18:29.290Z">
+<meta property="article:author" content="ruichao.lin">
+<meta property="article:tag" content="Docker">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="Group Replicaiton">
+<meta property="article:tag" content="MGR">
+<meta property="article:tag" content="Replicaiton">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://dev.mysql.com/doc/refman/5.7/en/images/gr-plugin-blocks.png">
+
+    
+    <link rel="alternative" href="/atom.xml" title="ruiayLin&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.jpeg" alt="ruiayLin&#39;s Blog" title="ruiayLin&#39;s Blog"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="ruiayLin&#39;s Blog">ruiayLin&#39;s Blog</a></h1>
+				<h2 class="blog-motto">蹈之而弗悔 , 慎思而笃行 ...</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:ruiaylin.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/12/22/mgr-01-build-a-mysql-group-replication-cluster-in-10-minutes/" title="【 MGR 】01 - Build a MGR cluster in ten minutes" itemprop="url">【 MGR 】01 - Build a MGR cluster in ten minutes</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="ruichao.lin" target="_blank" itemprop="author">ruichao.lin</a>
+		
+  <p class="article-time">
+    <time datetime="2016-12-22T08:20:00.000Z" itemprop="datePublished"> 发表于 2016-12-22</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Introduction"><span class="toc-number">1.</span> <span class="toc-text">Introduction</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#About-MySQL-Group-Replication"><span class="toc-number">2.</span> <span class="toc-text">About MySQL Group Replication</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Architecture-of-MGR-plugin"><span class="toc-number">3.</span> <span class="toc-text">Architecture of MGR plugin</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Resource-about-Group-Replication"><span class="toc-number">4.</span> <span class="toc-text">Resource about Group Replication</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Build-a-MGR-cluster-with-three-nodes"><span class="toc-number">5.</span> <span class="toc-text">Build a MGR cluster with three nodes</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Requirement"><span class="toc-number">5.1.</span> <span class="toc-text">Requirement</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E-centos7-%E9%95%9C%E5%83%8F%E8%BF%9B%E8%A1%8C%E6%89%8B%E5%B7%A5%E9%83%A8%E7%BD%B2"><span class="toc-number">5.2.</span> <span class="toc-text">基于 centos7 镜像进行手工部署</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8%E4%B8%89%E4%B8%AA-Container"><span class="toc-number">5.2.1.</span> <span class="toc-text">启动三个 Container</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Software-installation"><span class="toc-number">5.2.2.</span> <span class="toc-text">Software installation</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Configuration-Initialization"><span class="toc-number">5.2.3.</span> <span class="toc-text">Configuration &amp; Initialization</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Start-MySQL-instance"><span class="toc-number">5.2.4.</span> <span class="toc-text">Start MySQL instance</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E6%88%91%E6%89%93%E5%A5%BD%E7%9A%84image%E6%9D%A5%E6%8F%90%E4%BE%9B%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83"><span class="toc-number">5.3.</span> <span class="toc-text">基于我打好的image来提供运行环境</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE-Group-Replication"><span class="toc-number">6.</span> <span class="toc-text">配置 Group Replication</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Summary"><span class="toc-number">7.</span> <span class="toc-text">Summary</span></a></li></ol>
+		
+		</div>
+		
+		<h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><blockquote>
+<p>This is a series post about learning mysql group replication (including deployment ,operations, ha, performance testing, internals).This is the first post and i will share the way to build a MGR cluster in docker enviorement.  </p>
+</blockquote>
+<h2 id="About-MySQL-Group-Replication"><a href="#About-MySQL-Group-Replication" class="headerlink" title="About MySQL Group Replication"></a>About MySQL Group Replication</h2><p>Group Replication is a technique that can be used to implement fault-tolerant systems. The replication group is a set of servers that interact with each other through message passing. The communication layer provides a set of guarantees such as atomic message and total order message delivery. These are very powerful properties that translate into very useful abstractions that one can resort to build more advanced database replication solutions.</p>
+<blockquote>
+<p>上面的是官方文档对gr的一个简单的解释. 随着 MySQL5.7.17 版本的发布, Group Replication(后面简称 mgr)也随着发布了GA版本, MGR也是目前开源数据库界最热门的话题之一.Oracle官方出品类似 pxc 的数据库高可用解决方案. 个人认为 MGR 将会对现有HA方案产生很大的影响,MGR的前景很明朗,将会是很多场景下的利器.</p>
+</blockquote>
+<h2 id="Architecture-of-MGR-plugin"><a href="#Architecture-of-MGR-plugin" class="headerlink" title="Architecture of MGR plugin"></a>Architecture of MGR plugin</h2><p><img src="https://dev.mysql.com/doc/refman/5.7/en/images/gr-plugin-blocks.png" alt="架构图" title="Archtecture of gr "></p>
+<h2 id="Resource-about-Group-Replication"><a href="#Resource-about-Group-Replication" class="headerlink" title="Resource about Group Replication"></a>Resource about Group Replication</h2><blockquote>
+<p>gr 目前已经出了第一个稳定版, 学习gr刻不容缓哈(技术人都是这样, 苦逼的一直学习)<br>下面列举了一些相关资源</p>
+</blockquote>
+<ul>
+<li><p>MySQL 5.7 官方文档 <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/group-replication.html">链接</a></p>
+</li>
+<li><p>Frederic Descamps 介绍Group Replication的 <a target="_blank" rel="noopener" href="http://www.slideshare.net/lefred.descamps/mysql-group-replicatio-in-a-nutshell-mysql-innodb-cluster">ppt</a></p>
+</li>
+<li><p>MySQL High Availability 有很多关于MGR的 <a target="_blank" rel="noopener" href="http://mysqlhighavailability.com/?s=group+replication+">文章</a></p>
+</li>
+<li><p>Galera 和 MGR的对比 <a target="_blank" rel="noopener" href="http://lefred.be/content/group-replication-vs-galera">链接</a></p>
+</li>
+</ul>
+<h2 id="Build-a-MGR-cluster-with-three-nodes"><a href="#Build-a-MGR-cluster-with-three-nodes" class="headerlink" title="Build a MGR cluster with three nodes"></a>Build a MGR cluster with three nodes</h2><p>为了学习和测试, 需要部署一套真实的MGR运行环境. 接下来我就介绍一种基于容器来快速构建mgr cluster的方法. 方便, 简单, 效率, 让你玩转 MGR.</p>
+<h3 id="Requirement"><a href="#Requirement" class="headerlink" title="Requirement"></a>Requirement</h3><p>一台安装有docker的可以上网的机器(Windows, mac, Linux).</p>
+<blockquote>
+<p>从docker hub 上下载基础镜像</p>
+</blockquote>
+<p>1.基于 Centos 7 镜像进行手工部署</p>
+<p><code>基于centos 来进行手工部署. 容器,虚拟机 ,实体机三者应该是极其相似的. 既然以容器为例子, 那么就要下载 image</code></p>
+<pre><code><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull centos </span><br></pre></td></tr></table></figure>
+</code></pre>
+<p>2.基于我打好的image来部署 MGR</p>
+<p>打包好的镜像本身就已经部署完成 5.7.17GA, 启动容器的时候, 就会直接运行 mysql 实例</p>
+<pre><code><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull ruiaylin/mysql57-group-replicaiton</span><br></pre></td></tr></table></figure>
+</code></pre>
+<p>由于Group replication的部署需要节点协调, 采用容器的方式可以很快速的进行部署,以供测试<br><code>目前还没有实现自动集群部署, 不过后续依赖etcd完全可以自动化进行部署.</code></p>
+<p>进行下面步骤的前提是先将对应的镜像下载完成, 两者原理是一样的只是第二种方式更灵活. 两者都是先进行gr基本环境准备. gr的配置需要单独进行配置.</p>
+<h3 id="基于-centos7-镜像进行手工部署"><a href="#基于-centos7-镜像进行手工部署" class="headerlink" title="基于 centos7 镜像进行手工部署"></a>基于 centos7 镜像进行手工部署</h3><p>由于第一种部署方式, 做了很多初始化工作, 我们现在进行手工部署的方式. </p>
+<h4 id="启动三个-Container"><a href="#启动三个-Container" class="headerlink" title="启动三个 Container"></a>启动三个 Container</h4><p> 创建:</p>
+<pre><code>docker run -it  --name mgr00  -d centos
+docker run -it  --name mgr01  -d centos
+docker run -it  --name mgr02  -d centos
+</code></pre>
+<p> 登录: </p>
+<pre><code>docker exec -it mgr00 bash
+docker exec -it mgr01 bash
+docker exec -it mgr02 bash
+</code></pre>
+<h4 id="Software-installation"><a href="#Software-installation" class="headerlink" title="Software installation"></a>Software installation</h4><p>Install 5.7.17 stable version through yum or you can download the tarball.<br>This is the rpm installation:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rpm -ivh http://dev.mysql.com/get/mysql57-community-release-el7-9.noarch.rpm</span><br><span class="line">yum install mysql mysql-server -y </span><br></pre></td></tr></table></figure>
+
+<h4 id="Configuration-Initialization"><a href="#Configuration-Initialization" class="headerlink" title="Configuration &amp; Initialization"></a>Configuration &amp; Initialization</h4><blockquote>
+<p>Configuration</p>
+</blockquote>
+<p>启用 gr 的前提条件如下: 具体可以参考文档 <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/group-replication-requirements-and-limitations.html">Requirements and Limitations</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">gtid_mode=ON</span><br><span class="line">enforce_gtid_consistency=ON</span><br><span class="line">master_info_repository=TABLE</span><br><span class="line">relay_log_info_repository=TABLE</span><br><span class="line">binlog_checksum=NONE</span><br><span class="line">log_slave_updates=ON</span><br><span class="line">binlog_format=ROW</span><br></pre></td></tr></table></figure>
+
+<p>Group replication主要相关参数(都可以动态在线设置): </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">transaction-write-set-extraction = XXHASH64</span><br><span class="line">group_replication_start_on_boot = OFF</span><br><span class="line">group_replication_bootstrap_group = OFF</span><br><span class="line">group_replication_group_name = 716483bc-c763-11e6-93c0-0242ac110002</span><br><span class="line">group_replication_local_address = &#x27;&#x27;</span><br><span class="line">group_replication_group_seeds = &#x27;&#x27;</span><br><span class="line">group_replication_single_primary_mode=FALSE</span><br><span class="line">group_replication_enforce_update_everywhere_checks=TRUE</span><br></pre></td></tr></table></figure>
+
+<p>下面是一个测试样例 my.cnf :</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line">[mysql]</span><br><span class="line">prompt=\\u@\\d \\r:\\m:\\s&gt;</span><br><span class="line">default-character-set=utf8mb4</span><br><span class="line">[mysqld]</span><br><span class="line">server_id = 1</span><br><span class="line">log_timestamps=SYSTEM</span><br><span class="line">#</span><br><span class="line"># Remove leading # and set to the amount of RAM for the most important data</span><br><span class="line"># cache in MySQL. Start at 70% of total RAM for dedicated server, else 10%.</span><br><span class="line"># innodb_buffer_pool_size = 128M</span><br><span class="line">#</span><br><span class="line"># Remove leading # to turn on a very important data integrity option: logging</span><br><span class="line"># changes to the binary log between backups.</span><br><span class="line"># log_bin</span><br><span class="line">#</span><br><span class="line"># Remove leading # to set options mainly useful for reporting servers.</span><br><span class="line"># The server defaults are faster for transactions and fast SELECTs.</span><br><span class="line"># Adjust sizes as needed, experiment to find the optimal values.</span><br><span class="line"># join_buffer_size = 128M</span><br><span class="line"># sort_buffer_size = 2M</span><br><span class="line"># read_rnd_buffer_size = 2M</span><br><span class="line"># Disabling symbolic-links is recommended to prevent assorted security risks</span><br><span class="line">symbolic-links=0</span><br><span class="line">default-storage-engine=INNODB</span><br><span class="line">log_timestamps = SYSTEM</span><br><span class="line">#dir</span><br><span class="line">innodb_data_file_path=ibdata1:10M:autoextend:max:10G</span><br><span class="line">datadir=/var/lib/mysql</span><br><span class="line">slow_query_log_file=/var/lib/mysql/slow.log</span><br><span class="line">log-error=/var/log/mysqld.log</span><br><span class="line">log_bin=/var/lib/mysql/binlog</span><br><span class="line">relay-log=/var/lib/mysql/relaylog</span><br><span class="line">#innodb</span><br><span class="line">innodb_buffer_pool_size = 64M</span><br><span class="line">innodb_log_files_in_group=2</span><br><span class="line">innodb_flush_log_at_trx_commit=1</span><br><span class="line">innodb_io_capacity=100</span><br><span class="line">innodb_read_io_threads=4</span><br><span class="line">innodb_write_io_threads=4</span><br><span class="line">innodb_file_per_table=1</span><br><span class="line">innodb_adaptive_flushing=1</span><br><span class="line">innodb_stats_on_metadata=0</span><br><span class="line">innodb_flush_method=O_DIRECT</span><br><span class="line">innodb_log_buffer_size=10M</span><br><span class="line">transaction-isolation = READ-COMMITTED</span><br><span class="line">#table</span><br><span class="line">table_definition_cache=512</span><br><span class="line">table_open_cache=512</span><br><span class="line">table_open_cache_instances = 2</span><br><span class="line">#thread</span><br><span class="line">thread_stack=262144</span><br><span class="line">thread_cache_size=256</span><br><span class="line">thread_handling=one-thread-per-connection</span><br><span class="line">#gtid&amp;repl</span><br><span class="line">gtid_mode=ON</span><br><span class="line">enforce_gtid_consistency=ON</span><br><span class="line">master_info_repository=TABLE</span><br><span class="line">relay_log_info_repository=TABLE</span><br><span class="line">binlog_checksum=NONE</span><br><span class="line">log_slave_updates=ON</span><br><span class="line">#binlog</span><br><span class="line">max_binlog_size=50M</span><br><span class="line">binlog_cache_size=5M</span><br><span class="line">binlog-format=ROW</span><br><span class="line">sync_binlog=1</span><br><span class="line">long_query_time=0.2</span><br><span class="line">slow_query_log=1</span><br><span class="line">skip-slave-start</span><br><span class="line">#coms</span><br><span class="line">query_cache_type=0</span><br><span class="line">query_cache_size=0</span><br><span class="line">local-infile=0</span><br><span class="line">port=3306</span><br><span class="line">max_connections=110</span><br><span class="line">max_user_connections=100</span><br><span class="line">character-set-server=utf8mb4</span><br><span class="line">skip-name-resolve</span><br><span class="line"># GR</span><br><span class="line">plugin_load = &quot;group_replication.so&quot;</span><br><span class="line">transaction_write_set_extraction = XXHASH64</span><br><span class="line">group_replication_start_on_boot = OFF</span><br><span class="line">group_replication_bootstrap_group = OFF</span><br><span class="line">group_replication_group_name = 716483bc-c763-11e6-93c0-0242ac110002</span><br><span class="line">group_replication_local_address = &#x27;&#x27;</span><br><span class="line">group_replication_group_seeds = &#x27;&#x27;</span><br><span class="line">group_replication_single_primary_mode=FALSE</span><br><span class="line">group_replication_enforce_update_everywhere_checks=TRUE</span><br></pre></td></tr></table></figure>
+
+
+<blockquote>
+<p>初始化</p>
+</blockquote>
+<p>最后一部分 gr 的相关配置参数, 都是可以在线动态修改的: </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">DATADIR=&quot;$(&quot;mysqld&quot; --verbose --wsrep_provider= --help 2&gt;/dev/null | awk &#x27;$1 == &quot;datadir&quot; &#123; print $2; exit &#125;&#x27;)&quot;</span><br><span class="line">chown -R mysql:mysql &quot;$DATADIR&quot;</span><br><span class="line">chown mysql:mysql /var/log/mysqld.log</span><br><span class="line">mysqld --initialize-insecure --user=mysql</span><br></pre></td></tr></table></figure>
+
+<h4 id="Start-MySQL-instance"><a href="#Start-MySQL-instance" class="headerlink" title="Start MySQL instance"></a>Start MySQL instance</h4><p>每个容器(虚机,实体机)启动: </p>
+<pre><code>mysqld --user=mysql &amp; 
+</code></pre>
+<h3 id="基于我打好的image来提供运行环境"><a href="#基于我打好的image来提供运行环境" class="headerlink" title="基于我打好的image来提供运行环境"></a>基于我打好的image来提供运行环境</h3><p>启动三个已经初始化完成的MySQL运行实例:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --name mgr0x0 -e MYSQL_ROOT_PASSWORD=root -d ruiaylin/mysql57-group-replication</span><br><span class="line">docker run -it --name mgr0x1 -e MYSQL_ROOT_PASSWORD=root -d ruiaylin/mysql57-group-replication</span><br><span class="line">docker run -it --name mgr0x2 -e MYSQL_ROOT_PASSWORD=root -d ruiaylin/mysql57-group-replication</span><br></pre></td></tr></table></figure>
+
+<p>查看容器: </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ docker ps</span><br><span class="line">CONTAINER ID        IMAGE                                COMMAND             CREATED             STATUS              PORTS               NAMES</span><br><span class="line">23361ae481fa        ruiaylin/mysql57-group-replication   &quot;/entrypoint.sh &quot;   About an hour ago   Up About an hour    3306/tcp            mgr0x2</span><br><span class="line">2e8a57225332        ruiaylin/mysql57-group-replication   &quot;/entrypoint.sh &quot;   About an hour ago   Up About an hour    3306/tcp            mgr0x1</span><br><span class="line">1cb5c7fb1505        ruiaylin/mysql57-group-replication   &quot;/entrypoint.sh &quot;   About an hour ago   Up About an hour    3306/tcp            mgr0x0</span><br></pre></td></tr></table></figure>
+
+<p>获取容器的IP(去掉 NetworkSettings.IPAddress 左右大括号的反斜杠 ):</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">for x in `  docker ps |grep mgr | awk &#x27;&#123;print $1&#125;&#x27;`</span><br><span class="line">do</span><br><span class="line">    ip=`docker inspect --format=&#x27;\&#123;\&#123;.NetworkSettings.IPAddress\&#125;\&#125;&#x27; $x`</span><br><span class="line">    echo $ip         $x</span><br><span class="line">done </span><br></pre></td></tr></table></figure>
+
+<p>Output : </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">172.17.0.7 23361ae481fa</span><br><span class="line">172.17.0.6 2e8a57225332</span><br><span class="line">172.17.0.5 1cb5c7fb1505</span><br></pre></td></tr></table></figure>
+
+<p>将该输出放入到每个容器的 &#x2F;etc&#x2F;hosts 里面</p>
+<p><code>你有可能会问为什么 ? 下一篇文章会详细介绍, 敬请期待</code></p>
+<h2 id="配置-Group-Replication"><a href="#配置-Group-Replication" class="headerlink" title="配置 Group Replication"></a>配置 Group Replication</h2><blockquote>
+<p>配置白名单的网段:</p>
+</blockquote>
+<p>默认值是:  127.0.0.1&#x2F;32,10.0.0.0&#x2F;8,172.16.0.0&#x2F;12,192.168.0.0&#x2F;16 ; 需要添加自己所在网段的配置. </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">set global group_replication_ip_whitelist=&quot;127.0.0.1/32,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,172.17.0.0/16&quot;</span><br></pre></td></tr></table></figure>
+
+<p>否则会无法访问group, 报错如下: </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">2016-12-20T05:11:32.220173-00:00 0 [Warning] Plugin group_replication reported: &#x27;[GCS] Connection attempt from IP address 172.17.0.5 refused. Address is not in the IP whitelist.&#x27;</span><br><span class="line">2016-12-20T05:11:32.220240-00:00 0 [ERROR] Plugin group_replication reported </span><br><span class="line">2016-12-20T05:12:32.203122-00:00 4 [ERROR] Plugin group_replication reported: &#x27;[GCS] The member is leaving a group without being on one.&#x27;</span><br></pre></td></tr></table></figure>
+
+
+
+<blockquote>
+<p>配置参数:</p>
+</blockquote>
+<p> <code>注意每个节点的 group_replication_local_address 值都是不一样的根据自己的IP来设置</code> </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">set global transaction_write_set_extraction = XXHASH64</span><br><span class="line">set global group_replication_start_on_boot = OFF</span><br><span class="line">set global group_replication_bootstrap_group = OFF</span><br><span class="line">set global group_replication_group_name = 716483bc-c763-11e6-93c0-0242ac110002</span><br><span class="line">set global group_replication_local_address = &#x27;172.17.0.5:3316&#x27;</span><br><span class="line">set global group_replication_group_seeds = &#x27;172.17.0.5:3316,172.17.0.6:3316,172.17.0.7:3316&#x27;</span><br><span class="line">set global group_replication_single_primary_mode=FALSE</span><br><span class="line">set global group_replication_enforce_update_everywhere_checks=TRUE</span><br></pre></td></tr></table></figure>
+
+
+<blockquote>
+<p>创建复制账户(每个节点都要执行)</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">SET SQL_LOG_BIN=0;</span><br><span class="line">CREATE USER repl@&#x27;%&#x27;;</span><br><span class="line">GRANT REPLICATION SLAVE ON *.* TO repl@&#x27;%&#x27; IDENTIFIED BY &#x27;repl&#x27;;</span><br><span class="line">SET SQL_LOG_BIN=1;</span><br><span class="line"># 进行复制调整</span><br><span class="line">CHANGE MASTER TO MASTER_USER=&#x27;repl&#x27;, MASTER_PASSWORD=&#x27;repl&#x27; FOR CHANNEL &#x27;group_replication_recovery&#x27;;</span><br></pre></td></tr></table></figure>
+
+
+<blockquote>
+<p>启动组复制 </p>
+</blockquote>
+<p>第一个节点需要执行: </p>
+<pre><code>SET GLOBAL group_replication_bootstrap_group=ON;
+START GROUP_REPLICATION;
+SET GLOBAL group_replication_bootstrap_group=OFF;
+</code></pre>
+<p>其余节点都应该执行如下:</p>
+<pre><code>START GROUP_REPLICATION;
+SET GLOBAL group_replication_bootstrap_group=OFF;
+</code></pre>
+<blockquote>
+<p>检查状态: </p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">    root@(none) 11:08:47&gt;SELECT * FROM performance_schema.replication_group_members;;</span><br><span class="line">+---------------------------+--------------------------------------+--------------+-------------+--------------+</span><br><span class="line">| CHANNEL_NAME              | MEMBER_ID                            | MEMBER_HOST  | MEMBER_PORT | MEMBER_STATE |</span><br><span class="line">+---------------------------+--------------------------------------+--------------+-------------+--------------+</span><br><span class="line">| group_replication_applier | 2bde3d22-c82b-11e6-9c0b-0242ac110005 | 1cb5c7fb1505 |        3306 | ONLINE       |</span><br><span class="line">| group_replication_applier | 666b46de-c82b-11e6-9f57-0242ac110006 | 2e8a57225332 |        3306 | ONLINE       |</span><br><span class="line">| group_replication_applier | 6d0bbe81-c82b-11e6-9dbf-0242ac110007 | 23361ae481fa |        3306 | ONLINE       |</span><br><span class="line">+---------------------------+--------------------------------------+--------------+-------------+--------------+</span><br><span class="line">3 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+
+<p>至此 , 一个有三个节点的 Multi-Master Group Replication 集群构建完成. 好好去把玩一下把, 希望你喜欢哈哈. </p>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>很久不写东西了, 17年多写写东西. 本着学习分享为本, 以后多写写东西. 这个我 <code>第一篇</code> 写关于MGR的东西, 后续将会持续更新源于管理维护, 监控, 性能测试, 以及 internal 的相关内容.</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/MySQL/">MySQL</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Docker/">Docker</a><a href="/tags/MySQL/">MySQL</a><a href="/tags/Group-Replicaiton/">Group Replicaiton</a><a href="/tags/MGR/">MGR</a><a href="/tags/Replicaiton/">Replicaiton</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://ruiaylin.github.io/2016/12/22/mgr-01-build-a-mysql-group-replication-cluster-in-10-minutes/" data-title="【 MGR 】01 - Build a MGR cluster in ten minutes | ruiayLin&#39;s Blog" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/12/28/mgr-02-summary-of-configuring-mysql-group-replication-cluster/" title="【 MGR 】02 - Summary of configuring MGR cluster">
+  <strong>上一篇：</strong><br/>
+  <span>
+  【 MGR 】02 - Summary of configuring MGR cluster</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/09/30/Simple-Way-To-Install-MySQL/"  title="The Simple Way To Install MySQL">
+ <strong>下一篇：</strong><br/> 
+ <span>The Simple Way To Install MySQL
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Introduction"><span class="toc-number">1.</span> <span class="toc-text">Introduction</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#About-MySQL-Group-Replication"><span class="toc-number">2.</span> <span class="toc-text">About MySQL Group Replication</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Architecture-of-MGR-plugin"><span class="toc-number">3.</span> <span class="toc-text">Architecture of MGR plugin</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Resource-about-Group-Replication"><span class="toc-number">4.</span> <span class="toc-text">Resource about Group Replication</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Build-a-MGR-cluster-with-three-nodes"><span class="toc-number">5.</span> <span class="toc-text">Build a MGR cluster with three nodes</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Requirement"><span class="toc-number">5.1.</span> <span class="toc-text">Requirement</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E-centos7-%E9%95%9C%E5%83%8F%E8%BF%9B%E8%A1%8C%E6%89%8B%E5%B7%A5%E9%83%A8%E7%BD%B2"><span class="toc-number">5.2.</span> <span class="toc-text">基于 centos7 镜像进行手工部署</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8%E4%B8%89%E4%B8%AA-Container"><span class="toc-number">5.2.1.</span> <span class="toc-text">启动三个 Container</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Software-installation"><span class="toc-number">5.2.2.</span> <span class="toc-text">Software installation</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Configuration-Initialization"><span class="toc-number">5.2.3.</span> <span class="toc-text">Configuration &amp; Initialization</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Start-MySQL-instance"><span class="toc-number">5.2.4.</span> <span class="toc-text">Start MySQL instance</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E6%88%91%E6%89%93%E5%A5%BD%E7%9A%84image%E6%9D%A5%E6%8F%90%E4%BE%9B%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83"><span class="toc-number">5.3.</span> <span class="toc-text">基于我打好的image来提供运行环境</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE-Group-Replication"><span class="toc-number">6.</span> <span class="toc-text">配置 Group Replication</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Summary"><span class="toc-number">7.</span> <span class="toc-text">Summary</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Docker/" title="Docker">Docker<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Go/" title="Go">Go<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MySQL/" title="MySQL">MySQL<sup>18</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/NewSQL/" title="NewSQL">NewSQL<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Oracle/" title="Oracle">Oracle<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Python/" title="Python">Python<sup>7</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/MySQL/" title="MySQL">MySQL<sup>11</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OPS/" title="OPS">OPS<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Fabric/" title="Fabric">Fabric<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Go/" title="Go">Go<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Group-Replicaiton/" title="Group Replicaiton">Group Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MGR/" title="MGR">MGR<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Replicaiton/" title="Replicaiton">Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MHA/" title="MHA">MHA<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Python/" title="Python">Python<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Xtrabackup/" title="Xtrabackup">Xtrabackup<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DNS/" title="DNS">DNS<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Sharding/" title="Sharding">Sharding<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Discourse/" title="Discourse">Discourse<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forum/" title="Forum">Forum<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">知识链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/org/polardb-x" target="_blank" title="PloarDB-X专栏">PloarDB-X专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://cn.pingcap.com/blog/" target="_blank" title="TiDB 博客">TiDB 博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/doc/refman/8.0/en/" target="_blank" title="MySQL 8.0 Docs">MySQL 8.0 Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/blog-archive/" target="_blank" title="MySQL Server Blog">MySQL Server Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://lefred.be/" target="_blank" title="Lefred&#39;s blog">Lefred&#39;s blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/people/wen-zheng-hu" target="_blank" title="温正湖专栏">温正湖专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.percona.com/blog/" target="_blank" title="Percona Blog">Percona Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://engineering.fb.com/" target="_blank" title="Meta Engineering">Meta Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.uber.com/en-US/blog/engineering/" target="_blank" title="Uber Engineering">Uber Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.blog/category/engineering/" target="_blank" title="Github Engineering">Github Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://medium.com/pinterest-engineering" target="_blank" title="Pinterest Engineering">Pinterest Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://flask.palletsprojects.com/" target="_blank" title="Flask Docs">Flask Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://tympanus.net/codrops/" target="_blank" title="Codrops front">Codrops front</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
+			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
+		
+		<a href="/about" target="_blank" title="ruichao.lin">ruichao.lin</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+        getSize();
+        if (myWidth >= 1024) {
+          c.click();
+        }
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?e6d1f421bbc9962127a50488f9ed37d1";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

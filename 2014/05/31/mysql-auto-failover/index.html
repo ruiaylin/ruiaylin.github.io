@@ -1,0 +1,1078 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>MySQL5.6自动Failover | ruiayLin&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="ruichao.lin">
+    
+
+    
+    <meta name="description" content="MySQL自动failover介绍 mysql5.6支持以全局统一事务ID（GTID)为基础的复制，当在主库上提交事务或者被从库应用时， 可以定位和追踪每一个事务，可以通过使用–gtid-mode 和–enforce-gtid-consistency 参数启动复制可以开启GTIDs 这也是mysql官方提供的工具集utilities中的自动failover的一个基础，今天我们一步一步的来使用mys">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL5.6自动Failover">
+<meta property="og:url" content="http://ruiaylin.github.io/2014/05/31/mysql-auto-failover/index.html">
+<meta property="og:site_name" content="ruiayLin&#39;s Blog">
+<meta property="og:description" content="MySQL自动failover介绍 mysql5.6支持以全局统一事务ID（GTID)为基础的复制，当在主库上提交事务或者被从库应用时， 可以定位和追踪每一个事务，可以通过使用–gtid-mode 和–enforce-gtid-consistency 参数启动复制可以开启GTIDs 这也是mysql官方提供的工具集utilities中的自动failover的一个基础，今天我们一步一步的来使用mys">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2014-05-30T21:03:27.000Z">
+<meta property="article:modified_time" content="2024-03-02T09:18:29.293Z">
+<meta property="article:author" content="ruichao.lin">
+<meta property="article:tag" content="Autofailover">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="ruiayLin&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.jpeg" alt="ruiayLin&#39;s Blog" title="ruiayLin&#39;s Blog"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="ruiayLin&#39;s Blog">ruiayLin&#39;s Blog</a></h1>
+				<h2 class="blog-motto">蹈之而弗悔 , 慎思而笃行 ...</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:ruiaylin.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2014/05/31/mysql-auto-failover/" title="MySQL5.6自动Failover" itemprop="url">MySQL5.6自动Failover</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="ruichao.lin" target="_blank" itemprop="author">ruichao.lin</a>
+		
+  <p class="article-time">
+    <time datetime="2014-05-30T21:03:27.000Z" itemprop="datePublished"> 发表于 2014-05-31</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#MySQL%E8%87%AA%E5%8A%A8failover%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">MySQL自动failover介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-number">1.1.</span> <span class="toc-text">环境准备</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%E5%AE%89%E8%A3%85mysql-DB"><span class="toc-number">1.1.1.</span> <span class="toc-text">第一步安装mysql DB</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5-%E5%88%9D%E5%A7%8B%E5%8C%96mysql-DB"><span class="toc-number">1.1.2.</span> <span class="toc-text">第二步 初始化mysql DB</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%E6%9E%84%E5%BB%BA%E5%A4%8D%E5%88%B6%E7%BB%93%E6%9E%84"><span class="toc-number">1.1.3.</span> <span class="toc-text">第三步构建复制结构</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mysql-utilities%E7%9A%84%E5%87%A0%E4%B8%AA%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="toc-number">1.2.</span> <span class="toc-text">mysql utilities的几个常用命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%8A%A8%E5%92%8C%E6%89%8B%E5%8A%A8-failover"><span class="toc-number">1.3.</span> <span class="toc-text">自动和手动 failover</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%87%AA%E5%8A%A8-failover"><span class="toc-number">1.3.1.</span> <span class="toc-text">自动 failover</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%89%8B%E5%8A%A8-failover"><span class="toc-number">1.3.2.</span> <span class="toc-text">手动 failover</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">2.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<h2 id="MySQL自动failover介绍"><a href="#MySQL自动failover介绍" class="headerlink" title="MySQL自动failover介绍"></a>MySQL自动failover介绍</h2><blockquote>
+<p>mysql5.6支持以全局统一事务ID（GTID)为基础的复制，当在主库上<br>提交事务或者被从库应用时， 可以定位和追踪每一个事务，可以通<br>过使用–gtid-mode 和–enforce-gtid-consistency 参数启动复制可<br>以开启GTIDs 这也是mysql官方提供的工具集utilities中的自动failover<br>的一个基础，今天我们一步一步的来使用mysql utilities<br>来搭建一套 MySQL自动failover结构</p>
+</blockquote>
+<h3 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h3><p>我准备在我自己的电脑上面搭建四台mysql实例，一个master和三个slave</p>
+<pre><code>localhost：3306 （ master ）
+localhost：3307 （ slave  ） 
+localhost：3308 （ slave  ）
+localhost：3309 （ slave  ）
+</code></pre>
+<h4 id="第一步安装mysql-DB"><a href="#第一步安装mysql-DB" class="headerlink" title="第一步安装mysql DB"></a>第一步安装mysql DB</h4><p>从官方网站下载 &gt;&#x3D; 5.6.10 的mysql dmg版本。安装到系统中之后，配置好path 和 mysql_base</p>
+<pre><code>export MYSQL_BASE=/usr/local/mysql
+export DYLD_LIBRARY_PATH=&quot;$DYLD_LIBRARY_PATH:/usr/local/mysql/lib&quot; #for python 
+export PATH=$MYSQL_BASE/bin:$PATH 
+</code></pre>
+<h4 id="第二步-初始化mysql-DB"><a href="#第二步-初始化mysql-DB" class="headerlink" title="第二步 初始化mysql DB"></a>第二步 初始化mysql DB</h4><p>配置my.cnf文件</p>
+<pre><code>[client]
+port=3309
+socket=/data/mysql3309/run/mysql.sock
+[mysql]
+port=3309
+prompt=\\u@\\d \\r:\\m:\\s&gt;
+default-character-set=gbk
+[mysqld]
+report_host=localhost
+explicit_defaults_for_timestamp=true
+default-storage-engine=INNODB
+master-info-repository=TABLE
+#dir
+innodb_log_group_home_dir=/logs/mysql3309/iblog
+innodb_data_home_dir=/logs/mysql3309/iblog
+basedir=/usr/local/mysql/
+datadir=/data/mysql3309/data
+tmpdir=/data/mysql3309/tmp
+slave_load_tmpdir=/data/mysql3309/tmp
+log-error=/data/mysql3309/log/alert.log
+slow_query_log_file=/data/mysql3309/log/slow.log
+relay_log_info_file=/logs/mysql3309/binlog/relay-log.info
+master-info-file=/logs/mysql3309/binlog/master.info
+socket=/data/mysql3309/run/mysql.sock
+log-bin=/logs/mysql3309/binlog/binlog
+relay-log=/logs/mysql3309/binlog/relaylog
+lower_case_table_names=2
+#innodb
+innodb_log_files_in_group=4
+innodb_log_file_size=20M
+innodb_buffer_pool_size=256m
+innodb_open_files=65535
+innodb_flush_log_at_trx_commit=2
+innodb_max_dirty_pages_pct=50
+innodb_io_capacity=100
+innodb_read_io_threads=2
+innodb_write_io_threads=4
+innodb_file_format=Barracuda
+innodb_file_per_table=1
+innodb_thread_concurrency=10
+innodb_change_buffering=inserts
+innodb_adaptive_flushing=1
+innodb_stats_on_metadata=0
+innodb_additional_mem_pool_size=10M
+innodb_flush_method=O_DIRECT
+innodb_log_buffer_size=10M
+transaction-isolation = READ-COMMITTED
+query_cache_type=0
+sync_binlog=100
+max_binlog_size =50M
+binlog_cache_size=5M
+binlog-format=ROW
+expire_logs_days=7
+#gtid
+gtid-mode=on
+log-slave-updates=true
+enforce-gtid-consistency=true
+long_query_time=1
+slow_query_log=1
+skip-slave-start
+server_id=1
+#timeout
+connect_timeout=30
+delayed_insert_timeout =300
+innodb_lock_wait_timeout=50
+innodb_rollback_on_timeout=OFF
+net_read_timeout=30
+net_write_timeout=60
+slave_net_timeout=30
+port=3309
+skip-name-resolve
+max_connect_errors=1500
+connect_timeout=30
+max_allowed_packet=24M
+#myisam
+concurrent_insert=2
+key_buffer_size=8M
+sort_buffer_size=4M
+join_buffer_size=4M
+read_buffer_size=4M
+myisam_sort_buffer_size=20M
+#common
+character-set-server=gbk
+skip-external-locking
+read_rnd_buffer_size=5M
+safe-user-create
+local-infile=0
+[mysqld_safe]
+pid-file=/data/mysql3309/run/mysqld.pid
+</code></pre>
+<p>其中：    report_host&#x3D;localhost<br>          explicit_defaults_for_timestamp&#x3D;true<br>          gtid-mode&#x3D;on log-slave-updates&#x3D;true<br>          enforce-gtid-consistency&#x3D;true<br>    是必须的；注意四个实例的server_id 不能一样。</p>
+<p>配置每个实例的环境变量</p>
+<pre><code>alias my3306=&#39;export MYSQL_HOME=/data/mysql3306/&#39;
+alias my3307=&#39;export MYSQL_HOME=/data/mysql3307/&#39;
+alias my3308=&#39;export MYSQL_HOME=/data/mysql3308/&#39;
+alias my3309=&#39;export MYSQL_HOME=/data/mysql3309/&#39;
+alias dbasql=&#39;mysql -uroot -proot&#39;
+alias nsql=&#39;mysql &#39;
+alias alert=&#39;tail -100f $MYSQL_HOME/log/alert.log&#39;
+</code></pre>
+<p>初始化每一个实例(以3309为例子) 创建目录，赋权</p>
+<pre><code>mkdir -p /data/mysql3309/&#123;data,tmp,run,log&#125;
+mkdir -p /log/mysql3309/&#123;iblog,binlog&#125;
+chmod -R 777 /data/mysql3309/
+chmod -R 777 /logs/mysql3309/
+chmod 644  /data/mysql3309/my.cnf
+</code></pre>
+<p>create database </p>
+<pre><code>/usr/local/mysql/scripts/mysql_install_db --defaults-file=/data/mysql3309/my.cnf --basedir=/usr/local/mysql --datadir=/data/mysql3309/data  --user=root
+</code></pre>
+<p>启动实例</p>
+<pre><code>export MYSQL_HOME=/data/mysql3309/
+mysqld_safe &amp;
+</code></pre>
+<h4 id="第三步构建复制结构"><a href="#第三步构建复制结构" class="headerlink" title="第三步构建复制结构"></a>第三步构建复制结构</h4><pre><code>mysqlreplicate  --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3307 --rpl-user=repl:repl -vv
+mysqlreplicate  --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3308 --rpl-user=repl:repl -vv
+mysqlreplicate  --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3309 --rpl-user=repl:repl -vv
+</code></pre>
+<p>执行日志如下： </p>
+<pre><code>$ mysqlreplicate  --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3307 --rpl-user=repl:repl -vv
+# master on 127.0.0.1: ... connected.
+# slave on 127.0.0.1: ... connected.
+# master id = 2
+#  slave id = 3
+# master uuid = c23c028a-dc35-11e3-9ecf-fa53af763fd8
+#  slave uuid = c2350336-dc35-11e3-9ecf-c98b5f3b0a82
+# Checking InnoDB statistics for type and version conflicts.
+# Checking storage engines...
+# Checking for binary logging on master...
+# Setting up replication...
+# Connecting slave to master...
+# CHANGE MASTER TO MASTER_HOST = &#39;127.0.0.1&#39;, MASTER_USER = &#39;repl&#39;, MASTER_PASSWORD = &#39;repl&#39;, MASTER_PORT = 3306, MASTER_AUTO_POSITION=1
+# Starting slave from master&#39;s last position...
+# IO status: Waiting for master to send event
+# IO thread running: Yes
+# IO error: None
+# SQL thread running: Yes
+# SQL error: None
+# ...done.
+</code></pre>
+<p>查看复制结构</p>
+<pre><code>ruiayLinSunnydeMacBook-Pro-2:manages root# mysqlrplshow --master=root:root@localhost:3306 --discover-slaves-login=root:root -v
+# master on localhost: ... connected.
+# Finding slaves for master: localhost:3306
+# Replication Topology Graph
+localhost:3306 (MASTER)
+   |
+   +--- localhost:3307 [IO: Yes, SQL: Yes] - (SLAVE)
+   |
+   +--- localhost:3308 [IO: Yes, SQL: Yes] - (SLAVE)
+   |
+   +--- localhost:3309 [IO: Yes, SQL: Yes] - (SLAVE)
+</code></pre>
+<p>至此我们的环境已经搭建完成。</p>
+<h3 id="mysql-utilities的几个常用命令"><a href="#mysql-utilities的几个常用命令" class="headerlink" title="mysql utilities的几个常用命令"></a>mysql utilities的几个常用命令</h3><p>检查复制环境：</p>
+<pre><code>mysqlrplcheck --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3307 -s
+</code></pre>
+<p>—&gt;:检查日志</p>
+<pre><code>ruiayLinSunny at ruiayLinSunnydeMacBook-Pro-2 in ~
+$ mysqlrplcheck --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3307 -s
+# master on 127.0.0.1: ... connected.
+# slave on 127.0.0.1: ... connected.
+Test Description                                                     Status
+---------------------------------------------------------------------------
+Checking for binary logging on master                                [pass]
+Are there binlog exceptions?                                         [pass]
+Replication user exists?                                             [pass]
+Checking server_id values                                            [pass]
+Checking server_uuid values                                          [pass]
+Is slave connected to master?                                        [pass]
+Check master information file                                        [pass]
+Checking InnoDB compatibility                                        [pass]
+Checking storage engines compatibility                               [pass]
+Checking lower_case_table_names settings                             [pass]
+Checking slave delay (seconds behind master)                         [pass]
+</code></pre>
+<p>检查复制健康状态：</p>
+<pre><code>mysqlrpladmin --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3307 health
+</code></pre>
+<p>—&gt;: 检查日志</p>
+<pre><code>$ mysqlrpladmin --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3307 health
+# Checking privileges.
+#
+# Replication Topology Health:
++------------+-------+---------+--------+------------+---------+
+| host       | port  | role    | state  | gtid_mode  | health  |
++------------+-------+---------+--------+------------+---------+
+| 127.0.0.1  | 3306  | MASTER  | UP     | ON         | OK      |
+| 127.0.0.1  | 3307  | SLAVE   | UP     | ON         | OK      |
++------------+-------+---------+--------+------------+---------+
+</code></pre>
+<p>显示整体拓扑结构：</p>
+<pre><code>mysqlrplshow --master=root:root@127.0.0.1:3306  --discover-slaves-login=root:root -v
+</code></pre>
+<p>—&gt;: 检查结果</p>
+<pre><code>ruiaylinydembp2:manages root# mysqlrplshow --master=root:root@localhost:3306 --discover-slaves-login=root:root
+# master on localhost: ... connected.
+# Finding slaves for master: localhost:3306 
+# Replication Topology Graph
+localhost:3306 (MASTER)
+   |
+   +--- localhost:3307 - (SLAVE)
+   |
+   +--- localhost:3308 - (SLAVE)
+   |
+   +--- localhost:3309 - (SLAVE)
+</code></pre>
+<p>通过 mysqlrpladmin 来打开和关闭复制</p>
+<pre><code>mysqlrpladmin --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3308 start
+mysqlrpladmin --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3308 stop
+</code></pre>
+<p>以上是几个比较常用的工具，每一个具体工具详细内容，请自行看文档，呵呵</p>
+<h3 id="自动和手动-failover"><a href="#自动和手动-failover" class="headerlink" title="自动和手动 failover"></a>自动和手动 failover</h3><h4 id="自动-failover"><a href="#自动-failover" class="headerlink" title="自动 failover"></a>自动 failover</h4><pre><code>mysqlfailover --master=root:root@127.0.0.1:3306 --candidates=root:root@127.0.0.1:3307  --discover-slaves-login=root:root
+</code></pre>
+<p>执行这个命令之后，会在当前终端打开failover check的终端， like this ： </p>
+<pre><code>### mysqlfailover --master=root:root@127.0.0.1:3306 --candidates=root:root@127.0.0.1:3307  --discover-slaves-login=root:root
+
+MySQL Replication Failover Utility
+Failover Mode = auto     Next Interval = Sat May 31 16:05:59 2014
+
+Master Information
+------------------
+Binary Log File  Position  Binlog_Do_DB  Binlog_Ignore_DB  
+binlog.000009    191                                       
+
+GTID Executed Set
+dd1f65aa-e2d0-11e3-89e3-7f8d49c2f173:1-14
+
+Replication Health Status
++------------+-------+---------+--------+------------+---------+
+| host       | port  | role    | state  | gtid_mode  | health  |
++------------+-------+---------+--------+------------+---------+
+| 127.0.0.1  | 3306  | MASTER  | UP     | ON         | OK      |
+| localhost  | 3307  | SLAVE   | UP     | ON         | OK      |
+| localhost  | 3308  | SLAVE   | UP     | ON         | OK      |
+| localhost  | 3309  | SLAVE   | UP     | ON         | OK      |
++------------+-------+---------+--------+------------+---------+
+
+Q-quit R-refresh H-health G-GTID Lists U-UUIDs
+</code></pre>
+<p>另外开一个终端<br>执行 ：</p>
+<pre><code>mysqladmin  -uroot -proot shutdown
+</code></pre>
+<p>failover终端：</p>
+<pre><code>### mysqlfailover --master=root:root@127.0.0.1:3306 --candidates=root:root@127.0.0.1:3307  --discover-slaves-login=root:root
+Master Information
+------------------
+Binary Log File  Position  Binlog_Do_DB  Binlog_Ignore_DB
+binlog.000008    191
+
+GTID Executed Set
+dd1f65aa-e2d0-11e3-89e3-7f8d49c2f173:1-14
+
+Master GTID Executed Set
++------------+-------+---------+--------+------------+---------+
+| host       | port  | role    | state  | gtid_mode  | health  |
++------------+-------+---------+--------+------------+---------+
+| 127.0.0.1  | 3306  | MASTER  | UP     | ON         | OK      |
+| localhost  | 3307  | SLAVE   | UP     | ON         | OK      |
+| localhost  | 3308  | SLAVE   | UP     | ON         | OK      |
+| localhost  | 3309  | SLAVE   | UP     | ON         | OK      |
++------------+-------+---------+--------+------------+---------+
+
+Q-quit R-refresh H-health G-GTID Lists U-UUIDs
+Failed to reconnect to the master after 3 attemps.
+
+Failover starting in &#39;auto&#39; mode...
+# Candidate slave 127.0.0.1:3307 will become the new master.
+# Checking slaves status (before failover).
+# Preparing candidate for failover.
+# Creating replication user if it does not exist.
+# Stopping slaves.
+# Performing STOP on all slaves.
+# Switching slaves to new master.
+# Disconnecting new master as slave.
+# Starting slaves.
+# Performing START on all slaves.
+# Checking slaves for errors.
+# Failover complete.
+# Discovering slaves for master at 127.0.0.1:3307
+Failover console will restart in 5 seconds.
+
+Q-quit R-refresh H-health G-GTID Lists U-UUIDs
+# Discovering slaves for master at 127.0.0.1:3307
+MySQL Replication Failover Utility
+Failover Mode = auto     Next Interval = Sat May 31 15:01:00 2014
+Master Information
+------------------
+Binary Log File  Position  Binlog_Do_DB  Binlog_Ignore_DB
+binlog.000005    191
+
+GTID Executed Set
+dd1f65aa-e2d0-11e3-89e3-7f8d49c2f173:1-14
+
+Master GTID Executed Set
++------------+-------+---------+--------+------------+---------+
+| host       | port  | role    | state  | gtid_mode  | health  |
++------------+-------+---------+--------+------------+---------+
+| 127.0.0.1  | 3307  | MASTER  | UP     | ON         | OK      |
+| localhost  | 3308  | SLAVE   | UP     | ON         | OK      |
+| localhost  | 3309  | SLAVE   | UP     | ON         | OK      |
++------------+-------+---------+--------+------------+---------+
+</code></pre>
+<p>master down 了之后，3307 实例接管成为了master </p>
+<p>切换收尾：<br>    启动 3306 实例，也就是老的master ； 调整复制链路 ，使 3306 成为新的slave； </p>
+<pre><code>mysqld_safe &amp;
+mysqlreplicate  --master=root:root@127.0.0.1:3307 --slave=root:root@127.0.0.1:3306 --rpl-user=repl:repl -vv
+</code></pre>
+<h4 id="手动-failover"><a href="#手动-failover" class="headerlink" title="手动 failover"></a>手动 failover</h4><p>此时我们的链路是如下样子：</p>
+<pre><code>GTID Executed Set
+dd1f65aa-e2d0-11e3-89e3-7f8d49c2f173:1-14
+Master GTID Executed Set
++------------+-------+---------+--------+------------+---------+
+| host       | port  | role    | state  | gtid_mode  | health  |
++------------+-------+---------+--------+------------+---------+
+| 127.0.0.1  | 3307  | MASTER  | UP     | ON         | OK      |
+| localhost  | 3306  | SLAVE   | UP     | ON         | OK      |
+| localhost  | 3308  | SLAVE   | UP     | ON         | OK      |
+| localhost  | 3309  | SLAVE   | UP     | ON         | OK      |
++------------+-------+---------+--------+------------+---------+
+</code></pre>
+<p>我们执行手动切换： </p>
+<pre><code>mysqlrpladmin --master=root:root@127.0.0.1:3307 --new-master=root:root@127.0.0.1:3306 --discover-slaves-login=root:root --demote-master switchover
+</code></pre>
+<p>—&gt;：日志输出</p>
+<pre><code>ruiayLinSunnydeMacBook-Pro-2:~ root# mysqlrpladmin --master=root:root@127.0.0.1:3307 --new-master=root:root@127.0.0.1:3306 --discover-slaves-login=root:root --demote-master switchover
+# Discovering slaves for master at 127.0.0.1:3307
+# Discovering slave at localhost:3306
+# Found slave: localhost:3306
+# Discovering slave at localhost:3308
+# Found slave: localhost:3308
+# Discovering slave at localhost:3309
+# Found slave: localhost:3309
+# Checking privileges.
+# WARNING: You may be mixing host names and IP addresses. This may result in negative status reporting if your DNS services do not support reverse name lookup.
+# Performing switchover from master at 127.0.0.1:3307 to slave at 127.0.0.1:3306.
+# Checking candidate slave prerequisites.
+# Checking slaves configuration to master.
+# Waiting for slaves to catch up to old master.
+# Stopping slaves.
+# Performing STOP on all slaves.
+# Demoting old master to be a slave to the new master.
+# Switching slaves to new master.
+# Starting all slaves.
+# Performing START on all slaves.
+# Checking slaves for errors.
+# Switchover complete.
+#
+# Replication Topology Health:
++------------+-------+---------+--------+------------+---------+
+| host       | port  | role    | state  | gtid_mode  | health  |
++------------+-------+---------+--------+------------+---------+
+| 127.0.0.1  | 3306  | MASTER  | UP     | ON         | OK      |
+| 127.0.0.1  | 3307  | SLAVE   | UP     | ON         | OK      |
+| localhost  | 3308  | SLAVE   | UP     | ON         | OK      |
+| localhost  | 3309  | SLAVE   | UP     | ON         | OK      |
++------------+-------+---------+--------+------------+---------+
+# ...done.
+</code></pre>
+<p>执行切换成功之后，重新check 链路：</p>
+<pre><code>ruiayLinSunnydeMacBook-Pro-2:~ root# mysqlrplshow --master=root:root@127.0.0.1:3306  --discover-slaves-login=root:root -v
+# master on 127.0.0.1: ... connected.
+# Finding slaves for master: 127.0.0.1:3306
+# Replication Topology Graph
+127.0.0.1:3306 (MASTER)
+   |
+   +--- localhost:3307 [IO: Yes, SQL: Yes] - (SLAVE)
+   |
+   +--- localhost:3308 [IO: Yes, SQL: Yes] - (SLAVE)
+   |
+   +--- localhost:3309 [IO: Yes, SQL: Yes] - (SLAVE)
+</code></pre>
+<p>手动切换完成 ， end </p>
+<blockquote>
+<p>mysqlfailover 可以以Deamon的方式启动，还可以指定 –log&#x3D;LOG_FILE 打印到日志文件中</p>
+</blockquote>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><pre><code>mysql新版本的功能真的很让人鼓舞兴奋，作为一个dba尤然，继续学习，继续进步，才是硬道理 ...
+持续研究和学习 mysql 数据库，做一个好dba， 一个好数据架构师 ...
+</code></pre>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/MySQL/">MySQL</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Autofailover/">Autofailover</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://ruiaylin.github.io/2014/05/31/mysql-auto-failover/" data-title="MySQL5.6自动Failover | ruiayLin&#39;s Blog" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2014/06/15/mysql-fabric-01-desc/" title="MySQL Fabric [01] 简介">
+  <strong>上一篇：</strong><br/>
+  <span>
+  MySQL Fabric [01] 简介</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2014/05/23/using xtrabackup-to-build-mysql-slave/"  title="使用XtraBackup搭建Slave">
+ <strong>下一篇：</strong><br/> 
+ <span>使用XtraBackup搭建Slave
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#MySQL%E8%87%AA%E5%8A%A8failover%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">MySQL自动failover介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-number">1.1.</span> <span class="toc-text">环境准备</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%E5%AE%89%E8%A3%85mysql-DB"><span class="toc-number">1.1.1.</span> <span class="toc-text">第一步安装mysql DB</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5-%E5%88%9D%E5%A7%8B%E5%8C%96mysql-DB"><span class="toc-number">1.1.2.</span> <span class="toc-text">第二步 初始化mysql DB</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%E6%9E%84%E5%BB%BA%E5%A4%8D%E5%88%B6%E7%BB%93%E6%9E%84"><span class="toc-number">1.1.3.</span> <span class="toc-text">第三步构建复制结构</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mysql-utilities%E7%9A%84%E5%87%A0%E4%B8%AA%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="toc-number">1.2.</span> <span class="toc-text">mysql utilities的几个常用命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%8A%A8%E5%92%8C%E6%89%8B%E5%8A%A8-failover"><span class="toc-number">1.3.</span> <span class="toc-text">自动和手动 failover</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%87%AA%E5%8A%A8-failover"><span class="toc-number">1.3.1.</span> <span class="toc-text">自动 failover</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%89%8B%E5%8A%A8-failover"><span class="toc-number">1.3.2.</span> <span class="toc-text">手动 failover</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">2.</span> <span class="toc-text">总结</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Docker/" title="Docker">Docker<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Go/" title="Go">Go<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MySQL/" title="MySQL">MySQL<sup>18</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/NewSQL/" title="NewSQL">NewSQL<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Oracle/" title="Oracle">Oracle<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Python/" title="Python">Python<sup>7</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/MySQL/" title="MySQL">MySQL<sup>11</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OPS/" title="OPS">OPS<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Fabric/" title="Fabric">Fabric<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Go/" title="Go">Go<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Group-Replicaiton/" title="Group Replicaiton">Group Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MGR/" title="MGR">MGR<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Replicaiton/" title="Replicaiton">Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MHA/" title="MHA">MHA<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Python/" title="Python">Python<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Xtrabackup/" title="Xtrabackup">Xtrabackup<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DNS/" title="DNS">DNS<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Sharding/" title="Sharding">Sharding<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Discourse/" title="Discourse">Discourse<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forum/" title="Forum">Forum<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">知识链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/org/polardb-x" target="_blank" title="PloarDB-X专栏">PloarDB-X专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://cn.pingcap.com/blog/" target="_blank" title="TiDB 博客">TiDB 博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/doc/refman/8.0/en/" target="_blank" title="MySQL 8.0 Docs">MySQL 8.0 Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/blog-archive/" target="_blank" title="MySQL Server Blog">MySQL Server Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://lefred.be/" target="_blank" title="Lefred&#39;s blog">Lefred&#39;s blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/people/wen-zheng-hu" target="_blank" title="温正湖专栏">温正湖专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.percona.com/blog/" target="_blank" title="Percona Blog">Percona Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://engineering.fb.com/" target="_blank" title="Meta Engineering">Meta Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.uber.com/en-US/blog/engineering/" target="_blank" title="Uber Engineering">Uber Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.blog/category/engineering/" target="_blank" title="Github Engineering">Github Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://medium.com/pinterest-engineering" target="_blank" title="Pinterest Engineering">Pinterest Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://flask.palletsprojects.com/" target="_blank" title="Flask Docs">Flask Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://tympanus.net/codrops/" target="_blank" title="Codrops front">Codrops front</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
+			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
+		
+		<a href="/about" target="_blank" title="ruichao.lin">ruichao.lin</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+        getSize();
+        if (myWidth >= 1024) {
+          c.click();
+        }
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?e6d1f421bbc9962127a50488f9ed37d1";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

@@ -1,0 +1,678 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  
+  <url>
+    <loc>http://ruiaylin.github.io/about/index-1.html</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2017/01/12/mgr-03-Concurrent-DDLs-cause-inconsistency-on-Multi-Primary/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2014/06/15/mysql-fabric-01-desc/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/about/index.html</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2017/05/13/xtrabackup-for-encrypt-and-compress/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2014/05/22/xtrabackup-for-mysql/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2014/05/23/using%20xtrabackup-to-build-mysql-slave/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2014/02/27/tips-for-mysql-ops/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2014/03/01/thread-model-in-python/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2016/09/28/tidb-Tutorial/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2016/04/12/singleton-pattern/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2014/12/12/python-update/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2014/04/01/python-fabric/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2014/03/22/python-programer/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2014/04/22/python-change-privs-and-profile/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2014/03/22/oracle-plan-stablilty/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2014/11/20/pssh/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2014/03/15/oracle-colquery/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2014/02/17/mysql-load-data/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2015/01/05/mysql-query-response-time/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2014/08/09/mysql-fabric-02-deploy/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2014/02/27/mult-instance-mysql/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2014/05/31/mysql-auto-failover/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2015/06/03/mysql%20source%20code%20debug%20xcode/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2015/03/03/mha-install-conf/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2015/03/05/mha-manager/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2018/03/15/mha-a-litte-tricky/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2016/12/22/mgr-01-build-a-mysql-group-replication-cluster-in-10-minutes/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2014/04/27/linux-shell/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2016/12/28/mgr-02-summary-of-configuring-mysql-group-replication-cluster/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2014/01/01/hello-world/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2015/05/04/install-docker-on-centos-6x/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2015/01/15/intelligent%20Dns%20configuration/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2014/01/01/fabric/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2016/04/12/gh-ost-design-and-impletaion/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2016/04/12/handling-1-million-requests-per-minute-with-golang/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2016/04/12/docker-for-mysql/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2015/01/05/deploy-a-forum-using-%20discourse/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2016/09/30/Simple-Way-To-Install-MySQL/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2015/03/30/Put-PowerDNS-to-use/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2015/03/27/CentOS-7-update-kernel/</loc>
+    
+    <lastmod>2024-03-02</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+
+  <url>
+    <loc>http://ruiaylin.github.io/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/PowerDNS/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/DNS/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/Kernel/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/OPS/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/Docker/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/MySQL/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/Fabric/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/Discourse/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/Forum/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/Go/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/gh-ost/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/DDL/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/%E8%BD%AC%E8%BD%BD/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/BIND/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/Group-Replicaiton/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/MGR/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/Replicaiton/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/Shell/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/MHA/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/Multi-Instance/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/%E5%A4%9A%E5%AE%9E%E4%BE%8B/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/Autofailover/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/%E6%BA%90%E7%A0%81/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/Code/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/Sharding/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/load-data/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/Load/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/Tool/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/Optimization/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/Pssh/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/Python/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/Thread/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/TiDB/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/Xtrabackup/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/Encrypt/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+
+  
+  <url>
+    <loc>http://ruiaylin.github.io/categories/Linux/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/categories/MySQL/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/categories/Python/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/categories/Docker/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/categories/Go/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/categories/Oracle/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/categories/NewSQL/</loc>
+    <lastmod>2024-03-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+</urlset>

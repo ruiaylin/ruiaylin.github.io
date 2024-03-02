@@ -1,0 +1,750 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>Handling 1 Million Requests per Minute with Go [转载] | ruiayLin&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="ruichao.lin">
+    
+
+    
+    <meta name="description" content="Handling 1 Million Requests per Minute with Go  [转载]  Here at Malwarebytes we are experiencing phenomenal growth, and since I have joined the company over 1 year ago in the Silicon Valley, one my main">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Handling 1 Million Requests per Minute with Go [转载]">
+<meta property="og:url" content="http://ruiaylin.github.io/2016/04/12/handling-1-million-requests-per-minute-with-golang/index.html">
+<meta property="og:site_name" content="ruiayLin&#39;s Blog">
+<meta property="og:description" content="Handling 1 Million Requests per Minute with Go  [转载]  Here at Malwarebytes we are experiencing phenomenal growth, and since I have joined the company over 1 year ago in the Silicon Valley, one my main">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://ruiaylin.github.io/img/cloudwatch-latency.png">
+<meta property="og:image" content="http://ruiaylin.github.io/img/cloudwatch-console.png">
+<meta property="og:image" content="http://ruiaylin.github.io/img/elasticbeanstalk-healthy-hosts.png">
+<meta property="og:image" content="http://ruiaylin.github.io/img/elasticbeanstalk-production-dashboard.png">
+<meta property="article:published_time" content="2016-04-12T08:34:03.000Z">
+<meta property="article:modified_time" content="2024-03-02T09:18:29.288Z">
+<meta property="article:author" content="ruichao.lin">
+<meta property="article:tag" content="Go">
+<meta property="article:tag" content="转载">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://ruiaylin.github.io/img/cloudwatch-latency.png">
+
+    
+    <link rel="alternative" href="/atom.xml" title="ruiayLin&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.jpeg" alt="ruiayLin&#39;s Blog" title="ruiayLin&#39;s Blog"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="ruiayLin&#39;s Blog">ruiayLin&#39;s Blog</a></h1>
+				<h2 class="blog-motto">蹈之而弗悔 , 慎思而笃行 ...</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:ruiaylin.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/04/12/handling-1-million-requests-per-minute-with-golang/" title="Handling 1 Million Requests per Minute with Go [转载]" itemprop="url">Handling 1 Million Requests per Minute with Go [转载]</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="ruichao.lin" target="_blank" itemprop="author">ruichao.lin</a>
+		
+  <p class="article-time">
+    <time datetime="2016-04-12T08:34:03.000Z" itemprop="datePublished"> 发表于 2016-04-12</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Handling-1-Million-Requests-per-Minute-with-Go-%E8%BD%AC%E8%BD%BD"><span class="toc-number">1.</span> <span class="toc-text">Handling 1 Million Requests per Minute with Go  [转载] </span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#The-Problem"><span class="toc-number">2.</span> <span class="toc-text">The Problem</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Naive-approach-to-Go-routines"><span class="toc-number">3.</span> <span class="toc-text">Naive approach to Go routines</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Trying-again"><span class="toc-number">4.</span> <span class="toc-text">Trying again</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#The-Better-Solution"><span class="toc-number">5.</span> <span class="toc-text">The Better Solution</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#The-Immediate-results"><span class="toc-number">6.</span> <span class="toc-text">The Immediate results</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Conclusion"><span class="toc-number">7.</span> <span class="toc-text">Conclusion</span></a></li></ol>
+		
+		</div>
+		
+		<h3 id="Handling-1-Million-Requests-per-Minute-with-Go-转载"><a href="#Handling-1-Million-Requests-per-Minute-with-Go-转载" class="headerlink" title="Handling 1 Million Requests per Minute with Go  [转载] "></a>Handling 1 Million Requests per Minute with Go <a target="_blank" rel="noopener" href="http://marcio.io/2015/07/handling-1-million-requests-per-minute-with-golang/"> [转载] </a></h3><blockquote>
+<p>Here at <a target="_blank" rel="noopener" href="http://www.malwarebytes.org/">Malwarebytes</a> we are experiencing phenomenal growth, and since I have joined the company over 1 year ago in the Silicon Valley, one my main responsibilities has been to architect and develop several systems to power a fast-growing security company and all the needed infrastructure to support a product that is used by millions of people every single day. I have worked in the anti-virus and anti-malware industry for over 12 years in a few different companies, and I knew how complex these systems could end up being due to the massive amount of data we handle daily.</p>
+</blockquote>
+<p>What is interesting is that for the last 9 years or so, all the web backend development that I have been involved in has been mostly done in Ruby on Rails. Don’t take me wrong, I love Ruby on Rails and I believe it’s an amazing environment, but after a while you start thinking and designing systems in the ruby way, and you forget how efficient and simple your software architecture could have been if you could leverage multi-threading, parallelization, fast executions and small memory overhead. For many years, I was a C&#x2F;C++, Delphi and C# developer, and I just started realizing how less complex things could be with the right tool for the job.</p>
+<p>As a Principal Architect, I am not very big on the language and framework wars that the interwebs are always fighting about. I believe efficiency, productivity and code maintainability relies mostly on how simple you can architect your solution.</p>
+<h3 id="The-Problem"><a href="#The-Problem" class="headerlink" title="The Problem"></a>The Problem</h3><p>While working on a piece of our anonymous telemetry and analytics system, our goal was to be able to handle a large amount of POST requests from millions of endpoints. The web handler would receive a JSON document that may contain a collection of many payloads that needed to be written to Amazon S3, in order for our map-reduce systems to later operate on this data.</p>
+<p>Traditionally we would look into creating a worker-tier architecture, utilizing things such as:</p>
+<pre><code>+ Sidekiq
++ Resque
++ DelayedJob
++ Elasticbeanstalk Worker Tier
++ RabbitMQ
++ and so on...
+</code></pre>
+<p>And setup 2 different clusters, one for the web front-end and another for the workers, so we can scale up the amount of background work we can handle.</p>
+<p>But since the beginning, our team knew that we should do this in Go because during the discussion phases we saw this could be potentially a very large traffic system. I have been using Go for about 2 years or so, and we had developed a few systems here at work but none that would get this amount of load.</p>
+<p>We started by creating a few structures to define the web request payload that we would be receiving through the POST calls, and a method to upload it into our S3 bucket.</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> PayloadCollection <span class="keyword">struct</span> &#123;</span><br><span class="line">	WindowsVersion  <span class="type">string</span>    <span class="string">`json:&quot;version&quot;`</span></span><br><span class="line">	Token           <span class="type">string</span>    <span class="string">`json:&quot;token&quot;`</span></span><br><span class="line">	Payloads        []Payload <span class="string">`json:&quot;data&quot;`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Payload <span class="keyword">struct</span> &#123;</span><br><span class="line">    <span class="comment">// [redacted]</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Payload)</span></span> UploadToS3() <span class="type">error</span> &#123;</span><br><span class="line">    <span class="comment">// the storageFolder method ensures that there are no name collision in</span></span><br><span class="line">    <span class="comment">// case we get same timestamp in the key name</span></span><br><span class="line">    storage_path := fmt.Sprintf(<span class="string">&quot;%v/%v&quot;</span>, p.storageFolder, time.Now().UnixNano())</span><br><span class="line"></span><br><span class="line">	bucket := S3Bucket</span><br><span class="line"></span><br><span class="line">	b := <span class="built_in">new</span>(bytes.Buffer)</span><br><span class="line">	encodeErr := json.NewEncoder(b).Encode(payload)</span><br><span class="line">	<span class="keyword">if</span> encodeErr != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> encodeErr</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Everything we post to the S3 bucket should be marked &#x27;private&#x27;</span></span><br><span class="line">    <span class="keyword">var</span> acl = s3.Private</span><br><span class="line">	<span class="keyword">var</span> contentType = <span class="string">&quot;application/octet-stream&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> bucket.PutReader(storage_path, b, <span class="type">int64</span>(b.Len()), contentType, acl, s3.Options&#123;&#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Naive-approach-to-Go-routines"><a href="#Naive-approach-to-Go-routines" class="headerlink" title="Naive approach to Go routines"></a>Naive approach to Go routines</h3><p>Initially we took a very naive implementation of the POST handler, just trying to parallelize the job processing into a simple goroutine:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">payloadHandler</span><span class="params">(w http.ResponseWriter, r *http.Request)</span></span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> r.Method != <span class="string">&quot;POST&quot;</span> &#123;</span><br><span class="line">		w.WriteHeader(http.StatusMethodNotAllowed)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Read the body into a string for json decoding</span></span><br><span class="line">	<span class="keyword">var</span> content = &amp;PayloadCollection&#123;&#125;</span><br><span class="line">	err := json.NewDecoder(io.LimitReader(r.Body, MaxLength)).Decode(&amp;content)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		w.Header().Set(<span class="string">&quot;Content-Type&quot;</span>, <span class="string">&quot;application/json; charset=UTF-8&quot;</span>)</span><br><span class="line">		w.WriteHeader(http.StatusBadRequest)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Go through each payload and queue items individually to be posted to S3</span></span><br><span class="line">    <span class="keyword">for</span> _, payload := <span class="keyword">range</span> content.Payloads &#123;</span><br><span class="line">        <span class="keyword">go</span> payload.UploadToS3()   <span class="comment">// &lt;----- DON&#x27;T DO THIS</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    w.WriteHeader(http.StatusOK)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>For moderate loads, this could work for the majority of people, but this quickly proved to not work very well at a large scale. We were expecting a lot of requests but not in the order of magnitude we started seeing when we deployed the first version to production. We completely understimated the amount of traffic.</p>
+<p>The approach above is bad in several different ways. There is no way to control how many go routines we are spawning. And since we were getting 1 million POST requests per minute of course this code crashed and burned very quickly.</p>
+<h3 id="Trying-again"><a href="#Trying-again" class="headerlink" title="Trying again"></a>Trying again</h3><p>We needed to find a different way. Since the beginning we started discussing how we needed to keep the lifetime of the request handler very short and spawn processing in the background. Of course, this is what you must do in the Ruby on Rails world, otherwise you will block all the available worker web processors, whether you are using puma, unicorn, passenger (Let’s not get into the JRuby discussion please). Then we would have needed to leverage common solutions to do this, such as Resque, Sidekiq, SQS, etc. The list goes on since there are many ways of achieving this.</p>
+<p>So the second iteration was to create a buffered channel where we could queue up some jobs and upload them to S3, and since we could control the maximum number of items in our queue and we had plenty of RAM to queue up jobs in memory, we thought it would be okay to just buffer jobs in the channel queue.</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> Queue <span class="keyword">chan</span> Payload</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">init</span><span class="params">()</span></span> &#123;</span><br><span class="line">    Queue = <span class="built_in">make</span>(<span class="keyword">chan</span> Payload, MAX_QUEUE)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">payloadHandler</span><span class="params">(w http.ResponseWriter, r *http.Request)</span></span> &#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// Go through each payload and queue items individually to be posted to S3</span></span><br><span class="line">    <span class="keyword">for</span> _, payload := <span class="keyword">range</span> content.Payloads &#123;</span><br><span class="line">        Queue &lt;- payload</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>And then to actually dequeue jobs and process them, we were using something similar to this:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">StartProcessor</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        <span class="keyword">select</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> job := &lt;-Queue:</span><br><span class="line">            job.payload.UploadToS3()  <span class="comment">// &lt;-- STILL NOT GOOD</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>To be honest, I have no idea what we were thinking. This must have been a late night full of Red-Bulls. This approach didn’t buy us anything, we have traded flawed concurrency with a buffered queue that was simply postponing the problem. Our synchronous processor was only uploading one payload at a time to S3, and since the rate of incoming requests were much larger than the ability of the single processor to upload to S3, our buffered channel was quickly reaching its limit and blocking the request handler ability to queue more items.</p>
+<p>We were simply avoiding the problem and started a count-down to the death of our system eventually. Our latency rates kept increasing in a constant rate minutes after we deployed this flawed version.</p>
+<p><img src="/img/cloudwatch-latency.png" alt="cloudwatch-latency"></p>
+<h3 id="The-Better-Solution"><a href="#The-Better-Solution" class="headerlink" title="The Better Solution"></a>The Better Solution</h3><p>We have decided to utilize a common pattern when using Go channels, in order to create a 2-tier channel system, one for queuing jobs and another to control how many workers operate on the JobQueue concurrently.</p>
+<p>The idea was to parallelize the uploads to S3 to a somewhat sustainable rate, one that would not cripple the machine nor start generating connections errors from S3. So we have opted for creating a Job&#x2F;Worker pattern. For those that are familiar with Java, C#, etc, think about this as the Golang way of implementing a Worker Thread-Pool utilizing channels instead.</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> (</span><br><span class="line">	MaxWorker = os.Getenv(<span class="string">&quot;MAX_WORKERS&quot;</span>)</span><br><span class="line">	MaxQueue  = os.Getenv(<span class="string">&quot;MAX_QUEUE&quot;</span>)</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// Job represents the job to be run</span></span><br><span class="line"><span class="keyword">type</span> Job <span class="keyword">struct</span> &#123;</span><br><span class="line">	Payload Payload</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// A buffered channel that we can send work requests on.</span></span><br><span class="line"><span class="keyword">var</span> JobQueue <span class="keyword">chan</span> Job</span><br><span class="line"></span><br><span class="line"><span class="comment">// Worker represents the worker that executes the job</span></span><br><span class="line"><span class="keyword">type</span> Worker <span class="keyword">struct</span> &#123;</span><br><span class="line">	WorkerPool  <span class="keyword">chan</span> <span class="keyword">chan</span> Job</span><br><span class="line">	JobChannel  <span class="keyword">chan</span> Job</span><br><span class="line">	quit    	<span class="keyword">chan</span> <span class="type">bool</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewWorker</span><span class="params">(workerPool <span class="keyword">chan</span> <span class="keyword">chan</span> Job)</span></span> Worker &#123;</span><br><span class="line">	<span class="keyword">return</span> Worker&#123;</span><br><span class="line">		WorkerPool: workerPool,</span><br><span class="line">		JobChannel: <span class="built_in">make</span>(<span class="keyword">chan</span> Job),</span><br><span class="line">		quit:       <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="type">bool</span>)&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Start method starts the run loop for the worker, listening for a quit channel in</span></span><br><span class="line"><span class="comment">// case we need to stop it</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(w Worker)</span></span> Start() &#123;</span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">			<span class="comment">// register the current worker into the worker queue.</span></span><br><span class="line">			w.WorkerPool &lt;- w.JobChannel</span><br><span class="line"></span><br><span class="line">			<span class="keyword">select</span> &#123;</span><br><span class="line">			<span class="keyword">case</span> job := &lt;-w.JobChannel:</span><br><span class="line">				<span class="comment">// we have received a work request.</span></span><br><span class="line">				<span class="keyword">if</span> err := job.Payload.UploadToS3(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">					log.Errorf(<span class="string">&quot;Error uploading to S3: %s&quot;</span>, err.Error())</span><br><span class="line">				&#125;</span><br><span class="line"></span><br><span class="line">			<span class="keyword">case</span> &lt;-w.quit:</span><br><span class="line">				<span class="comment">// we have received a signal to stop</span></span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Stop signals the worker to stop listening for work requests.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(w Worker)</span></span> Stop() &#123;</span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		w.quit &lt;- <span class="literal">true</span></span><br><span class="line">	&#125;()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>We have modified our Web request handler to create an instance of <code>Job</code> struct with the payload and send into the <code>JobQueue</code> channel for the workers to pickup.</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">payloadHandler</span><span class="params">(w http.ResponseWriter, r *http.Request)</span></span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> r.Method != <span class="string">&quot;POST&quot;</span> &#123;</span><br><span class="line">		w.WriteHeader(http.StatusMethodNotAllowed)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Read the body into a string for json decoding</span></span><br><span class="line">	<span class="keyword">var</span> content = &amp;PayloadCollection&#123;&#125;</span><br><span class="line">	err := json.NewDecoder(io.LimitReader(r.Body, MaxLength)).Decode(&amp;content)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		w.Header().Set(<span class="string">&quot;Content-Type&quot;</span>, <span class="string">&quot;application/json; charset=UTF-8&quot;</span>)</span><br><span class="line">		w.WriteHeader(http.StatusBadRequest)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Go through each payload and queue items individually to be posted to S3</span></span><br><span class="line">    <span class="keyword">for</span> _, payload := <span class="keyword">range</span> content.Payloads &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// let&#x27;s create a job with the payload</span></span><br><span class="line">        work := Job&#123;Payload: payload&#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Push the work onto the queue.</span></span><br><span class="line">        JobQueue &lt;- work</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    w.WriteHeader(http.StatusOK)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>During our web server initialization we create a <code>Dispatcher</code> and call <code>Run()</code>to create the pool of workers and to start listening for jobs that would appear in the <code>JobQueue</code>.</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">dispatcher := NewDispatcher(MaxWorker)</span><br><span class="line">dispatcher.Run()</span><br></pre></td></tr></table></figure>
+
+<p>Below is the code for our dispatcher implementation:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Dispatcher <span class="keyword">struct</span> &#123;</span><br><span class="line">	<span class="comment">// A pool of workers channels that are registered with the dispatcher</span></span><br><span class="line">	WorkerPool <span class="keyword">chan</span> <span class="keyword">chan</span> Job</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewDispatcher</span><span class="params">(maxWorkers <span class="type">int</span>)</span></span> *Dispatcher &#123;</span><br><span class="line">	pool := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">chan</span> Job, maxWorkers)</span><br><span class="line">	<span class="keyword">return</span> &amp;Dispatcher&#123;WorkerPool: pool&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(d *Dispatcher)</span></span> Run() &#123;</span><br><span class="line">    <span class="comment">// starting n number of workers</span></span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; d.maxWorkers; i++ &#123;</span><br><span class="line">		worker := NewWorker(d.pool)</span><br><span class="line">		worker.Start()</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">go</span> d.dispatch()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(d *Dispatcher)</span></span> dispatch() &#123;</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> job := &lt;-JobQueue:</span><br><span class="line">			<span class="comment">// a job request has been received</span></span><br><span class="line">			<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(job Job)</span></span> &#123;</span><br><span class="line">				<span class="comment">// try to obtain a worker job channel that is available.</span></span><br><span class="line">				<span class="comment">// this will block until a worker is idle</span></span><br><span class="line">				jobChannel := &lt;-d.WorkerPool</span><br><span class="line"></span><br><span class="line">				<span class="comment">// dispatch the job to the worker job channel</span></span><br><span class="line">				jobChannel &lt;- job</span><br><span class="line">			&#125;(job)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Note that we provide the number of maximum workers to be instantiated and be added to our pool of workers. Since we have utilized Amazon Elasticbeanstalk for this project with a dockerized Go environment, and we always try to follow the <a target="_blank" rel="noopener" href="http://12factor.net/">12-factor</a> methodology to configure our systems in production, we read these values from environment variables. That way we could control how many workers and the maximum size of the Job Queue, so we can quickly tweak these values without requiring re-deployment of the cluster.</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> (</span><br><span class="line">	MaxWorker = os.Getenv(<span class="string">&quot;MAX_WORKERS&quot;</span>)</span><br><span class="line">	MaxQueue  = os.Getenv(<span class="string">&quot;MAX_QUEUE&quot;</span>)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h3 id="The-Immediate-results"><a href="#The-Immediate-results" class="headerlink" title="The Immediate results"></a>The Immediate results</h3><p>Immediately after we have deployed it we saw all of our latency rates drop to insignificant numbers and our ability to handle requests surged drastically.</p>
+<p><img src="/img/cloudwatch-console.png" alt="cloudwatch-console"></p>
+<p>Minutes after our Elastic Load Balancers were fully warmed up, we saw our ElasticBeanstalk application serving close to 1 million requests per minute. We usually have a few hours during the morning hours in which our traffic spikes over to more than a million per minute.</p>
+<p>As soon as we have deployed the new code, the number of servers dropped considerably from 100 servers to about 20 servers.</p>
+<p><img src="/img/elasticbeanstalk-healthy-hosts.png" alt="elasticbeanstalk-healthy-hosts"></p>
+<p>After we had properly configured our cluster and the auto-scaling settings, we were able to lower it even more to only 4x EC2 c4.Large instances and the Elastic Auto-Scaling set to spawn a new instance if CPU goes above 90% for 5 minutes straight.</p>
+<p><img src="/img/elasticbeanstalk-production-dashboard.png" alt="elasticbeanstalk-production-dashboard"></p>
+<h3 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h3><p>Simplicity always wins in my book. We could have designed a complex system with many queues, background workers, complex deployments, but instead we decided to leverage the power of Elasticbeanstalk auto-scaling and the efficiency and simple approach to concurrency that Golang provides us out of the box.</p>
+<p>It’s not everyday that you have a cluster of only 4 machines, that are probably much less powerful than my current MacBook Pro, handling POST requests writing to an Amazon S3 bucket 1 million times every minute.</p>
+<p>There is always the right tool for the job. For sometimes when your Ruby on Rails system needs a very powerful web handler, think a little outside of the ruby eco-system for simpler yet more powerful alternative solutions.</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Go/">Go</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Go/">Go</a><a href="/tags/转载/">转载</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://ruiaylin.github.io/2016/04/12/handling-1-million-requests-per-minute-with-golang/" data-title="Handling 1 Million Requests per Minute with Go [转载] | ruiayLin&#39;s Blog" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/04/12/gh-ost-design-and-impletaion/" title="Gh-OST 的设计和实现">
+  <strong>上一篇：</strong><br/>
+  <span>
+  Gh-OST 的设计和实现</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/04/12/singleton-pattern/"  title="Singleton Pattern in Go [转载]">
+ <strong>下一篇：</strong><br/> 
+ <span>Singleton Pattern in Go [转载]
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Handling-1-Million-Requests-per-Minute-with-Go-%E8%BD%AC%E8%BD%BD"><span class="toc-number">1.</span> <span class="toc-text">Handling 1 Million Requests per Minute with Go  [转载] </span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#The-Problem"><span class="toc-number">2.</span> <span class="toc-text">The Problem</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Naive-approach-to-Go-routines"><span class="toc-number">3.</span> <span class="toc-text">Naive approach to Go routines</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Trying-again"><span class="toc-number">4.</span> <span class="toc-text">Trying again</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#The-Better-Solution"><span class="toc-number">5.</span> <span class="toc-text">The Better Solution</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#The-Immediate-results"><span class="toc-number">6.</span> <span class="toc-text">The Immediate results</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Conclusion"><span class="toc-number">7.</span> <span class="toc-text">Conclusion</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Docker/" title="Docker">Docker<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Go/" title="Go">Go<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MySQL/" title="MySQL">MySQL<sup>18</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/NewSQL/" title="NewSQL">NewSQL<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Oracle/" title="Oracle">Oracle<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Python/" title="Python">Python<sup>7</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/MySQL/" title="MySQL">MySQL<sup>11</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OPS/" title="OPS">OPS<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Fabric/" title="Fabric">Fabric<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Go/" title="Go">Go<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Group-Replicaiton/" title="Group Replicaiton">Group Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MGR/" title="MGR">MGR<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Replicaiton/" title="Replicaiton">Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MHA/" title="MHA">MHA<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Python/" title="Python">Python<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Xtrabackup/" title="Xtrabackup">Xtrabackup<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DNS/" title="DNS">DNS<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Sharding/" title="Sharding">Sharding<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Discourse/" title="Discourse">Discourse<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forum/" title="Forum">Forum<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">知识链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/org/polardb-x" target="_blank" title="PloarDB-X专栏">PloarDB-X专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://cn.pingcap.com/blog/" target="_blank" title="TiDB 博客">TiDB 博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/doc/refman/8.0/en/" target="_blank" title="MySQL 8.0 Docs">MySQL 8.0 Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/blog-archive/" target="_blank" title="MySQL Server Blog">MySQL Server Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://lefred.be/" target="_blank" title="Lefred&#39;s blog">Lefred&#39;s blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/people/wen-zheng-hu" target="_blank" title="温正湖专栏">温正湖专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.percona.com/blog/" target="_blank" title="Percona Blog">Percona Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://engineering.fb.com/" target="_blank" title="Meta Engineering">Meta Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.uber.com/en-US/blog/engineering/" target="_blank" title="Uber Engineering">Uber Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.blog/category/engineering/" target="_blank" title="Github Engineering">Github Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://medium.com/pinterest-engineering" target="_blank" title="Pinterest Engineering">Pinterest Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://flask.palletsprojects.com/" target="_blank" title="Flask Docs">Flask Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://tympanus.net/codrops/" target="_blank" title="Codrops front">Codrops front</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
+			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
+		
+		<a href="/about" target="_blank" title="ruichao.lin">ruichao.lin</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+        getSize();
+        if (myWidth >= 1024) {
+          c.click();
+        }
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?e6d1f421bbc9962127a50488f9ed37d1";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

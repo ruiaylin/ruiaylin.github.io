@@ -1,0 +1,776 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>Docker for MySQL deployment | ruiayLin&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="ruichao.lin">
+    
+
+    
+    <meta name="description" content="Use Docker for MySQL deployment Docker is an open platform for developers and sysadmins to build, ship, and run distributed applications, whether on laptops, data center VMs, or the cloudsee the detai">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker for MySQL deployment">
+<meta property="og:url" content="http://ruiaylin.github.io/2016/04/12/docker-for-mysql/index.html">
+<meta property="og:site_name" content="ruiayLin&#39;s Blog">
+<meta property="og:description" content="Use Docker for MySQL deployment Docker is an open platform for developers and sysadmins to build, ship, and run distributed applications, whether on laptops, data center VMs, or the cloudsee the detai">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-04-12T08:34:03.000Z">
+<meta property="article:modified_time" content="2024-03-02T09:18:29.287Z">
+<meta property="article:author" content="ruichao.lin">
+<meta property="article:tag" content="Docker">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="ruiayLin&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.jpeg" alt="ruiayLin&#39;s Blog" title="ruiayLin&#39;s Blog"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="ruiayLin&#39;s Blog">ruiayLin&#39;s Blog</a></h1>
+				<h2 class="blog-motto">蹈之而弗悔 , 慎思而笃行 ...</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:ruiaylin.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/04/12/docker-for-mysql/" title="Docker for MySQL deployment" itemprop="url">Docker for MySQL deployment</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="ruichao.lin" target="_blank" itemprop="author">ruichao.lin</a>
+		
+  <p class="article-time">
+    <time datetime="2016-04-12T08:34:03.000Z" itemprop="datePublished"> 发表于 2016-04-12</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Use-Docker-for-MySQL-deployment"><span class="toc-number">1.</span> <span class="toc-text">Use Docker for MySQL deployment</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#OS-environment"><span class="toc-number">2.</span> <span class="toc-text">OS environment</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Run-software-updates"><span class="toc-number">2.1.</span> <span class="toc-text">Run software updates:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#install-EPEL-repository"><span class="toc-number">2.2.</span> <span class="toc-text">install EPEL repository</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Install-Docker-Tools"><span class="toc-number">2.3.</span> <span class="toc-text">Install Docker Tools</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Start-Docker-as-service"><span class="toc-number">2.4.</span> <span class="toc-text">Start Docker as service</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Configure-Docker-to-start-on-startup"><span class="toc-number">2.5.</span> <span class="toc-text">Configure Docker to start on startup</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#check-docker-service"><span class="toc-number">2.6.</span> <span class="toc-text">check docker service</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#install-Docker-done"><span class="toc-number">2.7.</span> <span class="toc-text">install Docker done</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Make-a-docker-images"><span class="toc-number">3.</span> <span class="toc-text">Make a docker images</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#frist-download-percona-mysql-rpms"><span class="toc-number">3.1.</span> <span class="toc-text">frist download percona mysql rpms</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#make-a-docker-file"><span class="toc-number">3.2.</span> <span class="toc-text">make a docker file</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#build-the-image"><span class="toc-number">3.3.</span> <span class="toc-text">build the image</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#push-image"><span class="toc-number">3.4.</span> <span class="toc-text">push image</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#use-exsiting-image"><span class="toc-number">4.</span> <span class="toc-text">use exsiting image</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#download-image"><span class="toc-number">4.1.</span> <span class="toc-text">download image</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#run-container-after-download"><span class="toc-number">4.2.</span> <span class="toc-text">run container after download</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#run-like-shell"><span class="toc-number">4.2.1.</span> <span class="toc-text">run like shell</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#run-like-a-tool"><span class="toc-number">4.2.2.</span> <span class="toc-text">run like a tool</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#get-container-ip"><span class="toc-number">4.3.</span> <span class="toc-text">get container ip :</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#make-image-use-container"><span class="toc-number">4.4.</span> <span class="toc-text">make image use container</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Summary"><span class="toc-number">5.</span> <span class="toc-text">Summary</span></a></li></ol>
+		
+		</div>
+		
+		<h2 id="Use-Docker-for-MySQL-deployment"><a href="#Use-Docker-for-MySQL-deployment" class="headerlink" title="Use Docker for MySQL deployment"></a>Use Docker for MySQL deployment</h2><blockquote>
+<p>Docker is an open platform for developers and sysadmins to build, ship, and run distributed applications, whether on laptops, data center VMs, or the cloud<br>see the details :<a target="_blank" rel="noopener" href="https://www.docker.com/whatisdocker/">https://www.docker.com/whatisdocker/</a></p>
+</blockquote>
+<h2 id="OS-environment"><a href="#OS-environment" class="headerlink" title="OS environment"></a>OS environment</h2><blockquote>
+<p>CentOs 6.6 newest version </p>
+</blockquote>
+<h3 id="Run-software-updates"><a href="#Run-software-updates" class="headerlink" title="Run software updates:"></a>Run software updates:</h3><pre><code>sudo -s
+yum update -y
+yum install -y wget git
+</code></pre>
+<h3 id="install-EPEL-repository"><a href="#install-EPEL-repository" class="headerlink" title="install EPEL repository"></a>install EPEL repository</h3><p>Enable EPEL repository so you can install some extra packages:</p>
+<pre><code>cd /tmp
+wget http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+sudo rpm -Uvh epel-release-6*.rpm
+</code></pre>
+<h3 id="Install-Docker-Tools"><a href="#Install-Docker-Tools" class="headerlink" title="Install Docker Tools"></a>Install Docker Tools</h3><pre><code>sudo yum -y install docker-io
+</code></pre>
+<h3 id="Start-Docker-as-service"><a href="#Start-Docker-as-service" class="headerlink" title="Start Docker as service"></a>Start Docker as service</h3><pre><code>sudo service docker start
+</code></pre>
+<h3 id="Configure-Docker-to-start-on-startup"><a href="#Configure-Docker-to-start-on-startup" class="headerlink" title="Configure Docker to start on startup"></a>Configure Docker to start on startup</h3><pre><code>sudo chkconfig docker on
+</code></pre>
+<h3 id="check-docker-service"><a href="#check-docker-service" class="headerlink" title="check docker service"></a>check docker service</h3><pre><code>service docker status 
+docker info 
+docker images 
+docker ps 
+</code></pre>
+<h3 id="install-Docker-done"><a href="#install-Docker-done" class="headerlink" title="install Docker done"></a>install Docker done</h3><pre><code>Now the docker enviorement is ready 
+</code></pre>
+<h2 id="Make-a-docker-images"><a href="#Make-a-docker-images" class="headerlink" title="Make a docker images"></a>Make a docker images</h2><blockquote>
+<p>you can download my images build for percona server at next section </p>
+</blockquote>
+<h3 id="frist-download-percona-mysql-rpms"><a href="#frist-download-percona-mysql-rpms" class="headerlink" title="frist download percona mysql rpms"></a>frist download percona mysql rpms</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mkdir /data/docker/repos -p </span><br><span class="line">cd /data/docker/repos</span><br><span class="line">wget http://www.percona.com/downloads/Percona-Server-5.6/Percona-Server-5.6.21-70.0/binary/redhat/6/x86_64/Percona-Server-5.6.21-70.0-r688-el6-x86_64-bundle.tar</span><br><span class="line">cd ../</span><br></pre></td></tr></table></figure>
+<h3 id="make-a-docker-file"><a href="#make-a-docker-file" class="headerlink" title="make a docker file"></a>make a docker file</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"># MySQL </span><br><span class="line"># use centos base image</span><br><span class="line">FROM centos:centos6</span><br><span class="line"># specify the maintainer</span><br><span class="line">MAINTAINER ruiayliln &quot;ruiaylin@gmail.com&quot;</span><br><span class="line"># update get mysql tars repos</span><br><span class="line">RUN yum install -y wget tar </span><br><span class="line">RUN yum install -y perl-libs perl perl-DBD-MySQL perl-DBI perl-Module-Pluggable  perl-Pod-Escapes  perl-Pod-Simple perl-Time-HiRes perl-IO-Socket-SSL</span><br><span class="line">RUN yum install -y libaio screen   </span><br><span class="line">RUN yum install -y python-setuptools </span><br><span class="line"># scp file </span><br><span class="line">ADD  repos/Percona-Server-5.6.21-70.0-r688-el6-x86_64-bundle.tar  /tmp/</span><br><span class="line"># install some dependencies</span><br><span class="line">RUN ls -al /tmp/</span><br><span class="line"># install </span><br><span class="line">RUN rpm -ivh /tmp/Percona-Server-shared-56-5.6.21-rel70.0.el6.x86_64.rpm</span><br><span class="line">RUN rpm -ivh /tmp/Percona-Server-devel-56-5.6.21-rel70.0.el6.x86_64.rpm</span><br><span class="line">RUN rpm -ivh /tmp/Percona-Server-56-debuginfo-5.6.21-rel70.0.el6.x86_64.rpm</span><br><span class="line">RUN rpm -ivh /tmp/Percona-Server-client-56-5.6.21-rel70.0.el6.x86_64.rpm</span><br><span class="line">#configure /etc/file </span><br><span class="line">ADD my.cnf /etc/</span><br><span class="line">RUN rpm -ivh /tmp/Percona-Server-server-56-5.6.21-rel70.0.el6.x86_64.</span><br><span class="line"># check mysql version</span><br><span class="line">RUN mysql -V</span><br><span class="line">RUN mysqld  -V  </span><br><span class="line"># python-setuptools </span><br><span class="line">RUN /usr/sbin/mysqld &amp; \</span><br><span class="line">    sleep 10s &amp;&amp;\</span><br><span class="line">    echo &quot; grant all privileges on *.* to admin@&#x27;localhost&#x27; identified by &#x27;studytest&#x27; with grant option;grant all privileges on *.* to admin@&#x27;127.0.0.1&#x27; identified by &#x27;studytest&#x27; with grant option;grant all privileges on *.* to opsdba@&#x27;%&#x27; identified by &#x27;studytest&#x27; ;grant REPLICATION SLAVE,REPLICATION CLIENT ON *.* TO &#x27;replication&#x27;@&#x27;%&#x27; IDENTIFIED BY &#x27;studytest&#x27;;grant SELECT,CREATE,DROP,PROCESS,FILE,INDEX,ALTER,SUPER,LOCK TABLES ON *.* TO &#x27;mtain&#x27;@&#x27;%&#x27; IDENTIFIED BY &#x27;studytest&#x27;;  flush privileges;&quot; | mysql   </span><br><span class="line"># expose mysqld port</span><br><span class="line">EXPOSE 3306  </span><br><span class="line"> </span><br><span class="line">CMD [&quot;/usr/bin/mysqld_safe&quot;]</span><br></pre></td></tr></table></figure>
+
+<h3 id="build-the-image"><a href="#build-the-image" class="headerlink" title="build the image"></a>build the image</h3><pre><code>docker build -t ruiaylin/percona56-gtid-sid1  .
+</code></pre>
+<h3 id="push-image"><a href="#push-image" class="headerlink" title="push image"></a>push image</h3><blockquote>
+<p>register :  <a target="_blank" rel="noopener" href="https://index.docker.io/account/signup/">https://index.docker.io/account/signup/</a><br>input username  &amp;&amp; password when you push image  </p>
+</blockquote>
+<p>push：</p>
+<pre><code>docker push ruiaylin/percona56-gtid-sid1:v1
+docker push ruiaylin/percona56-gtid-sid2:v1
+</code></pre>
+<p>check ： </p>
+<pre><code>[root@mytestdb01 ~]# docker search ruiaylin/percona56-gtid-sid 
+NAME                           DESCRIPTION    STARS     OFFICIAL   AUTOMATED
+ruiaylin/percona56-gtid-sid1   percona5.6s1   1                    
+ruiaylin/percona56-gtid-sid2   percona5.6     1    
+</code></pre>
+<h2 id="use-exsiting-image"><a href="#use-exsiting-image" class="headerlink" title="use exsiting image"></a>use exsiting image</h2><blockquote>
+<p>download percona mysql server for our envirament </p>
+</blockquote>
+<h3 id="download-image"><a href="#download-image" class="headerlink" title="download image"></a>download image</h3><pre><code>docker search ruiaylin/percona56-gtid-sid
+#download  
+docker pull ruiaylin/percona56-gtid-sid2:v1
+docker pull ruiaylin/percona56-gtid-sid1:v1 
+</code></pre>
+<h3 id="run-container-after-download"><a href="#run-container-after-download" class="headerlink" title="run container after download"></a>run container after download</h3><pre><code>docker images 
+[root@mytestdb01 ~]# docker images
+REPOSITORY                     TAG                 IMAGE ID            CREATED                  VIRTUAL SIZE
+ruiaylin/percona56-gtid-sid2   v1                  44754483adfa        Less than a second ago   1.463 GB
+ruiaylin/percona56-gtid-sid1   v1                  78eaac9dbe1e        Less than a second ago   1.484 GB
+</code></pre>
+<h4 id="run-like-shell"><a href="#run-like-shell" class="headerlink" title="run like shell"></a>run like shell</h4><p>command :<br>        docker run -it ruiaylin&#x2F;percona56-gtid-sid1:v1  &#x2F;bin&#x2F;bash</p>
+<p>like  : </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@mytestdb01 ~]# docker run -it ruiaylin/percona56-gtid-sid1:v1  /bin/bash</span><br><span class="line">[root@9ed2b3dc0f5f /]# </span><br><span class="line">[root@9ed2b3dc0f5f /]# </span><br><span class="line">[root@9ed2b3dc0f5f /]# </span><br><span class="line">[root@9ed2b3dc0f5f /]# mysqld_safe &amp;</span><br><span class="line">[1] 14</span><br><span class="line">[root@9ed2b3dc0f5f /]# 141223 02:17:47 mysqld_safe Logging to &#x27;/data/mysql3306/log/alert.log&#x27;.</span><br><span class="line">141223 02:17:47 mysqld_safe Starting mysqld daemon with databases from /data/mysql3306/data</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>if you execute  exit command , the container is stop , if you want keep the container running , use Ctrl + p ; Ctrl + q  to exit the termail .<br>you can start Several container , use the same command , one ip per container .</p>
+</blockquote>
+<h4 id="run-like-a-tool"><a href="#run-like-a-tool" class="headerlink" title="run like a tool"></a>run like a tool</h4><p>command : </p>
+<pre><code>docker run -it ruiaylin/percona56-gtid-sid1:v1  /usr/bin/mysqld_safe
+</code></pre>
+<p>log like this : </p>
+<pre><code>[root@mytestdb01 ~]# docker run -it ruiaylin/percona56-gtid-sid1:v1  /usr/bin/mysqld_safe 
+141223 02:27:27 mysqld_safe Logging to &#39;/data/mysql3306/log/alert.log&#39;.
+141223 02:27:27 mysqld_safe Starting mysqld daemon with databases from /data/mysql3306/data
+[root@mytestdb01 ~]# 
+</code></pre>
+<blockquote>
+<p>use “Ctrl + p ; Ctrl + q”  to exit the terminal </p>
+</blockquote>
+<h3 id="get-container-ip"><a href="#get-container-ip" class="headerlink" title="get container ip :"></a>get container ip :</h3><p>use docker inspect command to get the env :</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@mytestdb01 ~]# for x in  &#x27; docker ps | grep -v CONTAINER | awk  &#x27;&#123;print $1&#125;&#x27;   &#x27;; do   ip=&#x27;docker inspect -f &#x27;&#123;&#123; .NetworkSettings.IPAddress &#125;&#125;&#x27; $x &#x27;;echo $x:$ip  ; done</span><br><span class="line">ecb06307f126:172.17.0.7</span><br><span class="line">74dc6520fb70:172.17.0.6</span><br><span class="line">9ed2b3dc0f5f:172.17.0.5</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p> “ ‘ “ should change to “ &#96; “， when you execute the command above .</p>
+</blockquote>
+<h3 id="make-image-use-container"><a href="#make-image-use-container" class="headerlink" title="make image use container"></a>make image use container</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker commit -a &quot;ruiaylin  &lt;ruiaylin@gmail.com &gt;&quot;  0087e76555d2  ruiaylin/percona56-gtid-sid1:v2</span><br></pre></td></tr></table></figure>
+
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><pre><code>now , you mysql environment for study or testing is done , enjoy it buddy ....
+</code></pre>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Docker/">Docker</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Docker/">Docker</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://ruiaylin.github.io/2016/04/12/docker-for-mysql/" data-title="Docker for MySQL deployment | ruiayLin&#39;s Blog" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/09/28/tidb-Tutorial/" title="TiDB (NewSQL) Tutorial">
+  <strong>上一篇：</strong><br/>
+  <span>
+  TiDB (NewSQL) Tutorial</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/04/12/gh-ost-design-and-impletaion/"  title="Gh-OST 的设计和实现">
+ <strong>下一篇：</strong><br/> 
+ <span>Gh-OST 的设计和实现
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Use-Docker-for-MySQL-deployment"><span class="toc-number">1.</span> <span class="toc-text">Use Docker for MySQL deployment</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#OS-environment"><span class="toc-number">2.</span> <span class="toc-text">OS environment</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Run-software-updates"><span class="toc-number">2.1.</span> <span class="toc-text">Run software updates:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#install-EPEL-repository"><span class="toc-number">2.2.</span> <span class="toc-text">install EPEL repository</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Install-Docker-Tools"><span class="toc-number">2.3.</span> <span class="toc-text">Install Docker Tools</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Start-Docker-as-service"><span class="toc-number">2.4.</span> <span class="toc-text">Start Docker as service</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Configure-Docker-to-start-on-startup"><span class="toc-number">2.5.</span> <span class="toc-text">Configure Docker to start on startup</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#check-docker-service"><span class="toc-number">2.6.</span> <span class="toc-text">check docker service</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#install-Docker-done"><span class="toc-number">2.7.</span> <span class="toc-text">install Docker done</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Make-a-docker-images"><span class="toc-number">3.</span> <span class="toc-text">Make a docker images</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#frist-download-percona-mysql-rpms"><span class="toc-number">3.1.</span> <span class="toc-text">frist download percona mysql rpms</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#make-a-docker-file"><span class="toc-number">3.2.</span> <span class="toc-text">make a docker file</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#build-the-image"><span class="toc-number">3.3.</span> <span class="toc-text">build the image</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#push-image"><span class="toc-number">3.4.</span> <span class="toc-text">push image</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#use-exsiting-image"><span class="toc-number">4.</span> <span class="toc-text">use exsiting image</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#download-image"><span class="toc-number">4.1.</span> <span class="toc-text">download image</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#run-container-after-download"><span class="toc-number">4.2.</span> <span class="toc-text">run container after download</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#run-like-shell"><span class="toc-number">4.2.1.</span> <span class="toc-text">run like shell</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#run-like-a-tool"><span class="toc-number">4.2.2.</span> <span class="toc-text">run like a tool</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#get-container-ip"><span class="toc-number">4.3.</span> <span class="toc-text">get container ip :</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#make-image-use-container"><span class="toc-number">4.4.</span> <span class="toc-text">make image use container</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Summary"><span class="toc-number">5.</span> <span class="toc-text">Summary</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Docker/" title="Docker">Docker<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Go/" title="Go">Go<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MySQL/" title="MySQL">MySQL<sup>18</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/NewSQL/" title="NewSQL">NewSQL<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Oracle/" title="Oracle">Oracle<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Python/" title="Python">Python<sup>7</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/MySQL/" title="MySQL">MySQL<sup>11</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OPS/" title="OPS">OPS<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Fabric/" title="Fabric">Fabric<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Go/" title="Go">Go<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Group-Replicaiton/" title="Group Replicaiton">Group Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MGR/" title="MGR">MGR<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Replicaiton/" title="Replicaiton">Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MHA/" title="MHA">MHA<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Python/" title="Python">Python<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Xtrabackup/" title="Xtrabackup">Xtrabackup<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DNS/" title="DNS">DNS<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Sharding/" title="Sharding">Sharding<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Discourse/" title="Discourse">Discourse<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forum/" title="Forum">Forum<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">知识链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/org/polardb-x" target="_blank" title="PloarDB-X专栏">PloarDB-X专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://cn.pingcap.com/blog/" target="_blank" title="TiDB 博客">TiDB 博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/doc/refman/8.0/en/" target="_blank" title="MySQL 8.0 Docs">MySQL 8.0 Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/blog-archive/" target="_blank" title="MySQL Server Blog">MySQL Server Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://lefred.be/" target="_blank" title="Lefred&#39;s blog">Lefred&#39;s blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/people/wen-zheng-hu" target="_blank" title="温正湖专栏">温正湖专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.percona.com/blog/" target="_blank" title="Percona Blog">Percona Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://engineering.fb.com/" target="_blank" title="Meta Engineering">Meta Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.uber.com/en-US/blog/engineering/" target="_blank" title="Uber Engineering">Uber Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.blog/category/engineering/" target="_blank" title="Github Engineering">Github Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://medium.com/pinterest-engineering" target="_blank" title="Pinterest Engineering">Pinterest Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://flask.palletsprojects.com/" target="_blank" title="Flask Docs">Flask Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://tympanus.net/codrops/" target="_blank" title="Codrops front">Codrops front</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
+			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
+		
+		<a href="/about" target="_blank" title="ruichao.lin">ruichao.lin</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+        getSize();
+        if (myWidth >= 1024) {
+          c.click();
+        }
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?e6d1f421bbc9962127a50488f9ed37d1";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

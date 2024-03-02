@@ -1,0 +1,773 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>MySQL备份压缩加密解决方案 | ruiayLin&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="ruichao.lin">
+    
+
+    
+    <meta name="description" content="MySQL 备份压缩加密方案 数据安全性对于任何一个公司都是非常重要的, 特别是互联网公司. 对数据进行加密也是我们提高安全性的重要手段之一, 今天我们谈谈如何对MySQL进行备份加密.xtrabackup热备工具是我们最常用的, 它从 xtrabackup 2.2.1 版本开始提供了加密支持, 现今最新版本是2.4.7.今天我们利用该特性进行备份的加密和压缩  下载安装 XtraBackup1.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL备份压缩加密解决方案">
+<meta property="og:url" content="http://ruiaylin.github.io/2017/05/13/xtrabackup-for-encrypt-and-compress/index.html">
+<meta property="og:site_name" content="ruiayLin&#39;s Blog">
+<meta property="og:description" content="MySQL 备份压缩加密方案 数据安全性对于任何一个公司都是非常重要的, 特别是互联网公司. 对数据进行加密也是我们提高安全性的重要手段之一, 今天我们谈谈如何对MySQL进行备份加密.xtrabackup热备工具是我们最常用的, 它从 xtrabackup 2.2.1 版本开始提供了加密支持, 现今最新版本是2.4.7.今天我们利用该特性进行备份的加密和压缩  下载安装 XtraBackup1.">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-05-12T20:55:27.000Z">
+<meta property="article:modified_time" content="2024-03-02T09:18:29.305Z">
+<meta property="article:author" content="ruichao.lin">
+<meta property="article:tag" content="Xtrabackup">
+<meta property="article:tag" content="Encrypt">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="ruiayLin&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.jpeg" alt="ruiayLin&#39;s Blog" title="ruiayLin&#39;s Blog"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="ruiayLin&#39;s Blog">ruiayLin&#39;s Blog</a></h1>
+				<h2 class="blog-motto">蹈之而弗悔 , 慎思而笃行 ...</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:ruiaylin.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/05/13/xtrabackup-for-encrypt-and-compress/" title="MySQL备份压缩加密解决方案" itemprop="url">MySQL备份压缩加密解决方案</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="ruichao.lin" target="_blank" itemprop="author">ruichao.lin</a>
+		
+  <p class="article-time">
+    <time datetime="2017-05-12T20:55:27.000Z" itemprop="datePublished"> 发表于 2017-05-13</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#MySQL-%E5%A4%87%E4%BB%BD%E5%8E%8B%E7%BC%A9%E5%8A%A0%E5%AF%86%E6%96%B9%E6%A1%88"><span class="toc-number">1.</span> <span class="toc-text">MySQL 备份压缩加密方案</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8B%E8%BD%BD%E5%AE%89%E8%A3%85-XtraBackup"><span class="toc-number">1.1.</span> <span class="toc-text">下载安装 XtraBackup</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%8B%E7%BC%A9%E5%8A%A0%E5%AF%86%E5%A4%87%E4%BB%BD"><span class="toc-number">1.2.</span> <span class="toc-text">压缩加密备份</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E5%8F%82%E6%95%B0%E8%AF%B4%E6%98%8E%EF%BC%9A"><span class="toc-number">1.2.1.</span> <span class="toc-text">关键参数说明：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%93%8D%E4%BD%9C%E5%91%BD%E4%BB%A4"><span class="toc-number">1.3.</span> <span class="toc-text">操作命令</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%87%E4%BB%BD%E5%88%B0%E6%9C%AC%E6%9C%BA"><span class="toc-number">1.3.1.</span> <span class="toc-text">备份到本机</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%87%E4%BB%BD%E5%88%B0%E8%BF%9C%E7%AB%AF"><span class="toc-number">1.3.2.</span> <span class="toc-text">备份到远端</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%81%A2%E5%A4%8D"><span class="toc-number">1.4.</span> <span class="toc-text">恢复</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A7%A3%E7%A0%81%E6%96%87%E4%BB%B6"><span class="toc-number">1.4.1.</span> <span class="toc-text">解码文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%88%E8%A7%A3%E5%AF%86"><span class="toc-number">1.4.2.</span> <span class="toc-text">先解密</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A7%A3%E5%8E%8B%E7%BC%A9"><span class="toc-number">1.4.3.</span> <span class="toc-text">解压缩</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Apply-log"><span class="toc-number">1.4.4.</span> <span class="toc-text">Apply log</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">1.5.</span> <span class="toc-text">总结</span></a></li></ol></li></ol>
+		
+		</div>
+		
+		<h2 id="MySQL-备份压缩加密方案"><a href="#MySQL-备份压缩加密方案" class="headerlink" title="MySQL 备份压缩加密方案"></a>MySQL 备份压缩加密方案</h2><blockquote>
+<p>数据安全性对于任何一个公司都是非常重要的, 特别是互联网公司. 对数据进行加密也是我们提高安全性的重要手段之一, 今天我们谈谈如何对MySQL进行备份加密.<br>xtrabackup热备工具是我们最常用的, 它从 xtrabackup 2.2.1 版本开始提供了加密支持, 现今最新版本是2.4.7.今天我们利用该特性进行备份的加密和压缩</p>
+</blockquote>
+<h3 id="下载安装-XtraBackup"><a href="#下载安装-XtraBackup" class="headerlink" title="下载安装 XtraBackup"></a>下载安装 XtraBackup</h3><pre><code>1.在http://www.percona.com/downloads/XtraBackup/LATEST/   
+2.解压安装，并配置path路径 export PATH=$JAVA_HOME/bin:/usr/local/xxx:$PATH  
+3.我的mysql的配置文件是/xx/my.cnf，如果不指定，XtraBackup默认使用此文
+  件识别mysql安装目录，数据文件目录等信息
+</code></pre>
+<h3 id="压缩加密备份"><a href="#压缩加密备份" class="headerlink" title="压缩加密备份"></a>压缩加密备份</h3><h4 id="关键参数说明："><a href="#关键参数说明：" class="headerlink" title="关键参数说明："></a>关键参数说明：</h4><blockquote>
+<p>Compress</p>
+</blockquote>
+<p>–compress[&#x3D;name]   </p>
+<pre><code>This option instructs xtrabackup to compress backup
+copies of InnoDB data files. It is passed directly to the
+xtrabackup child process. Try &#39;xtrabackup --help&#39; for
+more details
+</code></pre>
+<p>–compress-threads&#x3D;#</p>
+<pre><code>This option specifies the number of worker threads that
+will be used for parallel compression. It is passed
+directly to the xtrabackup child process. Try &#39;xtrabackup
+--help&#39; for more details.
+</code></pre>
+<p>–compress-chunk-size&#x3D;#</p>
+<pre><code>Size of working buffer(s) for compression threads in
+bytes. The default value is 64K.
+</code></pre>
+<blockquote>
+<p>Encryption</p>
+</blockquote>
+<p>–encrypt&#x3D;ALGORITHM </p>
+<pre><code>currently supported algorithms are: AES128, AES192 and AES256
+</code></pre>
+<p>–encrypt-key&#x3D;ENCRYPTION_KEY </p>
+<pre><code>proper length encryption key to use. It is not recommended to use this
+option where there is uncontrolled access to the machine as the command 
+line and thus the key can be viewed as part of the process info.
+</code></pre>
+<p>–encrypt-key-file&#x3D;name</p>
+<pre><code>This option instructs xtrabackup to use the encryption
+key stored in the given ENCRYPTION-KEY-FILE when using
+the --encrypt or --decrypt options.
+</code></pre>
+<p>–encrypt-threads&#x3D; NUMBER</p>
+<pre><code>the threads number to do encrypt, default 1
+</code></pre>
+<h3 id="操作命令"><a href="#操作命令" class="headerlink" title="操作命令"></a>操作命令</h3><p>encrypt-key : 3c0efcea569021b49245e47b5d6a0e28</p>
+<h4 id="备份到本机"><a href="#备份到本机" class="headerlink" title="备份到本机"></a>备份到本机</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">innobackupex --defaults-file=/data/mysql3306/my.cnf --user=XXXXXXXXX \ </span><br><span class="line">--password=*************** --host=127.0.0.1 --port=3306 --stream=xbstream \</span><br><span class="line">--encrypt=AES256 --encrypt-key=$encrypt-key --encrypt-threads=5 --compress\</span><br><span class="line">--tmpdir=/data/baks/ --slave-info /data/baks/ &gt; backup20160101.xbstream</span><br></pre></td></tr></table></figure>
+
+<h4 id="备份到远端"><a href="#备份到远端" class="headerlink" title="备份到远端"></a>备份到远端</h4><p>假设备份中心机器: 192.168.xxx.xxx</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">innobackupex --defaults-file=/data/mysql3306/my.cnf --user=XXXXXXXXX \</span><br><span class="line"> --password=*************** --host=127.0.0.1 --port=3306 --stream=xbstream\</span><br><span class="line"> --encrypt=AES256 --encrypt-key=$encrypt-key \ </span><br><span class="line"> --encrypt-threads=5  --compress --tmpdir=/data/baks/ \</span><br><span class="line">  --slave-info /data/baks/ | pv -q -L20m | ssh -p 30000 192.168.xxx.xxx \</span><br><span class="line">  &quot;cat - &gt; /data/tmp/backup20160101.xbstream &quot;</span><br></pre></td></tr></table></figure>
+
+
+<blockquote>
+<p>备份完成之后会提示日志</p>
+</blockquote>
+<pre><code>xtrabackup: Transaction log of lsn (4669176459) to (4669176459) was copied.
+170427 11:36:02 completed OK!s
+</code></pre>
+<h3 id="恢复"><a href="#恢复" class="headerlink" title="恢复"></a>恢复</h3><h4 id="解码文件"><a href="#解码文件" class="headerlink" title="解码文件"></a>解码文件</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">xbstream -x &lt; /data/tmp/backup20160101.xbstream -C /data/tmp/test</span><br><span class="line"># ls /data/tmp/test</span><br><span class="line">[root@xxxxx test]# ll</span><br><span class="line">    total 105220</span><br><span class="line">    drwxr-x--- 2 root root     4096 Apr 27 11:37 xxxxx</span><br><span class="line">    -rw-r----- 1 root root      533 Apr 27 11:37 xxxx-my.cnf.qp.xbcrypt</span><br><span class="line">    -rw-r----- 1 root root   445218 Apr 27 11:37 ibdata1.qp.xbcrypt</span><br><span class="line">    drwxr-x--- 2 root root     4096 Apr 27 11:37 mysql </span><br><span class="line">    ...</span><br><span class="line">    ...</span><br><span class="line">    ...</span><br><span class="line">    -rw-r----- 1 root root      617 Apr 27 11:37 xtrabackup_logfile.qp.xbcrypt</span><br><span class="line">    -rw-r----- 1 root root      242 Apr 27 11:37 xtrabackup_slave_info.qp.xbcrypt</span><br></pre></td></tr></table></figure>
+
+<h4 id="先解密"><a href="#先解密" class="headerlink" title="先解密"></a>先解密</h4><p>方案1</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">cd /data/tmp/test</span><br><span class="line"># </span><br><span class="line">for i in `find . -iname &quot;*\.xbcrypt&quot;`</span><br><span class="line">do  </span><br><span class="line">    echo $i </span><br><span class="line">    xbcrypt -d --encrypt-key=$encrypt-key  --encrypt-algo=AES256 &lt; $i &gt; $(dirname $i)/$(basename $i .xbcrypt)</span><br><span class="line">    /bin/rm -f  $i</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
+
+<p>方案2</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">innobackupex --decrypt=AES256 --encrypt-key=$encrypt-key /data/tmp/test </span><br></pre></td></tr></table></figure>
+
+<h4 id="解压缩"><a href="#解压缩" class="headerlink" title="解压缩"></a>解压缩</h4><blockquote>
+<p>install qpress tool first</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">rpmkeys --import https://www.percona.com/downloads/RPM-GPG-KEY-percona</span><br><span class="line">yum install -y http://www.percona.com/downloads/percona-release/redhat/0.1-4/percona-release-0.1-4.noarch.rpm </span><br><span class="line">yum install qpress -y</span><br></pre></td></tr></table></figure>
+
+
+<p>方案1 </p>
+<pre><code>innobackupex --decompress . 
+</code></pre>
+<p>方案2 </p>
+<pre><code>/data/tmp/test
+for i in `find . -iname &quot;*.qp&quot;`
+do 
+    qpress -d $i  $(dirname $i) &amp;&amp; rm -f $i
+done
+</code></pre>
+<h4 id="Apply-log"><a href="#Apply-log" class="headerlink" title="Apply log"></a>Apply log</h4><pre><code>innobackupex --apply-log .
+...
+</code></pre>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><pre><code>数据备份的安全性, 对于互联网公司非常重要, 建议大家都进行加密.
+</code></pre>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/MySQL/">MySQL</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Xtrabackup/">Xtrabackup</a><a href="/tags/Encrypt/">Encrypt</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://ruiaylin.github.io/2017/05/13/xtrabackup-for-encrypt-and-compress/" data-title="MySQL备份压缩加密解决方案 | ruiayLin&#39;s Blog" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2018/03/15/mha-a-litte-tricky/" title="【 MHA 】一个手动切换中的报错">
+  <strong>上一篇：</strong><br/>
+  <span>
+  【 MHA 】一个手动切换中的报错</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2017/01/12/mgr-03-Concurrent-DDLs-cause-inconsistency-on-Multi-Primary/"  title="【 MGR 】03 The Problom about Concurrent DDLs [转]">
+ <strong>下一篇：</strong><br/> 
+ <span>【 MGR 】03 The Problom about Concurrent DDLs [转]
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#MySQL-%E5%A4%87%E4%BB%BD%E5%8E%8B%E7%BC%A9%E5%8A%A0%E5%AF%86%E6%96%B9%E6%A1%88"><span class="toc-number">1.</span> <span class="toc-text">MySQL 备份压缩加密方案</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8B%E8%BD%BD%E5%AE%89%E8%A3%85-XtraBackup"><span class="toc-number">1.1.</span> <span class="toc-text">下载安装 XtraBackup</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%8B%E7%BC%A9%E5%8A%A0%E5%AF%86%E5%A4%87%E4%BB%BD"><span class="toc-number">1.2.</span> <span class="toc-text">压缩加密备份</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E5%8F%82%E6%95%B0%E8%AF%B4%E6%98%8E%EF%BC%9A"><span class="toc-number">1.2.1.</span> <span class="toc-text">关键参数说明：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%93%8D%E4%BD%9C%E5%91%BD%E4%BB%A4"><span class="toc-number">1.3.</span> <span class="toc-text">操作命令</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%87%E4%BB%BD%E5%88%B0%E6%9C%AC%E6%9C%BA"><span class="toc-number">1.3.1.</span> <span class="toc-text">备份到本机</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%87%E4%BB%BD%E5%88%B0%E8%BF%9C%E7%AB%AF"><span class="toc-number">1.3.2.</span> <span class="toc-text">备份到远端</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%81%A2%E5%A4%8D"><span class="toc-number">1.4.</span> <span class="toc-text">恢复</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A7%A3%E7%A0%81%E6%96%87%E4%BB%B6"><span class="toc-number">1.4.1.</span> <span class="toc-text">解码文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%88%E8%A7%A3%E5%AF%86"><span class="toc-number">1.4.2.</span> <span class="toc-text">先解密</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A7%A3%E5%8E%8B%E7%BC%A9"><span class="toc-number">1.4.3.</span> <span class="toc-text">解压缩</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Apply-log"><span class="toc-number">1.4.4.</span> <span class="toc-text">Apply log</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">1.5.</span> <span class="toc-text">总结</span></a></li></ol></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Docker/" title="Docker">Docker<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Go/" title="Go">Go<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MySQL/" title="MySQL">MySQL<sup>18</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/NewSQL/" title="NewSQL">NewSQL<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Oracle/" title="Oracle">Oracle<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Python/" title="Python">Python<sup>7</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/MySQL/" title="MySQL">MySQL<sup>11</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OPS/" title="OPS">OPS<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Fabric/" title="Fabric">Fabric<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Go/" title="Go">Go<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Group-Replicaiton/" title="Group Replicaiton">Group Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MGR/" title="MGR">MGR<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Replicaiton/" title="Replicaiton">Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MHA/" title="MHA">MHA<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Python/" title="Python">Python<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Xtrabackup/" title="Xtrabackup">Xtrabackup<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DNS/" title="DNS">DNS<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Sharding/" title="Sharding">Sharding<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Discourse/" title="Discourse">Discourse<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forum/" title="Forum">Forum<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">知识链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/org/polardb-x" target="_blank" title="PloarDB-X专栏">PloarDB-X专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://cn.pingcap.com/blog/" target="_blank" title="TiDB 博客">TiDB 博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/doc/refman/8.0/en/" target="_blank" title="MySQL 8.0 Docs">MySQL 8.0 Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/blog-archive/" target="_blank" title="MySQL Server Blog">MySQL Server Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://lefred.be/" target="_blank" title="Lefred&#39;s blog">Lefred&#39;s blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/people/wen-zheng-hu" target="_blank" title="温正湖专栏">温正湖专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.percona.com/blog/" target="_blank" title="Percona Blog">Percona Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://engineering.fb.com/" target="_blank" title="Meta Engineering">Meta Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.uber.com/en-US/blog/engineering/" target="_blank" title="Uber Engineering">Uber Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.blog/category/engineering/" target="_blank" title="Github Engineering">Github Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://medium.com/pinterest-engineering" target="_blank" title="Pinterest Engineering">Pinterest Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://flask.palletsprojects.com/" target="_blank" title="Flask Docs">Flask Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://tympanus.net/codrops/" target="_blank" title="Codrops front">Codrops front</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
+			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
+		
+		<a href="/about" target="_blank" title="ruichao.lin">ruichao.lin</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+        getSize();
+        if (myWidth >= 1024) {
+          c.click();
+        }
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?e6d1f421bbc9962127a50488f9ed37d1";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

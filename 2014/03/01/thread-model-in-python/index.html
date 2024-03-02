@@ -1,0 +1,750 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>Python multi-threading program model | ruiayLin&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="ruichao.lin">
+    
+
+    
+    <meta name="description" content="在运维工作中，随着业务和系统的发展，集群规模会随之增长，就会面临一个大规模，批量运维的难题，这也就要求了，日常的操作，变更，查询，维护任务要能够系统化。并尽可能做到，并发或者并行。运维工具脚本语言中 python 就成了一个很有用利器。python的多线程在实际工作中，还是能够提高很大的工作效率的。   python多线程的概述和一些不足  python是支持多线程的，并且是native的线程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python multi-threading program model">
+<meta property="og:url" content="http://ruiaylin.github.io/2014/03/01/thread-model-in-python/index.html">
+<meta property="og:site_name" content="ruiayLin&#39;s Blog">
+<meta property="og:description" content="在运维工作中，随着业务和系统的发展，集群规模会随之增长，就会面临一个大规模，批量运维的难题，这也就要求了，日常的操作，变更，查询，维护任务要能够系统化。并尽可能做到，并发或者并行。运维工具脚本语言中 python 就成了一个很有用利器。python的多线程在实际工作中，还是能够提高很大的工作效率的。   python多线程的概述和一些不足  python是支持多线程的，并且是native的线程。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2014-02-28T23:56:29.000Z">
+<meta property="article:modified_time" content="2024-03-02T09:18:29.302Z">
+<meta property="article:author" content="ruichao.lin">
+<meta property="article:tag" content="Thread">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="ruiayLin&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.jpeg" alt="ruiayLin&#39;s Blog" title="ruiayLin&#39;s Blog"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="ruiayLin&#39;s Blog">ruiayLin&#39;s Blog</a></h1>
+				<h2 class="blog-motto">蹈之而弗悔 , 慎思而笃行 ...</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:ruiaylin.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2014/03/01/thread-model-in-python/" title="Python multi-threading program model" itemprop="url">Python multi-threading program model</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="ruichao.lin" target="_blank" itemprop="author">ruichao.lin</a>
+		
+  <p class="article-time">
+    <time datetime="2014-02-28T23:56:29.000Z" itemprop="datePublished"> 发表于 2014-03-01</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#python%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E6%A6%82%E8%BF%B0%E5%92%8C%E4%B8%80%E4%BA%9B%E4%B8%8D%E8%B6%B3"><span class="toc-number">1.</span> <span class="toc-text">python多线程的概述和一些不足</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%A4%9A%E8%BF%9B%E7%A8%8B%E7%BC%96%E7%A8%8B%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.1.</span> <span class="toc-text">多进程编程模型</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E8%BF%9B%E7%A8%8B%E6%B1%A0"><span class="toc-number">1.2.</span> <span class="toc-text">创建进程池</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E8%BF%9B%E7%A8%8B%E5%A5%BD%E5%A4%84"><span class="toc-number">1.3.</span> <span class="toc-text">使用进程好处</span></a></li></ol></li></ol>
+		
+		</div>
+		
+		<blockquote>
+<p>在运维工作中，随着业务和系统的发展，集群规模会随之增长，就会面临一个大规模，<br>批量运维的难题，这也就要求了，日常的操作，变更，查询，维护任务要能够系统化。<br>并尽可能做到，并发或者并行。运维工具脚本语言中 python 就成了一个很有用利器。<br>python的多线程在实际工作中，还是能够提高很大的工作效率的。 </p>
+</blockquote>
+<h4 id="python多线程的概述和一些不足"><a href="#python多线程的概述和一些不足" class="headerlink" title="python多线程的概述和一些不足"></a>python多线程的概述和一些不足</h4><blockquote>
+<p> python是支持多线程的，并且是native的线程。主要是通过thread和threading这两个<br> 模块来实现的。thread模块是比较底层的，threading模块是对thread做了一些包装<br> threading 模块按照OOP的思想对thread做了封装，主要线程的操作对象化了，创建了<br> 叫Thread的class 。</p>
+</blockquote>
+<p>####1).多线程</p>
+<p>一般来说，使用线程有3种模式:<br>a.创建任务函数，讲函数传递给thread对象执行 ;<br>b.传入一个可调用的对象，python 对象都是我们所说的可调用的，类的对象也是可以调用的，<br>   当被调用时会自动调用对象的内建方法__call__()，因此这种新建线程的方法就是给线程指<br>   定一个__call__方法被重载了的对象 ；<br>c.创建一个类，从Thread继承，把线程执行的代码放到这个新的class里面的run</p>
+<p>如下 ： </p>
+<blockquote>
+<p>1 : thread.start_new_thread ( function, args[, kwargs] )<br>   function - 线程函数。<br>   args     - 传递给线程函数的参数,他必须是个tuple类型 like thie (1,2)<br>   kwargs   - 可选参数。</p>
+</blockquote>
+<p>样例如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">import sys, os , thread  </span><br><span class="line"># 为线程定义 task 函数</span><br><span class="line">def prinft( threadName, delay):</span><br><span class="line">   count = 0</span><br><span class="line">   while count &lt; 5:</span><br><span class="line">      time.sleep(delay)</span><br><span class="line">      count += 1</span><br><span class="line">      print &quot;%s: %s&quot; % ( threadName, time.ctime(time.time()) )  </span><br><span class="line"># 创建两个线程</span><br><span class="line">try:</span><br><span class="line">   thread.start_new_thread( prinft, (&quot;Thread-1&quot;, 2, ) )</span><br><span class="line">   thread.start_new_thread( prinft, (&quot;Thread-2&quot;, 4, ) )</span><br><span class="line">except:</span><br><span class="line">   print &quot;Error: unable to start thread&quot;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>2 : 传入可调用对象<br>   样例如下</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">import threading</span><br><span class="line">#可调用的类</span><br><span class="line">class Callable(object):</span><br><span class="line">    def __init__(self, func, args):</span><br><span class="line">        self.func = func;</span><br><span class="line">        self.args = args;</span><br><span class="line">    def __call__(self):</span><br><span class="line">        apply(self.func, self.args);</span><br><span class="line">#用于线程执行的函数</span><br><span class="line">def prinft( threadName, delay):</span><br><span class="line">   count = 0</span><br><span class="line">   while count &lt; 5:</span><br><span class="line">      time.sleep(delay)</span><br><span class="line">      count += 1</span><br><span class="line">      print &quot;%s: %s&quot; % ( threadName, time.ctime(time.time()) )  </span><br><span class="line">if __name__ == &#x27;__main__&#x27;:</span><br><span class="line">    #初始化一个线程对象，传入可调用的Callable对象，并用函数counter及其参数1000初始化这个对象</span><br><span class="line">    th = threading.Thread(target=Callable(prinft, (&#x27;th1&#x27;,5)));</span><br><span class="line">    #启动线程</span><br><span class="line">    th.start();</span><br><span class="line">    #主线程阻塞等待子线程结束</span><br><span class="line">    th.join();</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>3 : 继承thread类<br>创建类 prinft 继承自 threading.Thread</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">#线程类创建</span><br><span class="line">class PRINFT(threading.Thread):</span><br><span class="line">    def __init__(self,threadname, delay):</span><br><span class="line">        threading.Thread.__init__(self)</span><br><span class="line">        self.name = threadname   </span><br><span class="line">        self.delay = delay</span><br><span class="line">    def run(self):</span><br><span class="line">        threadName = self.name</span><br><span class="line">        count = 0</span><br><span class="line">        while count &lt; 5:</span><br><span class="line">            time.sleep(self.delay)</span><br><span class="line">            count += 1</span><br><span class="line">            print &quot;%s: %s&quot; % ( threadName, time.ctime(time.time()) )   </span><br><span class="line"> </span><br><span class="line">#创建两个线程</span><br><span class="line">consumers = [ PRINFT(&quot;thread-&quot;+str(i) ,i+1 ,  )  for i in xrange(2) ] </span><br><span class="line">#开启线程</span><br><span class="line">for w in consumers:</span><br><span class="line">    w.start()</span><br><span class="line">#线程同步</span><br><span class="line">for w in consumers:</span><br><span class="line">    w.join()</span><br><span class="line"></span><br><span class="line">注意：目前使用多线程的情况，就是处理很多同质的任务的时候;为了提高性能</span><br><span class="line">大多是使用的生产者和消费者模型来组织代码结构。但是Python的thread有天生的缺陷(GIL)</span><br><span class="line">在计算密集型任务中性能会很差，而在io密集型的任务中，IO期间线程会释放解释器</span><br><span class="line">性能还是有比较大的提升的，特别是磁盘io密集操作，网络或者数据库相关的任务</span><br></pre></td></tr></table></figure>
+
+<p>####2). multi-process 多进程</p>
+<blockquote>
+<p>普通的任务或者运维脚本按照上述的两种结构基本上可以完成任务,当然性能上由于GIL的局限肯定有很大<br>的影响。Python 3.X 中有所改善。低版本的Python 引入的多线程的替代品，multiprocessing<br>多进程实现真正意义的并发</p>
+</blockquote>
+<h5 id="多进程编程模型"><a href="#多进程编程模型" class="headerlink" title="多进程编程模型"></a>多进程编程模型</h5><blockquote>
+<p>多进程编程模型和多线程模型基本上一致的，只是应用的lib和调用的方法不一样 。<br>进程的创建方式跟线程完全一致，只不过要将threading.Thread换成multiprocessing.Process。<br>multiprocessing模块尽力保持了与threading模块在方法名上的一致性.</p>
+</blockquote>
+<h5 id="创建进程池"><a href="#创建进程池" class="headerlink" title="创建进程池"></a>创建进程池</h5><blockquote>
+<p>该模块还允许一次创建一组进程，然后再给他们分配任务，另外包中有很多方法，具体见文档手册</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">import multiprocessing</span><br><span class="line">import time</span><br><span class="line"> </span><br><span class="line">def prinft( threadName, delay):</span><br><span class="line">   count = 0</span><br><span class="line">   while count &lt; 5:</span><br><span class="line">      time.sleep(delay)</span><br><span class="line">      count += 1</span><br><span class="line">      return  &quot;%s: %s&quot; % ( threadName, time.ctime(time.time()) )  </span><br><span class="line"> </span><br><span class="line">if __name__ == &quot;__main__&quot;:</span><br><span class="line">    pool = multiprocessing.Pool(processes=4)</span><br><span class="line">    result = []#获得结果</span><br><span class="line">    #如无需返回结果 可以直接 pool.apply_async(func, (msg, xx )) </span><br><span class="line">    for i in xrange(10):</span><br><span class="line">        msg = &quot;hello %d&quot; %(i)</span><br><span class="line">        result.append(pool.apply_async(prinft, (msg, )))</span><br><span class="line">    pool.close()</span><br><span class="line">    pool.join()</span><br><span class="line">    for res in result:</span><br><span class="line">        print res.get()  </span><br></pre></td></tr></table></figure>
+
+<h5 id="使用进程好处"><a href="#使用进程好处" class="headerlink" title="使用进程好处"></a>使用进程好处</h5><blockquote>
+<p>完全并行，无GIL的限制，可充分利用多cpu多核的环境；可以接受linux信号，后面将看到，<br>这个功能非常好用</p>
+</blockquote>
+<p>####3). multiprocessing.dummy 简化</p>
+<blockquote>
+<p>最近看到一个老外的 blog 讲解 multiprocessing.dummy ，感觉很方便，.按照我的理解来记录。<br>dummy 是多进程的 multiprocessing 的一个子包，其中其实引用了map的方式来进行简化多线程<br>Map能够处理集合按顺序遍历，最终将调用产生的结果保存在一个简单的集合当中，因为在引入需要的包<br>文件后，Map能大大简化并发的复杂度!</p>
+</blockquote>
+<p>multiprocessing &amp; multiprocessing.dummy 都是支持 Map 的。Digression这是啥东西？没听说过线程引用叫dummy的多进程包文件。我也是直到最近才知道。它在多进程的说明文档中也只被提到了一句。它的效果也只是让大家直到有这么个东西而已。这可真是营销的失误！<br>Dummy是一个多进程包的完整拷贝。唯一不同的是，多进程包使用进程，而dummy使用线程（自然也有Python本身的一些限制）。所以一个有的另一个也有。这样在两种模式间切换就十分简单，并且在判断框架调用时使用的是IO还是CPU模式非常有帮助</p>
+<p>#####准备开始</p>
+<blockquote>
+<p>准备使用带有并发的map功能首先要导入相关包文件：</p>
+</blockquote>
+<pre><code>from multiprocessing import Pool
+from multiprocessing.dummy import Pool as ThreadPool
+</code></pre>
+<blockquote>
+<p>然后初始化:</p>
+</blockquote>
+<pre><code>pool = ThreadPool()
+</code></pre>
+<blockquote>
+<p>具体来讲，它首先创建一些有效的worker启动它并将其保存在一些变量中以便随时访问。<br>pool对象需要一些参数，但现在最紧要的就是：进程。它可以限定线程池中worker的数量。<br>如果不填，它将采用系统的内核数作为初值. </p>
+</blockquote>
+<p>一般情况下，如果你进行的是计算密集型多进程任务，内核越多意味着速度越快（当然这是有前提的）。但如果是涉及到网络计算方面，影响的因素就千差万别。所以最好还是能给出合适的线程池大小数。</p>
+<pre><code>pool = ThreadPool(4) # Sets the pool size to 4
+</code></pre>
+<p>如果运行的线程很多，频繁的切换线程会十分影响工作效率。所以最好还是能通过调试找出任务调度的时间平衡点。好的，既然已经建好了线程池对象还有那些简单的并发内容。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">import urllib2 </span><br><span class="line">from multiprocessing.dummy import Pool as ThreadPool    </span><br><span class="line">urls = [</span><br><span class="line">    &#x27;http://www.python.org&#x27;, </span><br><span class="line">    &#x27;http://www.python.org/about/&#x27;,</span><br><span class="line">    &#x27;http://www.onlamp.com/pub/a/python/2003/04/17/metaclasses.html&#x27;,</span><br><span class="line">    &#x27;http://www.python.org/doc/&#x27;,</span><br><span class="line">    &#x27;http://www.python.org/download/&#x27;,</span><br><span class="line">    &#x27;http://www.python.org/getit/&#x27;,</span><br><span class="line">    &#x27;http://www.python.org/community/&#x27;,</span><br><span class="line">    &#x27;https://wiki.python.org/moin/&#x27;,</span><br><span class="line">    &#x27;http://planet.python.org/&#x27;,</span><br><span class="line">    &#x27;https://wiki.python.org/moin/LocalUserGroups&#x27;,</span><br><span class="line">    &#x27;http://www.python.org/psf/&#x27;,</span><br><span class="line">    &#x27;http://docs.python.org/devguide/&#x27;,</span><br><span class="line">    &#x27;http://www.python.org/community/awards/&#x27;</span><br><span class="line">    # etc.. </span><br><span class="line">    ]   </span><br><span class="line"># Make the Pool of workers</span><br><span class="line">pool = ThreadPool(4) </span><br><span class="line"># Open the urls in their own threads</span><br><span class="line"># and return the results</span><br><span class="line">results = pool.map(urllib2.urlopen, urls)</span><br><span class="line">#close the pool and wait for the work to finish </span><br><span class="line">pool.close() </span><br><span class="line">pool.join() </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>注 ： 这是一个完整的例子，pool的size 要经过调试，然后再进行设置。不过编程模型就是这一的。<br>关于多线程和多进程就到这里 。 还有实际开发工具和脚本的时候，面向对象的方式来进行开发和设计<br>是一个很好的体验。讲任务对象化 。 本篇blog 是以Python特性维度来进行的，后面会再根据任务类型来<br>深入总结。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Python/">Python</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Thread/">Thread</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://ruiaylin.github.io/2014/03/01/thread-model-in-python/" data-title="Python multi-threading program model | ruiayLin&#39;s Blog" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2014/03/15/oracle-colquery/" title="Oracle colquery">
+  <strong>上一篇：</strong><br/>
+  <span>
+  Oracle colquery</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2014/02/27/tips-for-mysql-ops/"  title="MySQL运维过程中的小tip [转载]">
+ <strong>下一篇：</strong><br/> 
+ <span>MySQL运维过程中的小tip [转载]
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#python%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E6%A6%82%E8%BF%B0%E5%92%8C%E4%B8%80%E4%BA%9B%E4%B8%8D%E8%B6%B3"><span class="toc-number">1.</span> <span class="toc-text">python多线程的概述和一些不足</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%A4%9A%E8%BF%9B%E7%A8%8B%E7%BC%96%E7%A8%8B%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.1.</span> <span class="toc-text">多进程编程模型</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E8%BF%9B%E7%A8%8B%E6%B1%A0"><span class="toc-number">1.2.</span> <span class="toc-text">创建进程池</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E8%BF%9B%E7%A8%8B%E5%A5%BD%E5%A4%84"><span class="toc-number">1.3.</span> <span class="toc-text">使用进程好处</span></a></li></ol></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Docker/" title="Docker">Docker<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Go/" title="Go">Go<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MySQL/" title="MySQL">MySQL<sup>18</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/NewSQL/" title="NewSQL">NewSQL<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Oracle/" title="Oracle">Oracle<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Python/" title="Python">Python<sup>7</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/MySQL/" title="MySQL">MySQL<sup>11</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OPS/" title="OPS">OPS<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Fabric/" title="Fabric">Fabric<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Go/" title="Go">Go<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Group-Replicaiton/" title="Group Replicaiton">Group Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MGR/" title="MGR">MGR<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Replicaiton/" title="Replicaiton">Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MHA/" title="MHA">MHA<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Python/" title="Python">Python<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Xtrabackup/" title="Xtrabackup">Xtrabackup<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DNS/" title="DNS">DNS<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Sharding/" title="Sharding">Sharding<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Discourse/" title="Discourse">Discourse<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forum/" title="Forum">Forum<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">知识链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/org/polardb-x" target="_blank" title="PloarDB-X专栏">PloarDB-X专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://cn.pingcap.com/blog/" target="_blank" title="TiDB 博客">TiDB 博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/doc/refman/8.0/en/" target="_blank" title="MySQL 8.0 Docs">MySQL 8.0 Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/blog-archive/" target="_blank" title="MySQL Server Blog">MySQL Server Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://lefred.be/" target="_blank" title="Lefred&#39;s blog">Lefred&#39;s blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/people/wen-zheng-hu" target="_blank" title="温正湖专栏">温正湖专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.percona.com/blog/" target="_blank" title="Percona Blog">Percona Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://engineering.fb.com/" target="_blank" title="Meta Engineering">Meta Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.uber.com/en-US/blog/engineering/" target="_blank" title="Uber Engineering">Uber Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.blog/category/engineering/" target="_blank" title="Github Engineering">Github Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://medium.com/pinterest-engineering" target="_blank" title="Pinterest Engineering">Pinterest Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://flask.palletsprojects.com/" target="_blank" title="Flask Docs">Flask Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://tympanus.net/codrops/" target="_blank" title="Codrops front">Codrops front</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
+			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
+		
+		<a href="/about" target="_blank" title="ruichao.lin">ruichao.lin</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+        getSize();
+        if (myWidth >= 1024) {
+          c.click();
+        }
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?e6d1f421bbc9962127a50488f9ed37d1";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

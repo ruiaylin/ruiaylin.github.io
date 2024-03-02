@@ -1,0 +1,852 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>The Simple Way To Install MySQL | ruiayLin&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="ruichao.lin">
+    
+
+    
+    <meta name="description" content="The easyest way to install mysqlInstall softwareyum -y  install perl-DBI perl-DBD-MySQL perl-Time-HiRes perl-IO-Socket-SSL  Install mysql Using yum to install mysql , example percona server  123rpmkey">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Simple Way To Install MySQL">
+<meta property="og:url" content="http://ruiaylin.github.io/2016/09/30/Simple-Way-To-Install-MySQL/index.html">
+<meta property="og:site_name" content="ruiayLin&#39;s Blog">
+<meta property="og:description" content="The easyest way to install mysqlInstall softwareyum -y  install perl-DBI perl-DBD-MySQL perl-Time-HiRes perl-IO-Socket-SSL  Install mysql Using yum to install mysql , example percona server  123rpmkey">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-09-30T05:50:53.000Z">
+<meta property="article:modified_time" content="2024-03-02T09:18:29.286Z">
+<meta property="article:author" content="ruichao.lin">
+<meta property="article:tag" content="Docker">
+<meta property="article:tag" content="MySQL">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="ruiayLin&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.jpeg" alt="ruiayLin&#39;s Blog" title="ruiayLin&#39;s Blog"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="ruiayLin&#39;s Blog">ruiayLin&#39;s Blog</a></h1>
+				<h2 class="blog-motto">蹈之而弗悔 , 慎思而笃行 ...</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:ruiaylin.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/09/30/Simple-Way-To-Install-MySQL/" title="The Simple Way To Install MySQL" itemprop="url">The Simple Way To Install MySQL</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="ruichao.lin" target="_blank" itemprop="author">ruichao.lin</a>
+		
+  <p class="article-time">
+    <time datetime="2016-09-30T05:50:53.000Z" itemprop="datePublished"> 发表于 2016-09-30</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#The-easyest-way-to-install-mysql"><span class="toc-number">1.</span> <span class="toc-text">The easyest way to install mysql</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Install-software"><span class="toc-number">2.</span> <span class="toc-text">Install software</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Install-mysql"><span class="toc-number">3.</span> <span class="toc-text">Install mysql</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Create-user-dictionarys"><span class="toc-number">4.</span> <span class="toc-text">Create user &amp; dictionarys</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Configure-the-etc-my-cnf"><span class="toc-number">5.</span> <span class="toc-text">Configure the &#x2F;etc&#x2F;my.cnf</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Initialize-and-start-up-the-server"><span class="toc-number">6.</span> <span class="toc-text">Initialize and start up the server</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Done"><span class="toc-number"></span> <span class="toc-text">Done</span></a>
+		
+		</div>
+		
+		<h3 id="The-easyest-way-to-install-mysql"><a href="#The-easyest-way-to-install-mysql" class="headerlink" title="The easyest way to install mysql"></a>The easyest way to install mysql</h3><h3 id="Install-software"><a href="#Install-software" class="headerlink" title="Install software"></a>Install software</h3><pre><code>yum -y  install perl-DBI perl-DBD-MySQL perl-Time-HiRes perl-IO-Socket-SSL
+</code></pre>
+<h3 id="Install-mysql"><a href="#Install-mysql" class="headerlink" title="Install mysql"></a>Install mysql</h3><blockquote>
+<p>Using yum to install mysql , example percona server</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">rpmkeys --import https://www.percona.com/downloads/RPM-GPG-KEY-percona</span><br><span class="line">yum install -y http://www.percona.com/downloads/percona-release/redhat/0.1-4/percona-release-0.1-4.noarch.rpm</span><br><span class="line">yum install -y which perl-Digest-MD5 percona-xtrabackup-24 Percona-Server-server-57 Percona-Server-client-57 Percona-Server-shared-57</span><br></pre></td></tr></table></figure>
+
+<h3 id="Create-user-dictionarys"><a href="#Create-user-dictionarys" class="headerlink" title="Create user &amp; dictionarys"></a>Create user &amp; dictionarys</h3><p>delete the default mysql user:</p>
+<pre><code>userdel mysql 
+</code></pre>
+<p>create user and grant the privileges:</p>
+<pre><code>groupadd mysql
+useradd -c &quot;mysql software owner&quot; -g mysql -G mysql mysql
+chmod 755 /home/mysql 
+mkdir /data/mysql/&#123;data,log,run,tmp&#125; -p
+mkdir /log/mysql/&#123;iblog,binlog&#125; -p
+chown -R mysql:mysql /data/mysql
+chown -R mysql:mysql /log/mysql 
+</code></pre>
+<h3 id="Configure-the-etc-my-cnf"><a href="#Configure-the-etc-my-cnf" class="headerlink" title="Configure the &#x2F;etc&#x2F;my.cnf"></a>Configure the &#x2F;etc&#x2F;my.cnf</h3><pre><code>[client]
+port=3306  
+default-character-set=utf8mb4
+socket=/data/mysql/run/mysql.sock
+[mysql]
+port=330
+prompt=\\u@\\d \\r:\\m:\\s&gt;
+default-character-set=utf8mb4
+no-auto-rehash
+socket=/data/mysql/run/mysql.sock
+[mysqld]
+character-set-server=utf8mb4
+default-storage-engine=INNODB
+default-time-zone=&quot;+08:00&quot;
+log_timestamps=system
+#dir
+innodb_log_group_home_dir=/log/mysql/iblog
+innodb_data_home_dir=/log/mysql/iblog
+innodb_data_file_path=ibdata1:10M:autoextend:max:10G
+datadir=/data/mysql/data
+tmpdir=/data/mysql/tmp
+slave_load_tmpdir=/data/mysql/tmp
+log-error=/data/mysql/log/alert.log
+slow_query_log_file=/data/mysql/log/slow.log
+socket=/data/mysql/run/mysql.sock
+log-bin=/log/mysql/binlog/binlog
+relay-log=/log/mysql/binlog/relaylog
+#undo
+innodb_undo_tablespaces=2
+innodb_undo_logs=128
+innodb_undo_directory=/log/mysql/iblog
+innodb_undo_log_truncate = 1
+innodb_max_undo_log_size = 1G
+#innodb
+innodb_log_files_in_group=2
+innodb_log_file_size=128M
+innodb_buffer_pool_size=256M
+innodb_open_files=15535
+innodb_flush_log_at_trx_commit=1
+innodb_max_dirty_pages_pct=50
+innodb_io_capacity=1000
+innodb_io_capacity_max=4000
+innodb_read_io_threads=8
+innodb_write_io_threads=16
+innodb_file_format=Barracuda
+innodb_file_per_table=1
+innodb_thread_concurrency=16
+innodb_change_buffering=inserts
+innodb_checksum_algorithm=crc32
+innodb_adaptive_flushing=1
+innodb_stats_on_metadata=0
+innodb_flush_method=O_DIRECT
+innodb_log_buffer_size=10M
+innodb_flush_neighbors=0
+innodb_lock_wait_timeout=50
+innodb_sync_array_size=16
+transaction-isolation = READ-COMMITTED
+##
+optimizer_switch=&#39;mrr_cost_based=off,batched_key_access=on&#39;
+#table
+metadata_locks_hash_instances=256
+table_definition_cache=8192
+table_open_cache=8192
+table_open_cache_instances = 16
+#thread
+thread_stack=262144
+thread_cache_size=256
+#thread pool
+thread_handling=pool-of-threads
+thread_pool_high_prio_mode=transactions
+thread_pool_idle_timeout=60
+thread_pool_oversubscribe=8
+thread_pool_size=32
+thread_pool_stall_limit=10
+#binlog
+binlog_cache_size=5M
+binlog-format=ROW
+sync_binlog=1
+expire_logs_days=7
+log_slave_updates = 1
+relay_log_info_repository=TABLE
+master_info_repository=TABLE
+relay_log_recovery=1
+max_binlog_size=512M
+binlog-format=ROW
+# semi sync replication settings #
+plugin_load = &quot;rpl_semi_sync_master=semisync_master.so;rpl_semi_sync_slave=semisync_slave.so&quot;
+rpl_semi_sync_master_enabled = 1
+rpl_semi_sync_master_timeout = 300
+rpl_semi_sync_slave_enabled = 1
+# new replication setting #
+slave-parallel-type = LOGICAL_CLOCK
+slave-parallel-workers = 16
+slave_preserve_commit_order=1
+slave_transaction_retries=128
+# gtid&amp;repl
+gtid_mode=ON
+enforce_gtid_consistency=ON
+#slow log
+log_slow_verbosity=full
+long_query_time=0.2
+slow_query_log=1
+skip-slave-start=1
+#coms
+query_cache_type=0
+query_cache_size=0
+local-infile=0
+port=3306
+server_id=2819248362
+max_allowed_packet=64M
+read_rnd_buffer_size=16M
+join_buffer_size=8M
+sort_buffer_size=2M
+read_buffer_size=4M
+open_files_limit=65535
+lower_case_table_names=1
+character-set-server=utf8
+skip-name-resolve=1
+skip-external-locking=1
+safe-user-create
+#timeout
+connect_timeout=30
+delayed_insert_timeout =300
+innodb_rollback_on_timeout=OFF
+net_read_timeout=30
+net_write_timeout=60
+slave_net_timeout=30
+#myisam
+concurrent_insert=2
+key_buffer_size=8M
+myisam_sort_buffer_size=20M
+#coms
+query_cache_type=0
+query_cache_size=0
+local-infile=0
+port=3306
+max_connections=11100
+max_user_connections=10000
+max_connect_errors=3500
+character-set-server=utf8mb4
+skip-name-resolve
+</code></pre>
+<h3 id="Initialize-and-start-up-the-server"><a href="#Initialize-and-start-up-the-server" class="headerlink" title="Initialize and start up the server"></a>Initialize and start up the server</h3><pre><code>su - mysql 
+# init
+mysqld --initialize-insecure
+# startup
+mysqld &amp; 
+</code></pre>
+<h2 id="Done"><a href="#Done" class="headerlink" title="Done"></a>Done</h2>  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/MySQL/">MySQL</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Docker/">Docker</a><a href="/tags/MySQL/">MySQL</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://ruiaylin.github.io/2016/09/30/Simple-Way-To-Install-MySQL/" data-title="The Simple Way To Install MySQL | ruiayLin&#39;s Blog" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/12/22/mgr-01-build-a-mysql-group-replication-cluster-in-10-minutes/" title="【 MGR 】01 - Build a MGR cluster in ten minutes">
+  <strong>上一篇：</strong><br/>
+  <span>
+  【 MGR 】01 - Build a MGR cluster in ten minutes</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/09/28/tidb-Tutorial/"  title="TiDB (NewSQL) Tutorial">
+ <strong>下一篇：</strong><br/> 
+ <span>TiDB (NewSQL) Tutorial
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#The-easyest-way-to-install-mysql"><span class="toc-number">1.</span> <span class="toc-text">The easyest way to install mysql</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Install-software"><span class="toc-number">2.</span> <span class="toc-text">Install software</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Install-mysql"><span class="toc-number">3.</span> <span class="toc-text">Install mysql</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Create-user-dictionarys"><span class="toc-number">4.</span> <span class="toc-text">Create user &amp; dictionarys</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Configure-the-etc-my-cnf"><span class="toc-number">5.</span> <span class="toc-text">Configure the &#x2F;etc&#x2F;my.cnf</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Initialize-and-start-up-the-server"><span class="toc-number">6.</span> <span class="toc-text">Initialize and start up the server</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Done"><span class="toc-number"></span> <span class="toc-text">Done</span></a>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Docker/" title="Docker">Docker<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Go/" title="Go">Go<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MySQL/" title="MySQL">MySQL<sup>18</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/NewSQL/" title="NewSQL">NewSQL<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Oracle/" title="Oracle">Oracle<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Python/" title="Python">Python<sup>7</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/MySQL/" title="MySQL">MySQL<sup>11</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OPS/" title="OPS">OPS<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Fabric/" title="Fabric">Fabric<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Go/" title="Go">Go<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Group-Replicaiton/" title="Group Replicaiton">Group Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MGR/" title="MGR">MGR<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Replicaiton/" title="Replicaiton">Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MHA/" title="MHA">MHA<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Python/" title="Python">Python<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Xtrabackup/" title="Xtrabackup">Xtrabackup<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DNS/" title="DNS">DNS<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Sharding/" title="Sharding">Sharding<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Discourse/" title="Discourse">Discourse<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forum/" title="Forum">Forum<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">知识链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/org/polardb-x" target="_blank" title="PloarDB-X专栏">PloarDB-X专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://cn.pingcap.com/blog/" target="_blank" title="TiDB 博客">TiDB 博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/doc/refman/8.0/en/" target="_blank" title="MySQL 8.0 Docs">MySQL 8.0 Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/blog-archive/" target="_blank" title="MySQL Server Blog">MySQL Server Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://lefred.be/" target="_blank" title="Lefred&#39;s blog">Lefred&#39;s blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/people/wen-zheng-hu" target="_blank" title="温正湖专栏">温正湖专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.percona.com/blog/" target="_blank" title="Percona Blog">Percona Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://engineering.fb.com/" target="_blank" title="Meta Engineering">Meta Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.uber.com/en-US/blog/engineering/" target="_blank" title="Uber Engineering">Uber Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.blog/category/engineering/" target="_blank" title="Github Engineering">Github Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://medium.com/pinterest-engineering" target="_blank" title="Pinterest Engineering">Pinterest Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://flask.palletsprojects.com/" target="_blank" title="Flask Docs">Flask Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://tympanus.net/codrops/" target="_blank" title="Codrops front">Codrops front</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
+			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
+		
+		<a href="/about" target="_blank" title="ruichao.lin">ruichao.lin</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+        getSize();
+        if (myWidth >= 1024) {
+          c.click();
+        }
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?e6d1f421bbc9962127a50488f9ed37d1";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

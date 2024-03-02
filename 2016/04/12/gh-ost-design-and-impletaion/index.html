@@ -1,0 +1,736 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>Gh-OST 的设计和实现 | ruiayLin&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="ruichao.lin">
+    
+
+    
+    <meta name="description" content="GitHub’s online schema migration tool for MySQL gh-ost has been developed at GitHub in recent months to answer a problem we faced with ongoing, continuous production changes requiring modifications to">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Gh-OST 的设计和实现">
+<meta property="og:url" content="http://ruiaylin.github.io/2016/04/12/gh-ost-design-and-impletaion/index.html">
+<meta property="og:site_name" content="ruiayLin&#39;s Blog">
+<meta property="og:description" content="GitHub’s online schema migration tool for MySQL gh-ost has been developed at GitHub in recent months to answer a problem we faced with ongoing, continuous production changes requiring modifications to">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://githubengineering.com/images/announcing-gh-ost/gh-ost-general-flow.png">
+<meta property="article:published_time" content="2016-04-12T08:34:03.000Z">
+<meta property="article:modified_time" content="2024-03-02T09:18:29.288Z">
+<meta property="article:author" content="ruichao.lin">
+<meta property="article:tag" content="Go">
+<meta property="article:tag" content="gh-ost">
+<meta property="article:tag" content="DDL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://githubengineering.com/images/announcing-gh-ost/gh-ost-general-flow.png">
+
+    
+    <link rel="alternative" href="/atom.xml" title="ruiayLin&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.jpeg" alt="ruiayLin&#39;s Blog" title="ruiayLin&#39;s Blog"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="ruiayLin&#39;s Blog">ruiayLin&#39;s Blog</a></h1>
+				<h2 class="blog-motto">蹈之而弗悔 , 慎思而笃行 ...</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:ruiaylin.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/04/12/gh-ost-design-and-impletaion/" title="Gh-OST 的设计和实现" itemprop="url">Gh-OST 的设计和实现</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="ruichao.lin" target="_blank" itemprop="author">ruichao.lin</a>
+		
+  <p class="article-time">
+    <time datetime="2016-04-12T08:34:03.000Z" itemprop="datePublished"> 发表于 2016-04-12</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#GitHub%E2%80%99s-online-schema-migration-tool-for-MySQL"><span class="toc-number">1.</span> <span class="toc-text">GitHub’s online schema migration tool for MySQL</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gh-ost"><span class="toc-number">2.</span> <span class="toc-text">gh-ost</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="toc-number">3.</span> <span class="toc-text">使用方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#example"><span class="toc-number">4.</span> <span class="toc-text">example</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-number">5.</span> <span class="toc-text">原理:</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A1%8C%E6%95%B0%E6%8D%AE%E6%8B%B7%E8%B4%9D-row-copy"><span class="toc-number">5.1.</span> <span class="toc-text">行数据拷贝(row copy)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%97%A5%E5%BF%97%E8%A7%A3%E6%9E%90%E5%92%8C%E5%BA%94%E7%94%A8"><span class="toc-number">5.2.</span> <span class="toc-text">日志解析和应用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%AF%E8%A1%8C%E6%80%A7%E5%88%86%E6%9E%90"><span class="toc-number">5.3.</span> <span class="toc-text">可行性分析</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<h3 id="GitHub’s-online-schema-migration-tool-for-MySQL"><a href="#GitHub’s-online-schema-migration-tool-for-MySQL" class="headerlink" title="GitHub’s online schema migration tool for MySQL"></a>GitHub’s online schema migration tool for MySQL</h3><blockquote>
+<p>gh-ost has been developed at GitHub in recent months to answer a problem we faced with ongoing, continuous production changes requiring modifications to MySQL tables. gh-ost changes the existing online table migration paradigm by providing a low impact, controllable, auditable, operations friendly solution.</p>
+</blockquote>
+<h3 id="gh-ost"><a href="#gh-ost" class="headerlink" title="gh-ost"></a>gh-ost</h3><p>gh-ost : stands for GitHub’s Online Schema </p>
+<p>– Triggerless<br>– Lightweight<br>– Pauseable<br>– Dynamically controllable<br>– Auditable<br>– Testable<br>– Trustable<br>– Triggerless</p>
+<p><img src="http://githubengineering.com/images/announcing-gh-ost/gh-ost-general-flow.png" alt="Transmogrifier/Transfigurator/Transformer/Thingy
+"> </p>
+<h3 id="使用方式"><a href="#使用方式" class="headerlink" title="使用方式"></a>使用方式</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><span class="line"># 执行命令</span><br><span class="line">./gh-ost --help</span><br><span class="line"></span><br><span class="line">#输出</span><br><span class="line">-allow-master-master</span><br><span class="line">    explicitly allow running in a master-master setup</span><br><span class="line">-allow-nullable-unique-key</span><br><span class="line">        allow gh-ost to migrate based on a unique key with nullable columns. As long as no NULL values exist, this should be OK. If NULL values exist in chosen key, data may be corrupted. Use at your own risk!</span><br><span class="line">-allow-on-master</span><br><span class="line">        allow this migration to run directly on master. Preferably it would run on a replica</span><br><span class="line">-alter string</span><br><span class="line">        alter statement (mandatory)</span><br><span class="line">-approve-renamed-columns ALTER</span><br><span class="line">        in case your ALTER statement renames columns, gh-ost will note that and offer its interpretation of the rename. By default gh-ost does not proceed to execute. This flag approves that gh-ost&#x27;s interpretation si correct</span><br><span class="line">-chunk-size int</span><br><span class="line">        amount of rows to handle in each iteration (allowed range: 100-100,000) (default 1000)</span><br><span class="line">-conf string</span><br><span class="line">        Config file</span><br><span class="line">-critical-load --max-load</span><br><span class="line">        Comma delimited status-name=threshold, same format as --max-load. When status exceeds threshold, app panics and quits</span><br><span class="line">-cut-over string</span><br><span class="line">        choose cut-over type (default|atomic, two-step) (default &quot;atomic&quot;)</span><br><span class="line">-cut-over-lock-timeout-seconds int</span><br><span class="line">        Max number of seconds to hold locks on tables while attempting to cut-over (retry attempted when lock exceeds timeout) (default 3)</span><br><span class="line">-database string</span><br><span class="line">        database name (mandatory)</span><br><span class="line">-debug</span><br><span class="line">        debug mode (very verbose)</span><br><span class="line">-default-retries int</span><br><span class="line">        Default number of retries for various operations before panicking (default 60)</span><br><span class="line">-exact-rowcount</span><br><span class="line">        actually count table rows as opposed to estimate them (results in more accurate progress estimation)</span><br><span class="line">-execute</span><br><span class="line">        actually execute the alter &amp; migrate the table. Default is noop: do some tests and exit</span><br><span class="line">-help</span><br><span class="line">        Display usage</span><br><span class="line">-host string</span><br><span class="line">        MySQL hostname (preferably a replica, not the master) (default &quot;127.0.0.1&quot;)</span><br><span class="line">-initially-drop-ghost-table</span><br><span class="line">        Drop a possibly existing Ghost table (remains from a previous run?) before beginning operation. Default is to panic and abort if such table exists</span><br><span class="line">-initially-drop-old-table</span><br><span class="line">        Drop a possibly existing OLD table (remains from a previous run?) before beginning operation. Default is to panic and abort if such table exists</span><br><span class="line">-initially-drop-socket-file</span><br><span class="line">        Should gh-ost forcibly delete an existing socket file. Be careful: this might drop the socket file of a running migration!</span><br><span class="line">-max-lag-millis int</span><br><span class="line">        replication lag at which to throttle operation (default 1500)</span><br><span class="line">-max-load string</span><br><span class="line">        Comma delimited status-name=threshold. e.g: &#x27;Threads_running=100,Threads_connected=500&#x27;. When status exceeds threshold, app throttles writes</span><br><span class="line">-migrate-on-replica</span><br><span class="line">        Have the migration run on a replica, not on the master. This will do the full migration on the replica including cut-over (as opposed to --test-on-replica)</span><br><span class="line">-nice-ratio float</span><br><span class="line">        force being &#x27;nice&#x27;, imply sleep time per chunk time; range: [0.0..100.0]. Example values: 0 is aggressive. 1.5: for every ms spend in a rowcopy chunk, spend 1.5ms sleeping immediately after</span><br><span class="line">-ok-to-drop-table</span><br><span class="line">        Shall the tool drop the old table at end of operation. DROPping tables can be a long locking operation, which is why I&#x27;m not doing it by default. I&#x27;m an online tool, yes?</span><br><span class="line">-panic-flag-file string</span><br><span class="line">        when this file is created, gh-ost will immediately terminate, without cleanup</span><br><span class="line">-password string</span><br><span class="line">        MySQL password</span><br><span class="line">-port int</span><br><span class="line">        MySQL port (preferably a replica, not the master) (default 3306)</span><br><span class="line">-postpone-cut-over-flag-file string</span><br><span class="line">        while this file exists, migration will postpone the final stage of swapping tables, and will keep on syncing the ghost table. Cut-over/swapping would be ready to perform the moment the file is deleted.</span><br><span class="line">-quiet</span><br><span class="line">        quiet</span><br><span class="line">-replication-lag-query string</span><br><span class="line">        Query that detects replication lag in seconds. Result can be a floating point (by default gh-ost issues SHOW SLAVE STATUS and reads Seconds_behind_master). If you&#x27;re using pt-heartbeat, query would be something like: SELECT ROUND(UNIX_TIMESTAMP() - MAX(UNIX_TIMESTAMP(ts))) AS delay FROM my_schema.heartbeat</span><br><span class="line">-serve-socket-file string</span><br><span class="line">        Unix socket file to serve on. Default: auto-determined and advertised upon startup</span><br><span class="line">-serve-tcp-port int</span><br><span class="line">        TCP port to serve on. Default: disabled</span><br><span class="line">-skip-renamed-columns ALTER</span><br><span class="line">        in case your ALTER statement renames columns, gh-ost will note that and offer its interpretation of the rename. By default gh-ost does not proceed to execute. This flag tells gh-ost to skip the renamed columns, i.e. to treat what gh-ost thinks are renamed columns as unrelated columns. NOTE: you may lose column data</span><br><span class="line">-stack</span><br><span class="line">        add stack trace upon error</span><br><span class="line">-switch-to-rbr</span><br><span class="line">        let this tool automatically switch binary log format to &#x27;ROW&#x27; on the replica, if needed. The format will NOT be switched back. I&#x27;m too scared to do that, and wish to protect you if you happen to execute another migration while this one is running</span><br><span class="line">-table string</span><br><span class="line">        table name (mandatory)</span><br><span class="line">-test-on-replica</span><br><span class="line">        Have the migration run on a replica, not on the master. At the end of migration replication is stopped, and tables are swapped and immediately swap-revert. Replication remains stopped and you can compare the two tables for building trust</span><br><span class="line">-throttle-additional-flag-file string</span><br><span class="line">        operation pauses when this file exists; hint: keep default, use for throttling multiple gh-ost operations (default &quot;/tmp/gh-ost.throttle&quot;)</span><br><span class="line">-throttle-control-replicas string</span><br><span class="line">        List of replicas on which to check for lag; comma delimited. Example: myhost1.com:3306,myhost2.com,myhost3.com:3307</span><br><span class="line">-throttle-flag-file string</span><br><span class="line">        operation pauses when this file exists; hint: use a file that is specific to the table being altered</span><br><span class="line">-throttle-query string</span><br><span class="line">        when given, issued (every second) to check if operation should throttle. Expecting to return zero for no-throttle, &gt;0 for throttle. Query is issued on the migrated server. Make sure this query is lightweight</span><br><span class="line">-user string</span><br><span class="line">        MySQL user</span><br><span class="line">-verbose</span><br><span class="line">    verbose</span><br><span class="line">-version</span><br><span class="line">    Print version &amp; exit</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="example"><a href="#example" class="headerlink" title="example"></a>example</h3><figure class="highlight plaintext"><figcaption><span>\</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">--max-load=Threads_running=25 \</span><br><span class="line">--critical-load=Threads_running=1000 \</span><br><span class="line">--chunk-size=1000 \</span><br><span class="line">--throttle-control-replicas=&quot;replip&quot; \</span><br><span class="line">--max-lag-millis=1500 \</span><br><span class="line">--user=&quot;xxxxx&quot; \</span><br><span class="line">--password=&quot;xxxxxx&quot; \</span><br><span class="line">--host=&quot;xxx.xxx..xxx.13&quot; \</span><br><span class="line">--port=3306 \</span><br><span class="line">--database=&quot;test&quot; \</span><br><span class="line">--table=&quot;big_data_check_hdfs&quot; \</span><br><span class="line">--verbose \</span><br><span class="line">--alter=&quot;change file_path file_path varchar(128) &quot; \</span><br><span class="line">--switch-to-rbr \</span><br><span class="line">--allow-master-master \</span><br><span class="line">--cut-over=default \</span><br><span class="line">--exact-rowcount \</span><br><span class="line">--default-retries=120 \</span><br><span class="line">--postpone-cut-over-flag-file=/data/dbbak/gh-ost/ghost.postpone.flag \</span><br><span class="line">--execute</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="原理"><a href="#原理" class="headerlink" title="原理:"></a>原理:</h3><blockquote>
+<p>gh-ost最核心的两个模块: 行数据拷贝 ; 日志解析和应用 . 两个操作是同时并发执行的, 只要有日志就会立即在影子表执行.</p>
+</blockquote>
+<h4 id="行数据拷贝-row-copy"><a href="#行数据拷贝-row-copy" class="headerlink" title="行数据拷贝(row copy)"></a>行数据拷贝(row copy)</h4><p>Row Copy的逻辑如下: </p>
+<ul>
+<li><p>计算Chunk </p>
+</li>
+<li><p>对每个 Chunk 数据进行copy, copy的过程中 , 对原表进行加锁, 保证copy过程中没有对正在copy的数据进行修改操作.(如果是给表添加unique key,重复的数据会被ignore, 正常现象)</p>
+  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">insert /* gh-ost %s.%s */ ignore into %s.%s (%s)</span><br><span class="line">  (select %s from %s.%s force index (%s)</span><br><span class="line">    where (%s and %s) %s  lock in share mode </span><br></pre></td></tr></table></figure>
+</li>
+<li><p>将所有的 chunck都copy完成,整个copy过程完成</p>
+</li>
+</ul>
+<h4 id="日志解析和应用"><a href="#日志解析和应用" class="headerlink" title="日志解析和应用"></a>日志解析和应用</h4><p>通过伪装为slave的方式从master获取binglog日志, 并解析拼装成为sql ,在目标库或者源库执行(这取决于在哪个库做操作, 大部分是在主库)</p>
+<h4 id="可行性分析"><a href="#可行性分析" class="headerlink" title="可行性分析"></a>可行性分析</h4><p>由于RowCopy的过程中是加锁的, 所以copy过程中是不存在对这部分数据的任何修改操作的, 即数据在copy过程中不可能有对应的binlog产生. 所以我们对不同类型的操作只需要分析 log before copy (b-log) 和 log after copy(a-log) , 我们假设copy过程为t0区间(可以看做一个时间点)</p>
+<blockquote>
+<p>代码生成模板</p>
+</blockquote>
+<ul>
+<li><p>INSTER</p>
+  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">result = fmt.Sprintf(`</span><br><span class="line">        replace /* gh-ost %s.%s */ into</span><br><span class="line">            %s.%s</span><br><span class="line">                (%s)</span><br><span class="line">            values</span><br><span class="line">                (%s)</span><br><span class="line">    `, databaseName, tableName,</span><br><span class="line">    databaseName, tableName,</span><br><span class="line">    strings.Join(mappedSharedColumnNames, &quot;, &quot;),</span><br><span class="line">    strings.Join(preparedValues, &quot;, &quot;),</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>日志提前到达, 直接insert进来, rowcopy的时候会被忽略. 日志延迟到<br>    #如下逻辑<br>    if b-log &gt; t0:<br>        日志延迟到达, 没有关系直接replace<br>    else:<br>        日志提前到达, 直接insert进来, rowcopy的时候会被忽略</p>
+<ul>
+<li><p>UPDATE</p>
+  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">fmt.Sprintf(`</span><br><span class="line">        update /* gh-ost %s.%s */</span><br><span class="line">                %s.%s</span><br><span class="line">            set</span><br><span class="line">                %s</span><br><span class="line">            where</span><br><span class="line">                %s</span><br><span class="line">    `, databaseName, tableName,</span><br><span class="line">    databaseName, tableName,</span><br><span class="line">    setClause,</span><br><span class="line">    equalsComparison</span><br></pre></td></tr></table></figure>
+<p>  #如下逻辑<br>  if b-log &gt; t0:<br>  直接update目标表数据<br>  else:<br>  空update, rowcopy的时候会把new 值带过来<br>  if a-log &gt; t0:<br>  空update<br>  else:<br>  直接update, 相当于update了两次</p>
+</li>
+<li><p>DELETE</p>
+  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">result = fmt.Sprintf(`</span><br><span class="line">        delete /* gh-ost %s.%s */</span><br><span class="line">            from</span><br><span class="line">                %s.%s</span><br><span class="line">            where</span><br><span class="line">                %s</span><br><span class="line">    `, databaseName, tableName,</span><br><span class="line">    databaseName, tableName,</span><br><span class="line">    equalsComparison,</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>  #如下逻辑<br>  if b-log &gt; t0:<br>  空删除<br>  else:<br>  空删除</p>
+</li>
+</ul>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>gh-ost以一个新的思路来完成 online ddl 等操作, 避免了传统使用trigger方式来操作的很多弊端. 不过目前gh-ost尚未流行,需要进行充分的测试才可以上生产环境. 总之 , gh-ost是一个好工具</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Go/">Go</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Go/">Go</a><a href="/tags/gh-ost/">gh-ost</a><a href="/tags/DDL/">DDL</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://ruiaylin.github.io/2016/04/12/gh-ost-design-and-impletaion/" data-title="Gh-OST 的设计和实现 | ruiayLin&#39;s Blog" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/04/12/docker-for-mysql/" title="Docker for MySQL deployment">
+  <strong>上一篇：</strong><br/>
+  <span>
+  Docker for MySQL deployment</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2016/04/12/handling-1-million-requests-per-minute-with-golang/"  title="Handling 1 Million Requests per Minute with Go [转载]">
+ <strong>下一篇：</strong><br/> 
+ <span>Handling 1 Million Requests per Minute with Go [转载]
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#GitHub%E2%80%99s-online-schema-migration-tool-for-MySQL"><span class="toc-number">1.</span> <span class="toc-text">GitHub’s online schema migration tool for MySQL</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gh-ost"><span class="toc-number">2.</span> <span class="toc-text">gh-ost</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="toc-number">3.</span> <span class="toc-text">使用方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#example"><span class="toc-number">4.</span> <span class="toc-text">example</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-number">5.</span> <span class="toc-text">原理:</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A1%8C%E6%95%B0%E6%8D%AE%E6%8B%B7%E8%B4%9D-row-copy"><span class="toc-number">5.1.</span> <span class="toc-text">行数据拷贝(row copy)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%97%A5%E5%BF%97%E8%A7%A3%E6%9E%90%E5%92%8C%E5%BA%94%E7%94%A8"><span class="toc-number">5.2.</span> <span class="toc-text">日志解析和应用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%AF%E8%A1%8C%E6%80%A7%E5%88%86%E6%9E%90"><span class="toc-number">5.3.</span> <span class="toc-text">可行性分析</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Docker/" title="Docker">Docker<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Go/" title="Go">Go<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MySQL/" title="MySQL">MySQL<sup>18</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/NewSQL/" title="NewSQL">NewSQL<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Oracle/" title="Oracle">Oracle<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Python/" title="Python">Python<sup>7</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/MySQL/" title="MySQL">MySQL<sup>11</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OPS/" title="OPS">OPS<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Fabric/" title="Fabric">Fabric<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Go/" title="Go">Go<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Group-Replicaiton/" title="Group Replicaiton">Group Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MGR/" title="MGR">MGR<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Replicaiton/" title="Replicaiton">Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MHA/" title="MHA">MHA<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Python/" title="Python">Python<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Xtrabackup/" title="Xtrabackup">Xtrabackup<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DNS/" title="DNS">DNS<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Sharding/" title="Sharding">Sharding<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Discourse/" title="Discourse">Discourse<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forum/" title="Forum">Forum<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">知识链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/org/polardb-x" target="_blank" title="PloarDB-X专栏">PloarDB-X专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://cn.pingcap.com/blog/" target="_blank" title="TiDB 博客">TiDB 博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/doc/refman/8.0/en/" target="_blank" title="MySQL 8.0 Docs">MySQL 8.0 Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/blog-archive/" target="_blank" title="MySQL Server Blog">MySQL Server Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://lefred.be/" target="_blank" title="Lefred&#39;s blog">Lefred&#39;s blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/people/wen-zheng-hu" target="_blank" title="温正湖专栏">温正湖专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.percona.com/blog/" target="_blank" title="Percona Blog">Percona Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://engineering.fb.com/" target="_blank" title="Meta Engineering">Meta Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.uber.com/en-US/blog/engineering/" target="_blank" title="Uber Engineering">Uber Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.blog/category/engineering/" target="_blank" title="Github Engineering">Github Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://medium.com/pinterest-engineering" target="_blank" title="Pinterest Engineering">Pinterest Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://flask.palletsprojects.com/" target="_blank" title="Flask Docs">Flask Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://tympanus.net/codrops/" target="_blank" title="Codrops front">Codrops front</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
+			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
+		
+		<a href="/about" target="_blank" title="ruichao.lin">ruichao.lin</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+        getSize();
+        if (myWidth >= 1024) {
+          c.click();
+        }
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?e6d1f421bbc9962127a50488f9ed37d1";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

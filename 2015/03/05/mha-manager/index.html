@@ -1,0 +1,723 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>【 MHA 】Management&amp;Maintain | ruiayLin&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="ruichao.lin">
+    
+
+    
+    <meta name="description" content="MHA 维护命令SSH登陆检查masterha_check_ssh --conf&#x3D;&#x2F;mha&#x2F;mha_groups&#x2F;app1.cnf  REPL 健康检查masterha_check_repl --conf&#x3D;&#x2F;mha&#x2F;mha_groups&#x2F;app1.cnf  启动MHA监控进程nohup masterha_manager --conf&#x3D;&#x2F;mha&#x2F;mha_groups&#x2F;app1.cnf &gt; &#x2F;t">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【 MHA 】Management&amp;Maintain">
+<meta property="og:url" content="http://ruiaylin.github.io/2015/03/05/mha-manager/index.html">
+<meta property="og:site_name" content="ruiayLin&#39;s Blog">
+<meta property="og:description" content="MHA 维护命令SSH登陆检查masterha_check_ssh --conf&#x3D;&#x2F;mha&#x2F;mha_groups&#x2F;app1.cnf  REPL 健康检查masterha_check_repl --conf&#x3D;&#x2F;mha&#x2F;mha_groups&#x2F;app1.cnf  启动MHA监控进程nohup masterha_manager --conf&#x3D;&#x2F;mha&#x2F;mha_groups&#x2F;app1.cnf &gt; &#x2F;t">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2015-03-05T05:50:53.000Z">
+<meta property="article:modified_time" content="2024-03-02T09:18:29.292Z">
+<meta property="article:author" content="ruichao.lin">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="MHA">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="ruiayLin&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.jpeg" alt="ruiayLin&#39;s Blog" title="ruiayLin&#39;s Blog"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="ruiayLin&#39;s Blog">ruiayLin&#39;s Blog</a></h1>
+				<h2 class="blog-motto">蹈之而弗悔 , 慎思而笃行 ...</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:ruiaylin.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2015/03/05/mha-manager/" title="【 MHA 】Management&amp;Maintain" itemprop="url">【 MHA 】Management&amp;Maintain</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="ruichao.lin" target="_blank" itemprop="author">ruichao.lin</a>
+		
+  <p class="article-time">
+    <time datetime="2015-03-05T05:50:53.000Z" itemprop="datePublished"> 发表于 2015-03-05</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#MHA-%E7%BB%B4%E6%8A%A4%E5%91%BD%E4%BB%A4"><span class="toc-number">1.</span> <span class="toc-text">MHA 维护命令</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#SSH%E7%99%BB%E9%99%86%E6%A3%80%E6%9F%A5"><span class="toc-number">1.1.</span> <span class="toc-text">SSH登陆检查</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#REPL-%E5%81%A5%E5%BA%B7%E6%A3%80%E6%9F%A5"><span class="toc-number">1.2.</span> <span class="toc-text">REPL 健康检查</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8MHA%E7%9B%91%E6%8E%A7%E8%BF%9B%E7%A8%8B"><span class="toc-number">1.3.</span> <span class="toc-text">启动MHA监控进程</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%A3%80%E6%9F%A5%E7%9B%91%E6%8E%A7%E8%BF%9B%E7%A8%8B%E7%9A%84%E7%8A%B6%E6%80%81"><span class="toc-number">1.4.</span> <span class="toc-text">检查监控进程的状态</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%81%9C%E6%AD%A2%E7%9B%91%E6%8E%A7%E8%BF%9B%E7%A8%8B"><span class="toc-number">1.5.</span> <span class="toc-text">停止监控进程</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%BA%E4%B8%BA%E6%89%8B%E5%B7%A5%E5%88%87%E6%8D%A2failover"><span class="toc-number">2.</span> <span class="toc-text">人为手工切换failover</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%89%8B%E5%8A%A8%E6%AD%A3%E5%B8%B8%E5%88%87%E6%8D%A2"><span class="toc-number">3.</span> <span class="toc-text">手动正常切换</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Summary"><span class="toc-number">4.</span> <span class="toc-text">Summary</span></a></li></ol>
+		
+		</div>
+		
+		<h4 id="MHA-维护命令"><a href="#MHA-维护命令" class="headerlink" title="MHA 维护命令"></a>MHA 维护命令</h4><h5 id="SSH登陆检查"><a href="#SSH登陆检查" class="headerlink" title="SSH登陆检查"></a>SSH登陆检查</h5><pre><code>masterha_check_ssh --conf=/mha/mha_groups/app1.cnf
+</code></pre>
+<h5 id="REPL-健康检查"><a href="#REPL-健康检查" class="headerlink" title="REPL 健康检查"></a>REPL 健康检查</h5><pre><code>masterha_check_repl --conf=/mha/mha_groups/app1.cnf
+</code></pre>
+<h5 id="启动MHA监控进程"><a href="#启动MHA监控进程" class="headerlink" title="启动MHA监控进程"></a>启动MHA监控进程</h5><pre><code>nohup masterha_manager --conf=/mha/mha_groups/app1.cnf &gt; /tmp/mha_manager.log  &lt; /dev/null 2&gt;&amp;1 &amp; 
+</code></pre>
+<p>–ignore_fail_on_start 即使有节点宕掉也能启动mha</p>
+<pre><code>masterha_manager --conf=/mha/mha_groups/app1.cnf  --ignore_fail_on_start &gt;  /tmp/mha_manager.log  &lt; /dev/null 2&gt;&amp;1 &amp; 
+</code></pre>
+<h5 id="检查监控进程的状态"><a href="#检查监控进程的状态" class="headerlink" title="检查监控进程的状态"></a>检查监控进程的状态</h5><pre><code>masterha_check_status --conf=/mha/mha_groups/app1.cnf
+</code></pre>
+<h5 id="停止监控进程"><a href="#停止监控进程" class="headerlink" title="停止监控进程"></a>停止监控进程</h5><pre><code>masterha_stop  --conf=/mha/mha_groups/app1.cnf
+</code></pre>
+<blockquote>
+<p>注意</p>
+</blockquote>
+<p>-failover切换后会在管理目录生成文件app1.failover.complete ，下次在切换的时候会发现有这个文件导致切换不成功，需要手动清理掉。</p>
+<pre><code>rm -rf /masterha/app1/app1.failover.complete
+</code></pre>
+<p>也可以加上参数–ignore_last_failover</p>
+<h4 id="人为手工切换failover"><a href="#人为手工切换failover" class="headerlink" title="人为手工切换failover"></a>人为手工切换failover</h4><p>masterha_manager没有开启，可以通过手工failover：</p>
+<pre><code>masterha_master_switch --conf=/mha/mha_groups/app1.cnf --dead_master_host=192.168.224.14 --dead_master_port=3307 --master_state=dead --new_master_host=192.168.224.13  --new_master_port=3307 --ignore_last_failover
+</code></pre>
+<h4 id="手动正常切换"><a href="#手动正常切换" class="headerlink" title="手动正常切换"></a>手动正常切换</h4><p>人为在线切换之前需要停掉 mha监控进程：</p>
+<pre><code>masterha_stop --conf=/mha/mha_groups/app1.cnf
+</code></pre>
+<p>然后手动切换</p>
+<pre><code>masterha_master_switch --conf=/mha/mha_groups/app1.cnf --master_state=alive  --new_master_host=192.168.224.14  --new_master_port=3307  --orig_master_is_new_slave
+</code></pre>
+<p>或者</p>
+<pre><code>masterha_master_switch --conf=/etc/app1.cnf --master_state=alive --new_master_host=192.168.119.74 --orig_master_is_new_slave --running_updates_limit=10000
+</code></pre>
+<p>或者：</p>
+<pre><code>masterha_master_switch --conf=/mha/mha_groups/app1.cnf --master_state=alive   --orig_master_is_new_slave
+</code></pre>
+<p>–orig_master_is_new_slave 将原master变为slave节点 </p>
+<p>–running_updates_limit&#x3D;10000 切换时候选master如果有延迟的话，mha切换不能成功，加上此参数表示延迟在此时间范围内都可切换（单位为s）  </p>
+<h4 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h4><p>MHA 总体还是比较简单的，测试过程中没有出过太多问题， 接下来我们会针对，内部DNS和MHA结合的部分来进行大致的代码实现。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/MySQL/">MySQL</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/MySQL/">MySQL</a><a href="/tags/MHA/">MHA</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://ruiaylin.github.io/2015/03/05/mha-manager/" data-title="【 MHA 】Management&amp;Maintain | ruiayLin&#39;s Blog" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2015/03/27/CentOS-7-update-kernel/" title="CentOS 7 update kernel in simple way">
+  <strong>上一篇：</strong><br/>
+  <span>
+  CentOS 7 update kernel in simple way</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2015/03/03/mha-install-conf/"  title="【 MHA 】Install&amp;Configuration">
+ <strong>下一篇：</strong><br/> 
+ <span>【 MHA 】Install&amp;Configuration
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#MHA-%E7%BB%B4%E6%8A%A4%E5%91%BD%E4%BB%A4"><span class="toc-number">1.</span> <span class="toc-text">MHA 维护命令</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#SSH%E7%99%BB%E9%99%86%E6%A3%80%E6%9F%A5"><span class="toc-number">1.1.</span> <span class="toc-text">SSH登陆检查</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#REPL-%E5%81%A5%E5%BA%B7%E6%A3%80%E6%9F%A5"><span class="toc-number">1.2.</span> <span class="toc-text">REPL 健康检查</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8MHA%E7%9B%91%E6%8E%A7%E8%BF%9B%E7%A8%8B"><span class="toc-number">1.3.</span> <span class="toc-text">启动MHA监控进程</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%A3%80%E6%9F%A5%E7%9B%91%E6%8E%A7%E8%BF%9B%E7%A8%8B%E7%9A%84%E7%8A%B6%E6%80%81"><span class="toc-number">1.4.</span> <span class="toc-text">检查监控进程的状态</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%81%9C%E6%AD%A2%E7%9B%91%E6%8E%A7%E8%BF%9B%E7%A8%8B"><span class="toc-number">1.5.</span> <span class="toc-text">停止监控进程</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%BA%E4%B8%BA%E6%89%8B%E5%B7%A5%E5%88%87%E6%8D%A2failover"><span class="toc-number">2.</span> <span class="toc-text">人为手工切换failover</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%89%8B%E5%8A%A8%E6%AD%A3%E5%B8%B8%E5%88%87%E6%8D%A2"><span class="toc-number">3.</span> <span class="toc-text">手动正常切换</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Summary"><span class="toc-number">4.</span> <span class="toc-text">Summary</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Docker/" title="Docker">Docker<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Go/" title="Go">Go<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MySQL/" title="MySQL">MySQL<sup>18</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/NewSQL/" title="NewSQL">NewSQL<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Oracle/" title="Oracle">Oracle<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Python/" title="Python">Python<sup>7</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/MySQL/" title="MySQL">MySQL<sup>11</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OPS/" title="OPS">OPS<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Fabric/" title="Fabric">Fabric<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Go/" title="Go">Go<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Group-Replicaiton/" title="Group Replicaiton">Group Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MGR/" title="MGR">MGR<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Replicaiton/" title="Replicaiton">Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MHA/" title="MHA">MHA<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Python/" title="Python">Python<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Xtrabackup/" title="Xtrabackup">Xtrabackup<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DNS/" title="DNS">DNS<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Sharding/" title="Sharding">Sharding<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Discourse/" title="Discourse">Discourse<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forum/" title="Forum">Forum<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">知识链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/org/polardb-x" target="_blank" title="PloarDB-X专栏">PloarDB-X专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://cn.pingcap.com/blog/" target="_blank" title="TiDB 博客">TiDB 博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/doc/refman/8.0/en/" target="_blank" title="MySQL 8.0 Docs">MySQL 8.0 Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/blog-archive/" target="_blank" title="MySQL Server Blog">MySQL Server Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://lefred.be/" target="_blank" title="Lefred&#39;s blog">Lefred&#39;s blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/people/wen-zheng-hu" target="_blank" title="温正湖专栏">温正湖专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.percona.com/blog/" target="_blank" title="Percona Blog">Percona Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://engineering.fb.com/" target="_blank" title="Meta Engineering">Meta Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.uber.com/en-US/blog/engineering/" target="_blank" title="Uber Engineering">Uber Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.blog/category/engineering/" target="_blank" title="Github Engineering">Github Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://medium.com/pinterest-engineering" target="_blank" title="Pinterest Engineering">Pinterest Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://flask.palletsprojects.com/" target="_blank" title="Flask Docs">Flask Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://tympanus.net/codrops/" target="_blank" title="Codrops front">Codrops front</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
+			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
+		
+		<a href="/about" target="_blank" title="ruichao.lin">ruichao.lin</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+        getSize();
+        if (myWidth >= 1024) {
+          c.click();
+        }
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?e6d1f421bbc9962127a50488f9ed37d1";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

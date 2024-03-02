@@ -1,0 +1,729 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>Mysql Multi Instance | ruiayLin&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="ruichao.lin">
+    
+
+    
+    <meta name="description" content="mysql的多实例有两种方式可以实现1.第一种是使用多个配置文件启动不同的进程来实现多实例，这种方式的优势逻辑简单，   配置简单，缺点是管理起来不太方便。 2.第二种是通过官方自带的mysqld_multi使用单独的配置文件来实现多实例，   这种方式定制每个实例的配置不太方面，优点是管理起来很方便，集中管理。  环境介绍： mysql 版本：5.1.50操作系统：linuxmysql实例数：3">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mysql Multi Instance">
+<meta property="og:url" content="http://ruiaylin.github.io/2014/02/27/mult-instance-mysql/index.html">
+<meta property="og:site_name" content="ruiayLin&#39;s Blog">
+<meta property="og:description" content="mysql的多实例有两种方式可以实现1.第一种是使用多个配置文件启动不同的进程来实现多实例，这种方式的优势逻辑简单，   配置简单，缺点是管理起来不太方便。 2.第二种是通过官方自带的mysqld_multi使用单独的配置文件来实现多实例，   这种方式定制每个实例的配置不太方面，优点是管理起来很方便，集中管理。  环境介绍： mysql 版本：5.1.50操作系统：linuxmysql实例数：3">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2014-02-26T21:03:51.000Z">
+<meta property="article:modified_time" content="2024-03-02T09:18:29.293Z">
+<meta property="article:author" content="ruichao.lin">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="Multi Instance">
+<meta property="article:tag" content="多实例">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="/atom.xml" title="ruiayLin&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.jpeg" alt="ruiayLin&#39;s Blog" title="ruiayLin&#39;s Blog"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="ruiayLin&#39;s Blog">ruiayLin&#39;s Blog</a></h1>
+				<h2 class="blog-motto">蹈之而弗悔 , 慎思而笃行 ...</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:ruiaylin.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2014/02/27/mult-instance-mysql/" title="Mysql Multi Instance" itemprop="url">Mysql Multi Instance</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="ruichao.lin" target="_blank" itemprop="author">ruichao.lin</a>
+		
+  <p class="article-time">
+    <time datetime="2014-02-26T21:03:51.000Z" itemprop="datePublished"> 发表于 2014-02-27</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#mysql%E7%9A%84%E5%A4%9A%E5%AE%9E%E4%BE%8B%E6%9C%89%E4%B8%A4%E7%A7%8D%E6%96%B9%E5%BC%8F%E5%8F%AF%E4%BB%A5%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.</span> <span class="toc-text">mysql的多实例有两种方式可以实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E4%BB%8B%E7%BB%8D%EF%BC%9A"><span class="toc-number">2.</span> <span class="toc-text">环境介绍：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9B%E5%BB%BAmysql%E7%94%A8%E6%88%B7"><span class="toc-number">2.1.</span> <span class="toc-text">创建mysql用户</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85mysql"><span class="toc-number">2.2.</span> <span class="toc-text">编译安装mysql</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-number">2.3.</span> <span class="toc-text">初始化数据库</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%9A%E8%BF%87%E5%AE%98%E6%96%B9%E8%87%AA%E5%B8%A6%E7%9A%84mysqld-multi%E6%9D%A5%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%AE%9E%E4%BE%8B%E5%AE%9E%E6%88%98%EF%BC%9A"><span class="toc-number">3.</span> <span class="toc-text">通过官方自带的mysqld_multi来实现多实例实战：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#mysqld-multi%E7%9A%84%E9%85%8D%E7%BD%AE"><span class="toc-number">3.1.</span> <span class="toc-text">mysqld_multi的配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mysqld-multi%E5%90%AF%E5%8A%A8"><span class="toc-number">3.2.</span> <span class="toc-text">mysqld_multi启动</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%88%96%E8%80%85%E9%87%87%E7%94%A8%E4%B8%80%E6%9D%A1%E5%91%BD%E4%BB%A4%E7%9A%84%E5%BD%A2%E5%BC%8F%EF%BC%9A"><span class="toc-number">3.3.</span> <span class="toc-text">或者采用一条命令的形式：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B7%BB%E5%8A%A0%E5%88%B0%E8%87%AA%E5%8A%A8%E5%90%AF%E5%8A%A8"><span class="toc-number">3.4.</span> <span class="toc-text">添加到自动启动</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AE%A1%E7%90%86"><span class="toc-number">4.</span> <span class="toc-text">管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<h3 id="mysql的多实例有两种方式可以实现"><a href="#mysql的多实例有两种方式可以实现" class="headerlink" title="mysql的多实例有两种方式可以实现"></a>mysql的多实例有两种方式可以实现</h3><pre><code>1.第一种是使用多个配置文件启动不同的进程来实现多实例，这种方式的优势逻辑简单，
+  配置简单，缺点是管理起来不太方便。
+2.第二种是通过官方自带的mysqld_multi使用单独的配置文件来实现多实例，
+  这种方式定制每个实例的配置不太方面，优点是管理起来很方便，集中管理。
+</code></pre>
+<h3 id="环境介绍："><a href="#环境介绍：" class="headerlink" title="环境介绍："></a>环境介绍：</h3><blockquote>
+<p>mysql 版本：5.1.50<br>操作系统：linux<br>mysql实例数：3个<br>实例占用端口分别为：3306、3307、3308</p>
+</blockquote>
+<h4 id="创建mysql用户"><a href="#创建mysql用户" class="headerlink" title="创建mysql用户"></a>创建mysql用户</h4><pre><code>/usr/sbin/groupadd mysql
+/usr/sbin/useradd -g mysql mysql
+</code></pre>
+<h4 id="编译安装mysql"><a href="#编译安装mysql" class="headerlink" title="编译安装mysql"></a>编译安装mysql</h4><pre><code>tar xzvf mysql-5.1.50.tar.gz
+cd mysql-5.1.50
+./configure &#39;--prefix=/usr/local/mysql&#39; &#39;--with-charset=utf8&#39; &#39;--with-extra-charsets=complex&#39; &#39;--with-pthread&#39; &#39;--enable-thread-safe-client&#39; &#39;--with-ssl&#39; &#39;--with-client-ldflags=-all-static&#39; &#39;--with-mysqld-ldflags=-all-static&#39; &#39;--with-plugins=partition,innobase,blackhole,myisam,innodb_plugin,heap,archive&#39; &#39;--enable-shared&#39; &#39;--enable-assembler&#39;
+
+make
+make install
+</code></pre>
+<h4 id="初始化数据库"><a href="#初始化数据库" class="headerlink" title="初始化数据库"></a>初始化数据库</h4><pre><code>/usr/local/mysql/bin/mysql_install_db --basedir=/usr/local/mysql --datadir=/data/dbdata_3306 --user=mysql
+
+/usr/local/mysql/bin/mysql_install_db --basedir=/usr/local/mysql --datadir=/data/dbdata_3307 --user=mysql
+
+/usr/local/mysql/bin/mysql_install_db --basedir=/usr/local/mysql --datadir=/data/dbdata_3308 --user=mysql
+</code></pre>
+<h3 id="通过官方自带的mysqld-multi来实现多实例实战："><a href="#通过官方自带的mysqld-multi来实现多实例实战：" class="headerlink" title="通过官方自带的mysqld_multi来实现多实例实战："></a>通过官方自带的mysqld_multi来实现多实例实战：</h3><h4 id="mysqld-multi的配置"><a href="#mysqld-multi的配置" class="headerlink" title="mysqld_multi的配置"></a>mysqld_multi的配置</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/my.cnf</span><br><span class="line">[mysqld_multi]</span><br><span class="line">mysqld = /usr/local/mysql/bin/mysqld_safe</span><br><span class="line">mysqladmin = /usr/local/mysql/bin/mysqladmin</span><br><span class="line">user = admin</span><br><span class="line">password = password</span><br><span class="line">[mysqld1]</span><br><span class="line">socket = /data/dbdata_3306/mysql.sock</span><br><span class="line">port = 3306</span><br><span class="line">pid-file = /data/dbdata_3306/3306.pid</span><br><span class="line">datadir = /data/dbdata_3306</span><br><span class="line">user = mysql</span><br><span class="line">skip-name-resolve</span><br><span class="line">lower_case_table_names=1</span><br><span class="line">innodb_file_per_table=1</span><br><span class="line">back_log = 50</span><br><span class="line">max_connections = 300</span><br><span class="line">max_connect_errors = 1000</span><br><span class="line">table_open_cache = 2048</span><br><span class="line">max_allowed_packet = 16M</span><br><span class="line">binlog_cache_size = 2M</span><br><span class="line">max_heap_table_size = 64M</span><br><span class="line">sort_buffer_size = 2M</span><br><span class="line">join_buffer_size = 2M</span><br><span class="line">thread_cache_size = 64</span><br><span class="line">thread_concurrency = 8</span><br><span class="line">query_cache_size = 64M</span><br><span class="line">query_cache_limit = 2M</span><br><span class="line">ft_min_word_len = 4</span><br><span class="line">default-storage-engine = innodb</span><br><span class="line">thread_stack = 192K</span><br><span class="line">transaction_isolation = REPEATABLE-READ</span><br><span class="line">tmp_table_size = 64M</span><br><span class="line">log-bin=mysql-bin</span><br><span class="line">binlog_format=mixed</span><br><span class="line">slow_query_log</span><br><span class="line">long_query_time = 1</span><br><span class="line">server-id = 1</span><br><span class="line">key_buffer_size = 8M</span><br><span class="line">read_buffer_size = 2M</span><br><span class="line">read_rnd_buffer_size = 2M</span><br><span class="line">bulk_insert_buffer_size = 64M</span><br><span class="line">myisam_sort_buffer_size = 128M</span><br><span class="line">myisam_max_sort_file_size = 10G</span><br><span class="line">myisam_repair_threads = 1</span><br><span class="line">myisam_recover</span><br><span class="line">innodb_additional_mem_pool_size = 16M</span><br><span class="line">innodb_buffer_pool_size = 200M</span><br><span class="line">innodb_data_file_path = ibdata1:10M:autoextend</span><br><span class="line">innodb_file_io_threads = 8</span><br><span class="line">innodb_thread_concurrency = 16</span><br><span class="line">innodb_flush_log_at_trx_commit = 1</span><br><span class="line">innodb_log_buffer_size = 16M</span><br><span class="line">innodb_log_file_size = 512M</span><br><span class="line">innodb_log_files_in_group = 3</span><br><span class="line">innodb_max_dirty_pages_pct = 60</span><br><span class="line">innodb_lock_wait_timeout = 120</span><br><span class="line">[mysqld2]</span><br><span class="line">socket = /data/dbdata_3307/mysql.sock</span><br><span class="line">port = 3307</span><br><span class="line">pid-file = /data/dbdata_3307/3307.pid</span><br><span class="line">datadir = /data/dbdata_3307</span><br><span class="line">user = mysql</span><br><span class="line">skip-name-resolve</span><br><span class="line">lower_case_table_names=1</span><br><span class="line">innodb_file_per_table=1</span><br><span class="line">back_log = 50</span><br><span class="line">max_connections = 300</span><br><span class="line">max_connect_errors = 1000</span><br><span class="line">table_open_cache = 2048</span><br><span class="line">max_allowed_packet = 16M</span><br><span class="line">binlog_cache_size = 2M</span><br><span class="line">max_heap_table_size = 64M</span><br><span class="line">sort_buffer_size = 2M</span><br><span class="line">join_buffer_size = 2M</span><br><span class="line">thread_cache_size = 64</span><br><span class="line">thread_concurrency = 8</span><br><span class="line">query_cache_size = 64M</span><br><span class="line">query_cache_limit = 2M</span><br><span class="line">ft_min_word_len = 4</span><br><span class="line">default-storage-engine = innodb</span><br><span class="line">thread_stack = 192K</span><br><span class="line">transaction_isolation = REPEATABLE-READ</span><br><span class="line">tmp_table_size = 64M</span><br><span class="line">log-bin=mysql-bin</span><br><span class="line">binlog_format=mixed</span><br><span class="line">slow_query_log</span><br><span class="line">long_query_time = 1</span><br><span class="line">server-id = 1</span><br><span class="line">key_buffer_size = 8M</span><br><span class="line">read_buffer_size = 2M</span><br><span class="line">read_rnd_buffer_size = 2M</span><br><span class="line">bulk_insert_buffer_size = 64M</span><br><span class="line">myisam_sort_buffer_size = 128M</span><br><span class="line">myisam_max_sort_file_size = 10G</span><br><span class="line">myisam_repair_threads = 1</span><br><span class="line">myisam_recover</span><br><span class="line">innodb_additional_mem_pool_size = 16M</span><br><span class="line">innodb_buffer_pool_size = 200M</span><br><span class="line">innodb_data_file_path = ibdata1:10M:autoextend</span><br><span class="line">innodb_file_io_threads = 8</span><br><span class="line">innodb_thread_concurrency = 16</span><br><span class="line">innodb_flush_log_at_trx_commit = 1</span><br><span class="line">innodb_log_buffer_size = 16M</span><br><span class="line">innodb_log_file_size = 512M</span><br><span class="line">innodb_log_files_in_group = 3</span><br><span class="line">innodb_max_dirty_pages_pct = 60</span><br><span class="line">innodb_lock_wait_timeout = 120</span><br><span class="line">[mysqld3]</span><br><span class="line">socket = /data/dbdata_3308/mysql.sock</span><br><span class="line">port = 3308</span><br><span class="line">pid-file = /data/dbdata_3308/3308.pid</span><br><span class="line">datadir = /data/dbdata_3308</span><br><span class="line">user = mysql</span><br><span class="line">skip-name-resolve</span><br><span class="line">lower_case_table_names=1</span><br><span class="line">innodb_file_per_table=1</span><br><span class="line">back_log = 50</span><br><span class="line">max_connections = 300</span><br><span class="line">max_connect_errors = 1000</span><br><span class="line">table_open_cache = 2048</span><br><span class="line">max_allowed_packet = 16M</span><br><span class="line">binlog_cache_size = 2M</span><br><span class="line">max_heap_table_size = 64M</span><br><span class="line">sort_buffer_size = 2M</span><br><span class="line">join_buffer_size = 2M</span><br><span class="line">thread_cache_size = 64</span><br><span class="line">thread_concurrency = 8</span><br><span class="line">query_cache_size = 64M</span><br><span class="line">query_cache_limit = 2M</span><br><span class="line">ft_min_word_len = 4</span><br><span class="line">default-storage-engine = innodb</span><br><span class="line">thread_stack = 192K</span><br><span class="line">transaction_isolation = REPEATABLE-READ</span><br><span class="line">tmp_table_size = 64M</span><br><span class="line">log-bin=mysql-bin</span><br><span class="line">binlog_format=mixed</span><br><span class="line">slow_query_log</span><br><span class="line">long_query_time = 1</span><br><span class="line">server-id = 1</span><br><span class="line">key_buffer_size = 8M</span><br><span class="line">read_buffer_size = 2M</span><br><span class="line">read_rnd_buffer_size = 2M</span><br><span class="line">bulk_insert_buffer_size = 64M</span><br><span class="line">myisam_sort_buffer_size = 128M</span><br><span class="line">myisam_max_sort_file_size = 10G</span><br><span class="line">myisam_repair_threads = 1</span><br><span class="line">myisam_recover</span><br><span class="line">innodb_additional_mem_pool_size = 16M</span><br><span class="line">innodb_buffer_pool_size = 200M</span><br><span class="line">innodb_data_file_path = ibdata1:10M:autoextend</span><br><span class="line">innodb_file_io_threads = 8</span><br><span class="line">innodb_thread_concurrency = 16</span><br><span class="line">innodb_flush_log_at_trx_commit = 1</span><br><span class="line">innodb_log_buffer_size = 16M</span><br><span class="line">innodb_log_file_size = 512M</span><br><span class="line">innodb_log_files_in_group = 3</span><br><span class="line">innodb_max_dirty_pages_pct = 60</span><br><span class="line">innodb_lock_wait_timeout = 120</span><br><span class="line">[mysqldump]</span><br><span class="line">quick</span><br><span class="line">max_allowed_packet = 256M</span><br><span class="line">[mysql]</span><br><span class="line">no-auto-rehash</span><br><span class="line">prompt=\\u@\\d \\R:\\m&gt;</span><br><span class="line">[myisamchk]</span><br><span class="line">key_buffer_size = 512M</span><br><span class="line">sort_buffer_size = 512M</span><br><span class="line">read_buffer = 8M</span><br><span class="line">write_buffer = 8M</span><br><span class="line">[mysqlhotcopy]</span><br><span class="line">interactive-timeout</span><br><span class="line">[mysqld_safe]</span><br><span class="line">open-files-limit = 8192</span><br></pre></td></tr></table></figure>
+<h4 id="mysqld-multi启动"><a href="#mysqld-multi启动" class="headerlink" title="mysqld_multi启动"></a>mysqld_multi启动</h4><pre><code>/usr/local/mysql/bin/mysqld_multi start 1
+/usr/local/mysql/bin/mysqld_multi start 2
+/usr/local/mysql/bin/mysqld_multi start 3
+</code></pre>
+<h4 id="或者采用一条命令的形式："><a href="#或者采用一条命令的形式：" class="headerlink" title="或者采用一条命令的形式："></a>或者采用一条命令的形式：</h4><pre><code>/usr/local/mysql/bin/mysqld_multi start 1-3
+</code></pre>
+<h4 id="添加到自动启动"><a href="#添加到自动启动" class="headerlink" title="添加到自动启动"></a>添加到自动启动</h4><pre><code>vim /etc/init.d/boot.local
+/usr/local/mysql/bin/mysqld_multi start 1-3
+注 ：如果是rhel或者centos系统的话自启动文件/etc/rc.local
+</code></pre>
+<h3 id="管理"><a href="#管理" class="headerlink" title="管理"></a>管理</h3><pre><code>在本地都是采用 -S /data/dbdata_3308/mysql.sock，如果在远程可以通过不同的端口连接上去坐管理操作。其他的和单实例的管理没什么区别！
+大家在管理多实例的话可以使用mysqlmanager实例管理器，管理器来会比较方面，限于篇幅，这里就不在多做介绍！
+</code></pre>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><pre><code>本内容来自互联网。MARK一下。 
+实际生产系统中，对于大型的互联网app，高并发和大数据量的前提下，对硬件要求很高， 但是基于mysql 数据库本身的特性，很多时候无法发挥出硬件的优势，这种场景
+下，多实例系统就会用的比较多 ... 
+COME ON  
+</code></pre>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/MySQL/">MySQL</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/MySQL/">MySQL</a><a href="/tags/Multi-Instance/">Multi Instance</a><a href="/tags/多实例/">多实例</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://ruiaylin.github.io/2014/02/27/mult-instance-mysql/" data-title="Mysql Multi Instance | ruiayLin&#39;s Blog" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2014/02/27/tips-for-mysql-ops/" title="MySQL运维过程中的小tip [转载]">
+  <strong>上一篇：</strong><br/>
+  <span>
+  MySQL运维过程中的小tip [转载]</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2014/02/17/mysql-load-data/"  title="MySQL load data 操纵数据">
+ <strong>下一篇：</strong><br/> 
+ <span>MySQL load data 操纵数据
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#mysql%E7%9A%84%E5%A4%9A%E5%AE%9E%E4%BE%8B%E6%9C%89%E4%B8%A4%E7%A7%8D%E6%96%B9%E5%BC%8F%E5%8F%AF%E4%BB%A5%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.</span> <span class="toc-text">mysql的多实例有两种方式可以实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E4%BB%8B%E7%BB%8D%EF%BC%9A"><span class="toc-number">2.</span> <span class="toc-text">环境介绍：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9B%E5%BB%BAmysql%E7%94%A8%E6%88%B7"><span class="toc-number">2.1.</span> <span class="toc-text">创建mysql用户</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85mysql"><span class="toc-number">2.2.</span> <span class="toc-text">编译安装mysql</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-number">2.3.</span> <span class="toc-text">初始化数据库</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%9A%E8%BF%87%E5%AE%98%E6%96%B9%E8%87%AA%E5%B8%A6%E7%9A%84mysqld-multi%E6%9D%A5%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%AE%9E%E4%BE%8B%E5%AE%9E%E6%88%98%EF%BC%9A"><span class="toc-number">3.</span> <span class="toc-text">通过官方自带的mysqld_multi来实现多实例实战：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#mysqld-multi%E7%9A%84%E9%85%8D%E7%BD%AE"><span class="toc-number">3.1.</span> <span class="toc-text">mysqld_multi的配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mysqld-multi%E5%90%AF%E5%8A%A8"><span class="toc-number">3.2.</span> <span class="toc-text">mysqld_multi启动</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%88%96%E8%80%85%E9%87%87%E7%94%A8%E4%B8%80%E6%9D%A1%E5%91%BD%E4%BB%A4%E7%9A%84%E5%BD%A2%E5%BC%8F%EF%BC%9A"><span class="toc-number">3.3.</span> <span class="toc-text">或者采用一条命令的形式：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B7%BB%E5%8A%A0%E5%88%B0%E8%87%AA%E5%8A%A8%E5%90%AF%E5%8A%A8"><span class="toc-number">3.4.</span> <span class="toc-text">添加到自动启动</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AE%A1%E7%90%86"><span class="toc-number">4.</span> <span class="toc-text">管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Docker/" title="Docker">Docker<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Go/" title="Go">Go<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MySQL/" title="MySQL">MySQL<sup>18</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/NewSQL/" title="NewSQL">NewSQL<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Oracle/" title="Oracle">Oracle<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Python/" title="Python">Python<sup>7</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/MySQL/" title="MySQL">MySQL<sup>11</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OPS/" title="OPS">OPS<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Fabric/" title="Fabric">Fabric<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Go/" title="Go">Go<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Group-Replicaiton/" title="Group Replicaiton">Group Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MGR/" title="MGR">MGR<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Replicaiton/" title="Replicaiton">Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MHA/" title="MHA">MHA<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Python/" title="Python">Python<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Xtrabackup/" title="Xtrabackup">Xtrabackup<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DNS/" title="DNS">DNS<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Sharding/" title="Sharding">Sharding<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Discourse/" title="Discourse">Discourse<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forum/" title="Forum">Forum<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">知识链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/org/polardb-x" target="_blank" title="PloarDB-X专栏">PloarDB-X专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://cn.pingcap.com/blog/" target="_blank" title="TiDB 博客">TiDB 博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/doc/refman/8.0/en/" target="_blank" title="MySQL 8.0 Docs">MySQL 8.0 Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/blog-archive/" target="_blank" title="MySQL Server Blog">MySQL Server Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://lefred.be/" target="_blank" title="Lefred&#39;s blog">Lefred&#39;s blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/people/wen-zheng-hu" target="_blank" title="温正湖专栏">温正湖专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.percona.com/blog/" target="_blank" title="Percona Blog">Percona Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://engineering.fb.com/" target="_blank" title="Meta Engineering">Meta Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.uber.com/en-US/blog/engineering/" target="_blank" title="Uber Engineering">Uber Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.blog/category/engineering/" target="_blank" title="Github Engineering">Github Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://medium.com/pinterest-engineering" target="_blank" title="Pinterest Engineering">Pinterest Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://flask.palletsprojects.com/" target="_blank" title="Flask Docs">Flask Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://tympanus.net/codrops/" target="_blank" title="Codrops front">Codrops front</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
+			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
+		
+		<a href="/about" target="_blank" title="ruichao.lin">ruichao.lin</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+        getSize();
+        if (myWidth >= 1024) {
+          c.click();
+        }
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?e6d1f421bbc9962127a50488f9ed37d1";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
