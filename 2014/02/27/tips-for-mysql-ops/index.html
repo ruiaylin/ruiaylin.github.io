@@ -11,15 +11,15 @@
     
 
     
-    <meta name="description" content="MySQL运维过程中的小 tips查询数据库不同引擎下表和索引的大小select engine,count(*) table_num,  concat(truncate(sum(DATA_LENGTH&#x2F;1024&#x2F;1024),2),&#39;MB&#39;) table_size, concat(truncate(sum(INDEX_LENGTH&#x2F;1024&#x2F;1024),2),&#39;MB&#39;">
+    <meta name="description" content="MySQL运维过程中的小 tips查询数据库不同引擎下表和索引的大小1234567select engine,count(*) table_num, concat(truncate(sum(DATA_LENGTH&#x2F;1024&#x2F;1024),2),&#x27;MB&#x27;) table_size,concat(truncate(sum(INDEX_LENGTH&#x2F;1024&#x2F;1024),2),&amp;#x27">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MySQL运维过程中的小tip [转载]">
 <meta property="og:url" content="http://ruiaylin.github.io/2014/02/27/tips-for-mysql-ops/index.html">
 <meta property="og:site_name" content="ruiayLin&#39;s Blog">
-<meta property="og:description" content="MySQL运维过程中的小 tips查询数据库不同引擎下表和索引的大小select engine,count(*) table_num,  concat(truncate(sum(DATA_LENGTH&#x2F;1024&#x2F;1024),2),&#39;MB&#39;) table_size, concat(truncate(sum(INDEX_LENGTH&#x2F;1024&#x2F;1024),2),&#39;MB&#39;">
+<meta property="og:description" content="MySQL运维过程中的小 tips查询数据库不同引擎下表和索引的大小1234567select engine,count(*) table_num, concat(truncate(sum(DATA_LENGTH&#x2F;1024&#x2F;1024),2),&#x27;MB&#x27;) table_size,concat(truncate(sum(INDEX_LENGTH&#x2F;1024&#x2F;1024),2),&amp;#x27">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2014-02-26T21:04:23.000Z">
-<meta property="article:modified_time" content="2024-03-02T09:18:29.303Z">
+<meta property="article:modified_time" content="2024-03-03T02:25:13.555Z">
 <meta property="article:author" content="ruichao.lin">
 <meta property="article:tag" content="OPS">
 <meta property="article:tag" content="MySQL">
@@ -105,77 +105,22 @@
 		
 		</div>
 		
-		<h3 id="MySQL运维过程中的小-tips"><a href="#MySQL运维过程中的小-tips" class="headerlink" title="MySQL运维过程中的小 tips"></a>MySQL运维过程中的小 tips</h3><h4 id="查询数据库不同引擎下表和索引的大小"><a href="#查询数据库不同引擎下表和索引的大小" class="headerlink" title="查询数据库不同引擎下表和索引的大小"></a>查询数据库不同引擎下表和索引的大小</h4><pre><code>select engine,count(*) table_num, 
-concat(truncate(sum(DATA_LENGTH/1024/1024),2),&#39;MB&#39;) table_size,
-concat(truncate(sum(INDEX_LENGTH/1024/1024),2),&#39;MB&#39;) index_size ,
-concat(truncate(sum(DATA_LENGTH/1024/1024)+sum(INDEX_LENGTH/1024/1024),2),&#39;MB&#39;) total_size 
-from information_schema.tables 
-where TABLE_TYPE=&#39;BASE TABLE&#39;  
-group by engine;
-</code></pre>
-<h4 id="查询数据库用户的状态"><a href="#查询数据库用户的状态" class="headerlink" title="查询数据库用户的状态"></a>查询数据库用户的状态</h4><pre><code>mysql -uroot -p  -e &#39;show processlist\G&#39;|grep State|sort|uniq -c|sort -n
-</code></pre>
-<p>或<br>    mysql -uroot -p  -e ‘show processlist\G’|grep State|sort|uniq -c|sort -n</p>
-<h4 id="mysql-5-5-查询锁阻塞的情况"><a href="#mysql-5-5-查询锁阻塞的情况" class="headerlink" title="mysql&gt;&#x3D;5.5 查询锁阻塞的情况"></a>mysql&gt;&#x3D;5.5 查询锁阻塞的情况</h4><pre><code>select   
-r.trx_id,  
-r.trx_mysql_thread_id waiting_thread,  
-r.trx_query id,  
-b.trx_mysql_thread_id blocking_thread,  
-b.trx_query blocking_query 
-from  
-information_schema.innodb_lock_waits w 
-inner join  
-information_schema.innodb_trx b  
-on b.trx_id=w.blocking_trx_id 
-inner join 
-information_schema.innodb_trx r  
-on r.trx_id=w.requesting_trx_id;
-+--------+----------------+------------------------------+-----------------+----------------+
-| trx_id | waiting_thread | id                 | blocking_thread | blocking_query |
-+--------+----------------+------------------------------+-----------------+----------------+
-| 527    |             17 | insert into lidan values (9) |              14 | NULL           |
-| 526    |             16 | insert into lidan values (6) |              14 | NULL           |
-=======================================================
-</code></pre>
-<h4 id="抓包获取协议包中的sql语句"><a href="#抓包获取协议包中的sql语句" class="headerlink" title="抓包获取协议包中的sql语句"></a>抓包获取协议包中的sql语句</h4><pre><code>/usr/sbin/tcpdump -i eth0 -s 0 -l -w - dst port 3306 | strings | egrep -i &#39;SELECT|UPDATE|DELETE|INSERT|SET|COMMIT|ROLLBACK|CREATE|DROP|ALTER|CALL&#39;
-- 表示输入的文件名（这里表示先输入文件，然后又输出到stdout）
-</code></pre>
-<h4 id="批量修改存储引擎"><a href="#批量修改存储引擎" class="headerlink" title="批量修改存储引擎"></a>批量修改存储引擎</h4><pre><code>/usr/local/mysql/bin/mysql_convert_table_format
--- 将  28 行  $opt_type ---&gt;  $opt_engine
--- 需要注意innodb 的外键和myisam的fulltext index
-</code></pre>
+		<h3 id="MySQL运维过程中的小-tips"><a href="#MySQL运维过程中的小-tips" class="headerlink" title="MySQL运维过程中的小 tips"></a>MySQL运维过程中的小 tips</h3><h4 id="查询数据库不同引擎下表和索引的大小"><a href="#查询数据库不同引擎下表和索引的大小" class="headerlink" title="查询数据库不同引擎下表和索引的大小"></a>查询数据库不同引擎下表和索引的大小</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">select engine,count(*) table_num, </span><br><span class="line">concat(truncate(sum(DATA_LENGTH/1024/1024),2),&#x27;MB&#x27;) table_size,</span><br><span class="line">concat(truncate(sum(INDEX_LENGTH/1024/1024),2),&#x27;MB&#x27;) index_size ,</span><br><span class="line">concat(truncate(sum(DATA_LENGTH/1024/1024)+sum(INDEX_LENGTH/1024/1024),2),&#x27;MB&#x27;) total_size </span><br><span class="line">from information_schema.tables </span><br><span class="line">where TABLE_TYPE=&#x27;BASE TABLE&#x27;  </span><br><span class="line">group by engine;</span><br></pre></td></tr></table></figure>
+<h4 id="查询数据库用户的状态"><a href="#查询数据库用户的状态" class="headerlink" title="查询数据库用户的状态"></a>查询数据库用户的状态</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">    mysql -uroot -p  -e &#x27;show processlist\G&#x27;|grep State|sort|uniq -c|sort -n</span><br><span class="line">或</span><br><span class="line">    mysql -uroot -p  -e &#x27;show processlist\G&#x27;|grep State|sort|uniq -c|sort -n</span><br></pre></td></tr></table></figure>
+<h4 id="mysql-5-5-查询锁阻塞的情况"><a href="#mysql-5-5-查询锁阻塞的情况" class="headerlink" title="mysql&gt;&#x3D;5.5 查询锁阻塞的情况"></a>mysql&gt;&#x3D;5.5 查询锁阻塞的情况</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">select   </span><br><span class="line">r.trx_id,  </span><br><span class="line">r.trx_mysql_thread_id waiting_thread,  </span><br><span class="line">r.trx_query id,  </span><br><span class="line">b.trx_mysql_thread_id blocking_thread,  </span><br><span class="line">b.trx_query blocking_query </span><br><span class="line">from  </span><br><span class="line">information_schema.innodb_lock_waits w </span><br><span class="line">inner join  </span><br><span class="line">information_schema.innodb_trx b  </span><br><span class="line">on b.trx_id=w.blocking_trx_id </span><br><span class="line">inner join </span><br><span class="line">information_schema.innodb_trx r  </span><br><span class="line">on r.trx_id=w.requesting_trx_id;</span><br><span class="line">+--------+----------------+------------------------------+-----------------+----------------+</span><br><span class="line">| trx_id | waiting_thread | id                 | blocking_thread | blocking_query |</span><br><span class="line">+--------+----------------+------------------------------+-----------------+----------------+</span><br><span class="line">| 527    |             17 | insert into lidan values (9) |              14 | NULL           |</span><br><span class="line">| 526    |             16 | insert into lidan values (6) |              14 | NULL           |</span><br><span class="line">=======================================================</span><br></pre></td></tr></table></figure>
+<h4 id="抓包获取协议包中的sql语句"><a href="#抓包获取协议包中的sql语句" class="headerlink" title="抓包获取协议包中的sql语句"></a>抓包获取协议包中的sql语句</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/usr/sbin/tcpdump -i eth0 -s 0 -l -w - dst port 3306 | strings | egrep -i &#x27;SELECT|UPDATE|DELETE|INSERT|SET|COMMIT|ROLLBACK|CREATE|DROP|ALTER|CALL&#x27;</span><br><span class="line">- 表示输入的文件名（这里表示先输入文件，然后又输出到stdout）</span><br></pre></td></tr></table></figure>
+<h4 id="批量修改存储引擎"><a href="#批量修改存储引擎" class="headerlink" title="批量修改存储引擎"></a>批量修改存储引擎</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/mysql/bin/mysql_convert_table_format</span><br><span class="line">-- 将  28 行  $opt_type ---&gt;  $opt_engine</span><br><span class="line">-- 需要注意innodb 的外键和myisam的fulltext index</span><br></pre></td></tr></table></figure>
 <h4 id="mysql-快速创建空表"><a href="#mysql-快速创建空表" class="headerlink" title="mysql 快速创建空表"></a>mysql 快速创建空表</h4><p>在MYSQL中有两种方法。</p>
-<pre><code>1、create table select ...
-2、create table like ...
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1、create table select ...</span><br><span class="line">2、create table like ...</span><br></pre></td></tr></table></figure>
 <p>第一种很多人都知道，第二种却很少人用。<br>第一种有个缺点<br>1、第一种会取消掉原来表的有些定义。<br>手册上是这么讲的：</p>
-<pre><code>Some conversion of data types might occur. For example, the AUTO_INCREMENT attribute is not preserved,
-and VARCHAR columns can become CHAR columns. 
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Some conversion of data types might occur. For example, the AUTO_INCREMENT attribute is not preserved,</span><br><span class="line">and VARCHAR columns can become CHAR columns. </span><br></pre></td></tr></table></figure>
 <h4 id="观察mysql-status-变量的变化情况"><a href="#观察mysql-status-变量的变化情况" class="headerlink" title="观察mysql status 变量的变化情况"></a>观察mysql status 变量的变化情况</h4><p>方法一，（推荐）<br>每三秒打印出innodb相关状态的变化情况，并且使用白色标示</p>
 <pre><code>watch -d -n 3 &quot;mysqladmin -uroot -pxxx ext|egrep Innodb&quot; 
 </code></pre>
-<p>同样也是没三秒打印相关变化但是并没有白色标示</p>
+<p>同样也是每三秒打印相关变化但是并没有白色标示</p>
 <pre><code> mysqladmin -uroot -p1111 -i 3 ext|egrep Innodb
 </code></pre>
-<h4 id="left-join-条件的区别"><a href="#left-join-条件的区别" class="headerlink" title="left join 条件的区别"></a>left join 条件的区别</h4><pre><code>SELECT * FROM a LEFT JOIN b ON a.uid=b.uid_a WHERE b.password=&#39;abcd&#39;;
-+-----+---------+----------+----------+-------+
-| uid | userfen | username | password | uid_a |
-+-----+---------+----------+----------+-------+
-|   1 |    1000 | admin    | abcd     |     1 | 
-+-----+---------+----------+----------+-------+
-1 ROW IN SET (0.00 sec)
- 
-mysql&gt; SELECT * FROM a LEFT JOIN b ON a.uid=b.uid_a AND b.password=&#39;abcd&#39;;     
-+-------+---------+----------+----------+-------+
-| uid   | userfen | username | password | uid_a |
-+-------+---------+----------+----------+-------+
-|     1 |    1000 | admin    | abcd     |     1 | 
-| 22222 | 2392032 | NULL     | NULL     |  NULL | 
-+-------+---------+----------+----------+-------+
-2 ROWS IN SET (0.00 sec)
-WHERE 语句是在left join完成之后才执行的，所以它匹配不到NULL的行，ON语句是在left join之前执行。
-</code></pre>
+<h4 id="left-join-条件的区别"><a href="#left-join-条件的区别" class="headerlink" title="left join 条件的区别"></a>left join 条件的区别</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM a LEFT JOIN b ON a.uid=b.uid_a WHERE b.password=&#x27;abcd&#x27;;</span><br><span class="line">+-----+---------+----------+----------+-------+</span><br><span class="line">| uid | userfen | username | password | uid_a |</span><br><span class="line">+-----+---------+----------+----------+-------+</span><br><span class="line">|   1 |    1000 | admin    | abcd     |     1 | </span><br><span class="line">+-----+---------+----------+----------+-------+</span><br><span class="line">1 ROW IN SET (0.00 sec)</span><br><span class="line"> </span><br><span class="line">mysql&gt; SELECT * FROM a LEFT JOIN b ON a.uid=b.uid_a AND b.password=&#x27;abcd&#x27;;     </span><br><span class="line">+-------+---------+----------+----------+-------+</span><br><span class="line">| uid   | userfen | username | password | uid_a |</span><br><span class="line">+-------+---------+----------+----------+-------+</span><br><span class="line">|     1 |    1000 | admin    | abcd     |     1 | </span><br><span class="line">| 22222 | 2392032 | NULL     | NULL     |  NULL | </span><br><span class="line">+-------+---------+----------+----------+-------+</span><br><span class="line">2 ROWS IN SET (0.00 sec)</span><br><span class="line">WHERE 语句是在left join完成之后才执行的，所以它匹配不到NULL的行，ON语句是在left join之前执行。</span><br></pre></td></tr></table></figure>
 <h4 id="多表关联删除"><a href="#多表关联删除" class="headerlink" title="多表关联删除"></a>多表关联删除</h4><p>删除表aaa中id 与表t中id相同的数据</p>
 <pre><code>delete from aaa using t ,aaa  where aaa.id=t.id ; 
 </code></pre>
@@ -227,182 +172,63 @@ WHERE 语句是在left join完成之后才执行的，所以它匹配不到NULL�
 </code></pre>
 <p>上边的函数可以实现查询结果<br>另外用group_concat的时候请注意，连接起来的字段如果是int型，一定要转换成char再拼起来，<br>否则在你执行后返回的将不是一个逗号隔开的串，而是byte。需要注意的是如果不带group by<br>那么函数就是对列的所有值进行连接</p>
 <h4 id="杀死当前用户bbs正在运行的连接）"><a href="#杀死当前用户bbs正在运行的连接）" class="headerlink" title="杀死当前用户bbs正在运行的连接）"></a>杀死当前用户bbs正在运行的连接）</h4><p>已验证</p>
-<pre><code>mysqladmin -uroot -p  processlist|awk -F &quot;|&quot; &#39;&#123;if($3~/bbs/)print $2&#125;&#39;|xargs -n 1 mysqladmin -uroot -p kill
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqladmin -uroot -p  processlist|awk -F &quot;|&quot; &#x27;&#123;if($3~/bbs/)print $2&#125;&#x27;|xargs -n 1 mysqladmin -uroot -p kill</span><br></pre></td></tr></table></figure>
 <p>升级版：<br>kill 用户名为haha 执行时间超过50秒的select 语句</p>
-<pre><code>mysqladmin -uroot -pxxx  processlist|awk -F &quot;|&quot; &#39;/select/&#123;if($3~/haha/ &amp;&amp; $7 &gt; 50)print $2&#125;&#39;|xargs -n 1 mysqladmin -uroot -pxxx kill
-</code></pre>
-<h4 id="脚本实现qps，tps的查看"><a href="#脚本实现qps，tps的查看" class="headerlink" title="脚本实现qps，tps的查看"></a>脚本实现qps，tps的查看</h4><pre><code>mysqladmin -uroot -pxxxx extended-status -i1 |\
-awk &#39;BEGIN&#123;print &quot; QPS   Com_commit  Com_rollback   Threads_con   Threads_run   TPS\n \
- ---------------------------------------------------------------------------\n&quot;&#125; \
-/Queries/&#123;q=$4-qp;qp=$4&#125;\
-/Com_commit/&#123;com=$4-qc;qc=$4&#125;\
-/Com_rollback/&#123;rol=$4-cr;cr=$4&#125;\
-/Threads_connected/&#123;tc=$4&#125;\
-/Threads_running/&#123;printf &quot;%5d %5d %10d %15d %15d %10d\n&quot;,q,com,rol,tc,$4,com + rol&#125;&#39;
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqladmin -uroot -pxxx  processlist|awk -F &quot;|&quot; &#x27;/select/&#123;if($3~/haha/ &amp;&amp; $7 &gt; 50)print $2&#125;&#x27;|xargs -n 1 mysqladmin -uroot -pxxx kill</span><br></pre></td></tr></table></figure>
+<h4 id="脚本实现qps，tps的查看"><a href="#脚本实现qps，tps的查看" class="headerlink" title="脚本实现qps，tps的查看"></a>脚本实现qps，tps的查看</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mysqladmin -uroot -pxxxx extended-status -i1 |\</span><br><span class="line">awk &#x27;BEGIN&#123;print &quot; QPS   Com_commit  Com_rollback   Threads_con   Threads_run   TPS\n \</span><br><span class="line"> ---------------------------------------------------------------------------\n&quot;&#125; \</span><br><span class="line">/Queries/&#123;q=$4-qp;qp=$4&#125;\</span><br><span class="line">/Com_commit/&#123;com=$4-qc;qc=$4&#125;\</span><br><span class="line">/Com_rollback/&#123;rol=$4-cr;cr=$4&#125;\</span><br><span class="line">/Threads_connected/&#123;tc=$4&#125;\</span><br><span class="line">/Threads_running/&#123;printf &quot;%5d %5d %10d %15d %15d %10d\n&quot;,q,com,rol,tc,$4,com + rol&#125;&#x27;</span><br></pre></td></tr></table></figure>
+
 <p>上面的是5.1的 5.5的参数增加了很多需要修改</p>
-<pre><code>mysqladmin -uroot -pxxx extended-status -i1|\
-awk &#39;BEGIN&#123;print &quot; QPS   Com_commit  Com_rollback   Threads_con   Threads_run   TPS\n \
- ---------------------------------------------------------------------------\n&quot;&#125; \
-/Queries/&#123;q=$4-qp;qp=$4&#125;\
-/Com_commit/&#123;com=$4-qc;qc=$4&#125;\
-/Com_rollback /&#123;rol=$4-cr;cr=$4&#125;\
-/Threads_connected/&#123;tc=$4&#125;\
-/Threads_running/&#123;printf &quot;%5d %5d %10d %15d %15d %10d\n&quot;,q,com,rol,tc,$4,com + rol&#125;&#39;
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mysqladmin -uroot -pxxx extended-status -i1|\</span><br><span class="line">awk &#x27;BEGIN&#123;print &quot; QPS   Com_commit  Com_rollback   Threads_con   Threads_run   TPS\n \</span><br><span class="line"> ---------------------------------------------------------------------------\n&quot;&#125; \</span><br><span class="line">/Queries/&#123;q=$4-qp;qp=$4&#125;\</span><br><span class="line">/Com_commit/&#123;com=$4-qc;qc=$4&#125;\</span><br><span class="line">/Com_rollback /&#123;rol=$4-cr;cr=$4&#125;\</span><br><span class="line">/Threads_connected/&#123;tc=$4&#125;\</span><br><span class="line">/Threads_running/&#123;printf &quot;%5d %5d %10d %15d %15d %10d\n&quot;,q,com,rol,tc,$4,com + rol&#125;&#x27;</span><br></pre></td></tr></table></figure>
 <p>注意rollback后面的空格，另外你可能一直看到TPS对应的值为0，原因是：<br> 计算TPS公式（com_commit+com_rollback）&#x2F;time 这种计算方法必须有一个前提条件是：所有的事务必须是显示提交的，<br>如果存在隐式的提交和会滚（默认autocommit&#x3D;1，或者value为on）可以看到Com_commit 始终为0 ，这就是隐式提交的时候，<br>不计入com_commit和com_rollback中的。</p>
-<h4 id="not-in-改写"><a href="#not-in-改写" class="headerlink" title="not in 改写"></a>not in 改写</h4><pre><code>mysql&gt; select d.* from d where name&lt;&gt;&#39;1&#39; and id not in (select id from e);
-+----+------+
-| id | name |
-+----+------+
-|  9 | 9    |
-| 19 | 19   |
-+----+------+
-2 rows in set (0.00 sec)
-</code></pre>
-<p>改装后<br>    mysql&gt;  select d.id ,d.name,e.id,e.name from d left join e on d.id&#x3D;e.id where d.name&lt;&gt;’1’ and e.id is null;<br>    +—-+——+——+——+<br>    | id | name | id   | name |<br>    +—-+——+——+——+<br>    |  9 | 9    | NULL | NULL |<br>    | 19 | 19   | NULL | NULL |<br>    +—-+——+——+——+<br>    2 rows in set (0.00 sec)</p>
+<h4 id="not-in-改写"><a href="#not-in-改写" class="headerlink" title="not in 改写"></a>not in 改写</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">    mysql&gt; select d.* from d where name&lt;&gt;&#x27;1&#x27; and id not in (select id from e);</span><br><span class="line">    +----+------+</span><br><span class="line">    | id | name |</span><br><span class="line">    +----+------+</span><br><span class="line">    |  9 | 9    |</span><br><span class="line">    | 19 | 19   |</span><br><span class="line">    +----+------+</span><br><span class="line">    2 rows in set (0.00 sec)```</span><br><span class="line">改装后</span><br><span class="line">    ```mysql&gt;  select d.id ,d.name,e.id,e.name from d left join e on d.id=e.id where d.name&lt;&gt;&#x27;1&#x27; and e.id is null;</span><br><span class="line">    +----+------+------+------+</span><br><span class="line">    | id | name | id   | name |</span><br><span class="line">    +----+------+------+------+</span><br><span class="line">    |  9 | 9    | NULL | NULL |</span><br><span class="line">    | 19 | 19   | NULL | NULL |</span><br><span class="line">    +----+------+------+------+</span><br><span class="line">    2 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure>
 <h4 id="删除重复记录"><a href="#删除重复记录" class="headerlink" title="删除重复记录"></a>删除重复记录</h4><p>number_id 和number_Pstn_Backup 相同就表示重复而id表示主键</p>
 <p>&#x3D;&#x3D;嵌套子查询写法 </p>
-<pre><code>delete   k from imeet_test as k  ,
-(select a.id from imeet_test a where a.id &lt;(select max(b.id) from imeet_test b where b.number_id=a.number_id and b.number_Pstn_Backup=a.number_Pstn_Backup)
-) as  m where k.id=m.id;
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">delete   k from imeet_test as k  ,</span><br><span class="line">(select a.id from imeet_test a where a.id &lt;(select max(b.id) from imeet_test b where b.number_id=a.number_id and b.number_Pstn_Backup=a.number_Pstn_Backup)</span><br><span class="line">) as  m where k.id=m.id;</span><br></pre></td></tr></table></figure>
 <p>&#x3D;&#x3D;相关子查询写法</p>
-<pre><code>explain  select a.id from imeet_test a ,(select max(b.id) id ,b.number_id,b.number_Pstn_Backup from imeet_test b group by  b.number_id, 
-b.number_Pstn_Backup having count(1)&gt;1) as c where  a.number_id= c.number_id and a.number_Pstn_Backup= c.number_Pstn_Backup
-and a.id&lt;c.id; 
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">explain  select a.id from imeet_test a ,(select max(b.id) id ,b.number_id,b.number_Pstn_Backup from imeet_test b group by  b.number_id, </span><br><span class="line">b.number_Pstn_Backup having count(1)&gt;1) as c where  a.number_id= c.number_id and a.number_Pstn_Backup= c.number_Pstn_Backup</span><br><span class="line">and a.id&lt;c.id; </span><br></pre></td></tr></table></figure>
 <h4 id="时间取值"><a href="#时间取值" class="headerlink" title="时间取值"></a>时间取值</h4><p>前一天</p>
 <pre><code>select now()-interval 1 day 
 </code></pre>
 <p>取上一个月的第一天</p>
-<pre><code>select date_sub(date_format(now(),&#39;%y-%m-01&#39;),interval 1 month);
-select date_add(date_add(last_day(now()),interval 1 day),interval -2 month);
-select date_sub(date_sub(date_format(now(),&#39;%y-%m-%d&#39;),interval extract(day from now())-1 day),interval 1 month);
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">select date_sub(date_format(now(),&#x27;%y-%m-01&#x27;),interval 1 month);</span><br><span class="line">select date_add(date_add(last_day(now()),interval 1 day),interval -2 month);</span><br><span class="line">select date_sub(date_sub(date_format(now(),&#x27;%y-%m-%d&#x27;),interval extract(day from now())-1 day),interval 1 month);</span><br></pre></td></tr></table></figure>
 <p>上个月的最后一天</p>
-<pre><code>select last_day(now()-interval 1 month);
-select date_add(last_day(now()),interval -1 month);
-select date_sub(date_sub(date_format(now(),&#39;%y-%m-01&#39;),interval 0 month),interval 1 day); 
-select date_add(date_sub(date_format(now(),&#39;%y-%m-01&#39;),interval 0 month),interval -1 day);
-select date_sub(date_sub(date_format(now(),&#39;%y-%m-%d&#39;),interval extract(day     from now()) day),interval 0 month) as dt
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">select last_day(now()-interval 1 month);</span><br><span class="line">select date_add(last_day(now()),interval -1 month);</span><br><span class="line">select date_sub(date_sub(date_format(now(),&#x27;%y-%m-01&#x27;),interval 0 month),interval 1 day); </span><br><span class="line">select date_add(date_sub(date_format(now(),&#x27;%y-%m-01&#x27;),interval 0 month),interval -1 day);</span><br><span class="line">select date_sub(date_sub(date_format(now(),&#x27;%y-%m-%d&#x27;),interval extract(day     from now()) day),interval 0 month) as dt</span><br></pre></td></tr></table></figure>
 <p>本周第一天：</p>
-<pre><code>select date_add(curdate(),interval (WEEKDAY(curdate()) + 1)*-1day) ;
-select date_sub(curdate(),interval WEEKDAY(curdate()) + 1day) ;
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">select date_add(curdate(),interval (WEEKDAY(curdate()) + 1)*-1day) ;</span><br><span class="line">select date_sub(curdate(),interval WEEKDAY(curdate()) + 1day) ;</span><br></pre></td></tr></table></figure>
 <p>本周最后一天</p>
-<pre><code>select date_sub(curdate(),interval WEEKDAY(curdate()) - 5 day);
-select date_add(curdate(),INTERVAL (WEEKDAY(curdate()) - 5)*-1 day);
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">select date_sub(curdate(),interval WEEKDAY(curdate()) - 5 day);</span><br><span class="line">select date_add(curdate(),INTERVAL (WEEKDAY(curdate()) - 5)*-1 day);</span><br></pre></td></tr></table></figure>
 <p>前一周的最后一天</p>
-<pre><code>select date_sub(curdate(),interval WEEKDAY(curdate()) + 2 day) 
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select date_sub(curdate(),interval WEEKDAY(curdate()) + 2 day) </span><br></pre></td></tr></table></figure>
 <p>其他的可以类推</p>
 <h4 id="查看分区表的执行计划"><a href="#查看分区表的执行计划" class="headerlink" title="查看分区表的执行计划"></a>查看分区表的执行计划</h4><p>查看分区的执行计划 EXPLAIN PARTITIONS SELECT * FROM trb1 WHERE id &lt; 5\G<br>但是记得住不能让两个关键字PARTITIONS 和 EXTENDED 同时出现在explain里 </p>
 <h4 id="备库临时表问题"><a href="#备库临时表问题" class="headerlink" title="备库临时表问题"></a>备库临时表问题</h4><p>slave重启的时候要检查是否有临时表show status like ‘%Slav_open_temp_tables%’ 必须为0才能够正常重启<br>否则可能导致报错或数据不一致</p>
-<h4 id="mysqldump注意事项"><a href="#mysqldump注意事项" class="headerlink" title="mysqldump注意事项"></a>mysqldump注意事项</h4><pre><code> 1，mysqldump  默认不会导出 INFORMATION_SCHEMA 库，但是在5.5之后可以在db
- 列表显示指定该库名并且加上 --skip-lock-tables 参数
- 2，5.5.25之前mysqldump 是不导出mysql系统库的general_log 和 slow_query_log 表，而在此之后mysqldump会生成
- 重建语句因此在reload 的时候这两个表不会丢失，但是表内容为空。
- 3，mysqldump 可以导出为cvs 和xml格式，对于导出为xml格式对配置文件的管理是一个不错的应用
-</code></pre>
+<h4 id="mysqldump注意事项"><a href="#mysqldump注意事项" class="headerlink" title="mysqldump注意事项"></a>mysqldump注意事项</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1，mysqldump  默认不会导出 INFORMATION_SCHEMA 库，但是在5.5之后可以在db</span><br><span class="line">列表显示指定该库名并且加上 --skip-lock-tables 参数</span><br><span class="line">2，5.5.25之前mysqldump 是不导出mysql系统库的general_log 和 slow_query_log 表，而在此之后mysqldump会生成</span><br><span class="line">重建语句因此在reload 的时候这两个表不会丢失，但是表内容为空。</span><br><span class="line">3，mysqldump 可以导出为cvs 和xml格式，对于导出为xml格式对配置文件的管理是一个不错的应用</span><br></pre></td></tr></table></figure>
 <h4 id="MySQL需要的最大内存"><a href="#MySQL需要的最大内存" class="headerlink" title="MySQL需要的最大内存"></a>MySQL需要的最大内存</h4><p>服务器允许的最大连接数，尽量不要设置太大，因为设置太大的话容易导致内存溢出，需要通过如下公式来确定：</p>
-<pre><code>SET @k_bytes = 1024; SET @m_bytes = @k_bytes * 1024; SET @g_bytes = @m_bytes * 1024; SELECT ( @@key_buffer_size + @@query_cache_size + @@tmp_table_size+ @@innodb_buffer_pool_size + @@innodb_additional_mem_pool_size+ @@innodb_log_buffer_size+ @@max_connections * ( @@read_buffer_size + @@read_rnd_buffer_size + @@sort_buffer_size+ @@join_buffer_size + @@binlog_cache_size + @@thread_stack ) ) / @g_bytes AS MAX_MEMORY_USED_GB;
-</code></pre>
-<h4 id="实现oracle的count-over"><a href="#实现oracle的count-over" class="headerlink" title="实现oracle的count() over()"></a>实现oracle的count() over()</h4><pre><code>select a.*,b.c_s from c_over a ,(select d ,d2 ,count(*) c_s from c_over group by d,d2  ) as b where a.d=b.d and a.d2=b.d2 order by a.name desc
-+---------------------+---------------------+------+-----+
-| d                   | d2                  | name | c_s |
-+---------------------+---------------------+------+-----+
-| 2013-12-30 18:27:55 | 2013-12-30 18:27:55 | ee   |   2 |
-| 2013-12-30 18:27:55 | 2013-12-30 18:27:55 | dd   |   2 |
-| 2013-12-30 18:27:48 | 2013-12-30 18:27:44 | bb   |   2 |
-| 2013-12-30 18:27:30 | 2013-12-30 18:27:30 | aa   |   1 |
-| 2013-12-30 18:27:48 | 2013-12-30 18:27:44 | aa   |   2 |
-+---------------------+---------------------+------+-----+
-</code></pre>
-<h4 id="实现oracle-的row-number-over"><a href="#实现oracle-的row-number-over" class="headerlink" title="实现oracle 的row_number() over()"></a>实现oracle 的row_number() over()</h4><pre><code>select a.id ,a.d ,if(@od=a.d,@rank:=@rank+1,@rank:=1) num ,@od:=a.d from (select id ,d from number c order by c.id) as a ,(select @od:=null,@rank:=0 ) as b;                                    
-+----+---------------------+------+---------------------+
-| id | d                   | num  | @od:=a.d            |
-+----+---------------------+------+---------------------+
-|  1 | 2013-12-30 17:14:11 |    1 | 2013-12-30 17:14:11 |
-|  2 | 2013-12-30 17:14:18 |    1 | 2013-12-30 17:14:18 |
-|  3 | 2013-12-30 17:14:28 |    1 | 2013-12-30 17:14:28 |
-|  4 | 2013-12-30 17:14:28 |    2 | 2013-12-30 17:14:28 |
-|  5 | 2013-12-30 17:15:33 |    1 | 2013-12-30 17:15:33 |
-|  6 | 2013-12-30 17:15:33 |    2 | 2013-12-30 17:15:33 |
-|  7 | 2013-12-30 17:15:33 |    3 | 2013-12-30 17:15:33 |
-+----+---------------------+------+---------------------+
-</code></pre>
-<h4 id="mysqldump-的时候忽略某些表"><a href="#mysqldump-的时候忽略某些表" class="headerlink" title="mysqldump 的时候忽略某些表"></a>mysqldump 的时候忽略某些表</h4><pre><code>mysqldump -uroot -pxxx  --ignore-table=db_name.table_name1 --ignore-table=db_name.table_name2 ... ... 
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SET @k_bytes = 1024; SET @m_bytes = @k_bytes * 1024; SET @g_bytes = @m_bytes * 1024; SELECT ( @@key_buffer_size + @@query_cache_size + @@tmp_table_size+ @@innodb_buffer_pool_size + @@innodb_additional_mem_pool_size+ @@innodb_log_buffer_size+ @@max_connections * ( @@read_buffer_size + @@read_rnd_buffer_size + @@sort_buffer_size+ @@join_buffer_size + @@binlog_cache_size + @@thread_stack ) ) / @g_bytes AS MAX_MEMORY_USED_GB;</span><br></pre></td></tr></table></figure>
+<h4 id="实现oracle的count-over"><a href="#实现oracle的count-over" class="headerlink" title="实现oracle的count() over()"></a>实现oracle的count() over()</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">select a.*,b.c_s from c_over a ,(select d ,d2 ,count(*) c_s from c_over group by d,d2  ) as b where a.d=b.d and a.d2=b.d2 order by a.name desc</span><br><span class="line">+---------------------+---------------------+------+-----+</span><br><span class="line">| d                   | d2                  | name | c_s |</span><br><span class="line">+---------------------+---------------------+------+-----+</span><br><span class="line">| 2013-12-30 18:27:55 | 2013-12-30 18:27:55 | ee   |   2 |</span><br><span class="line">| 2013-12-30 18:27:55 | 2013-12-30 18:27:55 | dd   |   2 |</span><br><span class="line">| 2013-12-30 18:27:48 | 2013-12-30 18:27:44 | bb   |   2 |</span><br><span class="line">| 2013-12-30 18:27:30 | 2013-12-30 18:27:30 | aa   |   1 |</span><br><span class="line">| 2013-12-30 18:27:48 | 2013-12-30 18:27:44 | aa   |   2 |</span><br><span class="line">+---------------------+---------------------+------+-----+</span><br></pre></td></tr></table></figure>
+<h4 id="实现oracle-的row-number-over"><a href="#实现oracle-的row-number-over" class="headerlink" title="实现oracle 的row_number() over()"></a>实现oracle 的row_number() over()</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">select a.id ,a.d ,if(@od=a.d,@rank:=@rank+1,@rank:=1) num ,@od:=a.d from (select id ,d from number c order by c.id) as a ,(select @od:=null,@rank:=0 ) as b;                                    </span><br><span class="line">+----+---------------------+------+---------------------+</span><br><span class="line">| id | d                   | num  | @od:=a.d            |</span><br><span class="line">+----+---------------------+------+---------------------+</span><br><span class="line">|  1 | 2013-12-30 17:14:11 |    1 | 2013-12-30 17:14:11 |</span><br><span class="line">|  2 | 2013-12-30 17:14:18 |    1 | 2013-12-30 17:14:18 |</span><br><span class="line">|  3 | 2013-12-30 17:14:28 |    1 | 2013-12-30 17:14:28 |</span><br><span class="line">|  4 | 2013-12-30 17:14:28 |    2 | 2013-12-30 17:14:28 |</span><br><span class="line">|  5 | 2013-12-30 17:15:33 |    1 | 2013-12-30 17:15:33 |</span><br><span class="line">|  6 | 2013-12-30 17:15:33 |    2 | 2013-12-30 17:15:33 |</span><br><span class="line">|  7 | 2013-12-30 17:15:33 |    3 | 2013-12-30 17:15:33 |</span><br><span class="line">+----+---------------------+------+---------------------+</span><br></pre></td></tr></table></figure>
+<h4 id="mysqldump-的时候忽略某些表"><a href="#mysqldump-的时候忽略某些表" class="headerlink" title="mysqldump 的时候忽略某些表"></a>mysqldump 的时候忽略某些表</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqldump -uroot -pxxx  --ignore-table=db_name.table_name1 --ignore-table=db_name.table_name2 ... ... </span><br></pre></td></tr></table></figure>
 <p>即每一个表需要完整的写一遍，而不是 –ignore-table&#x3D;db_name.table_name1 ，db_name.table_name2 挺土鳖的</p>
-<h4 id="修改mysql默认值无需copy表"><a href="#修改mysql默认值无需copy表" class="headerlink" title="修改mysql默认值无需copy表"></a>修改mysql默认值无需copy表</h4><pre><code>alter table tt modify t timestamp default &#39;0000-00-00 00:00:00&#39;;
-Query OK, 0 rows affected (0.03 sec)
-Records: 0  Duplicates: 0  Warnings: 0
-</code></pre>
+<h4 id="修改mysql默认值无需copy表"><a href="#修改mysql默认值无需copy表" class="headerlink" title="修改mysql默认值无需copy表"></a>修改mysql默认值无需copy表</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">alter table tt modify t timestamp default &#x27;0000-00-00 00:00:00&#x27;;</span><br><span class="line">Query OK, 0 rows affected (0.03 sec)</span><br><span class="line">Records: 0  Duplicates: 0  Warnings: 0</span><br></pre></td></tr></table></figure>
 <p>用modify 修改默认值 1572864 记录瞬间完成<br>如果你喜欢使用change那也行，多打几个字</p>
-<h4 id="查询会话时间超过10秒SQL"><a href="#查询会话时间超过10秒SQL" class="headerlink" title="查询会话时间超过10秒SQL"></a>查询会话时间超过10秒SQL</h4><pre><code>select * from  PROCESSLIST where command&lt;&gt;&quot;Sleep&quot;  and time &gt;10 AND DB is not null order by TIME desc limit 10;   
-</code></pre>
-<h4 id="实现时间计算迭代"><a href="#实现时间计算迭代" class="headerlink" title="实现时间计算迭代"></a>实现时间计算迭代</h4><pre><code>select to_char(add_months(to_date(&#39;201301&#39;,&#39;yyyymm&#39;),level-1),&#39;yyyymm&#39;) yyyymm  from dual connect by level &lt;13;
-</code></pre>
+<h4 id="查询会话时间超过10秒SQL"><a href="#查询会话时间超过10秒SQL" class="headerlink" title="查询会话时间超过10秒SQL"></a>查询会话时间超过10秒SQL</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from  PROCESSLIST where command&lt;&gt;&quot;Sleep&quot;  and time &gt;10 AND DB is not null order by TIME desc limit 10;   </span><br></pre></td></tr></table></figure>
+
+<h4 id="实现时间计算迭代"><a href="#实现时间计算迭代" class="headerlink" title="实现时间计算迭代"></a>实现时间计算迭代</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select to_char(add_months(to_date(&#x27;201301&#x27;,&#x27;yyyymm&#x27;),level-1),&#x27;yyyymm&#x27;) yyyymm  from dual connect by level &lt;13;</span><br></pre></td></tr></table></figure>
 <p>改写如下：</p>
-<pre><code>select date_format(date_add(now() ,interval f.seq month),&#39;%Y%m&#39;)  as m from (select ifnull(@rank,0),@rank:=@rank+1 as seq from (select 1 from dual union all select 0 from dual) as a ,(select 1 from dual union all select 0 from dual) as b,(select 1 from dual union all select 0 from dual) as c,(select 1 from dual union all select 0 from dual) as d,(select @rank:=0) as e ) as f where f.seq&lt;=12; 
-</code></pre>
+<p>  <code>select date_format(date_add(now() ,interval f.seq month),&#39;%Y%m&#39;)  as m from (select ifnull(@rank,0),@rank:=@rank+1 as seq from (select 1 from dual union all select 0 from dual) as a ,(select 1 from dual union all select 0 from dual) as b,(select 1 from dual union all select 0 from dual) as c,(select 1 from dual union all select 0 from dual) as d,(select @rank:=0) as e ) as f where f.seq&lt;=12; </code></p>
 <p>结果集：</p>
-<pre><code>+--------+
-| m      |
-+--------+
-| 201403 |
-| 201404 |
-| 201405 |
-| 201406 |
-| 201407 |
-| 201408 |
-| 201409 |
-| 201410 |
-| 201411 |
-| 201412 |
-| 201501 |
-| 201502 |
-+--------+
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">+--------+</span><br><span class="line">| m      |</span><br><span class="line">+--------+</span><br><span class="line">| 201403 |</span><br><span class="line">| 201404 |</span><br><span class="line">| 201405 |</span><br><span class="line">| 201406 |</span><br><span class="line">| 201407 |</span><br><span class="line">| 201408 |</span><br><span class="line">| 201409 |</span><br><span class="line">| 201410 |</span><br><span class="line">| 201411 |</span><br><span class="line">| 201412 |</span><br><span class="line">| 201501 |</span><br><span class="line">| 201502 |</span><br><span class="line">+--------+</span><br></pre></td></tr></table></figure>
 <h4 id="复制延迟参数的含义"><a href="#复制延迟参数的含义" class="headerlink" title="复制延迟参数的含义"></a>复制延迟参数的含义</h4><p>from : <a target="_blank" rel="noopener" href="http://www.dbunix.com/?p=3348">http://www.dbunix.com/?p=3348</a><br>源码：</p>
-<pre><code>long time_diff= ((long)(time(0) - mi-&gt;rli.last_master_timestamp)- mi-&gt;clock_diff_with_master);
-mi-&gt;clock_diff_with_master=(long) (time((time_t*) 0) - strtoul(master_row[0], 0, 10));
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">long time_diff= ((long)(time(0) - mi-&gt;rli.last_master_timestamp)- mi-&gt;clock_diff_with_master);</span><br><span class="line">mi-&gt;clock_diff_with_master=(long) (time((time_t*) 0) - strtoul(master_row[0], 0, 10));</span><br></pre></td></tr></table></figure>
 <p>结论：<br>seconds_behind_master&#x3D;(slave系统时间-master执行最新event的timestamp)-(slave系统时间-master系统时间)<br>(slave系统时间-master执行最新event的timestamp):得到最新event到slave执行还要多久。<br>(slave系统时间-master系统时间):可能存在主备系统时间差别，所以计算seconds_behind_master要减去，但实际情况，slave和master系统时间基本一致，得到结果应该接近0<br>文档中这句误导很多人计算seconds_behind_master</p>
-<pre><code>If the network is slow, this is not a good approximation; the slave SQL thread may quite often be caught up with the slow-reading slave I/O thread, so Seconds_Behind_Master often shows a value of 0
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">If the network is slow, this is not a good approximation; the slave SQL thread may quite often be caught up with the slow-reading slave I/O thread, so Seconds_Behind_Master often shows a value of 0</span><br></pre></td></tr></table></figure>
 <h4 id="INSERT-INTO-ON-DUPLICATE-KEY-UPDATE的问题"><a href="#INSERT-INTO-ON-DUPLICATE-KEY-UPDATE的问题" class="headerlink" title="INSERT INTO ON DUPLICATE KEY UPDATE的问题"></a>INSERT INTO ON DUPLICATE KEY UPDATE的问题</h4><p>很多小伙伴都知道该语句的用法是如果插入的数据和UNIQUE索引或PRIMARY KEY<br>重复则进行更新，但是如果是扩展插入好像不常见</p>
 <pre><code>INSERT INTO TABLE (a,b,c) VALUES
 (1,2,3),
 (4,5,6),
 </code></pre>
 <p>ON DUPLICATE KEY UPDATE b&#x3D;VALUES(b);<br>测试数据：</p>
-<pre><code>select * from group_t;
-+------+-----+------+
-| id   | id2 | id3  |
-+------+-----+------+
-|    2 |   1 |   10 |
-|    1 |   2 |    2 |
-|    1 |   3 |    2 |
-|    3 |   4 |    4 |
-|    2 |   5 |   10 |
-+------+-----+------+
-insert into group_t values (1,1,1),(1,2,1) ON DUPLICATE KEY update id3=values(id3);
-select * from group_t;
-+------+-----+------+
-| id   | id2 | id3  |
-+------+-----+------+
-|    2 |   1 |    1 |
-|    1 |   2 |    1 |
-|    1 |   3 |    2 |
-|    3 |   4 |    4 |
-|    2 |   5 |   10 |
-+------+-----+------+
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">select * from group_t;</span><br><span class="line">+------+-----+------+</span><br><span class="line">| id   | id2 | id3  |</span><br><span class="line">+------+-----+------+</span><br><span class="line">|    2 |   1 |   10 |</span><br><span class="line">|    1 |   2 |    2 |</span><br><span class="line">|    1 |   3 |    2 |</span><br><span class="line">|    3 |   4 |    4 |</span><br><span class="line">|    2 |   5 |   10 |</span><br><span class="line">+------+-----+------+</span><br><span class="line">insert into group_t values (1,1,1),(1,2,1) ON DUPLICATE KEY update id3=values(id3);</span><br><span class="line">select * from group_t;</span><br><span class="line">+------+-----+------+</span><br><span class="line">| id   | id2 | id3  |</span><br><span class="line">+------+-----+------+</span><br><span class="line">|    2 |   1 |    1 |</span><br><span class="line">|    1 |   2 |    1 |</span><br><span class="line">|    1 |   3 |    2 |</span><br><span class="line">|    3 |   4 |    4 |</span><br><span class="line">|    2 |   5 |   10 |</span><br><span class="line">+------+-----+------+</span><br></pre></td></tr></table></figure>
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><pre><code>依旧在路上 ...
 </code></pre>
   
@@ -478,12 +304,6 @@ select * from group_t;
 <aside class="clearfix">
 
   
-<div class="github-card">
-<p class="asidetitle">Github 名片</p>
-<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
-<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
-</div>
-
 
 
   
@@ -581,11 +401,11 @@ select * from group_t;
 			
 		
 			
-				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
 			
 		
 			
@@ -597,15 +417,15 @@ select * from group_t;
 			
 		
 			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
 			
 		
 		</ul>
@@ -618,7 +438,7 @@ select * from group_t;
         
           <li>
             
-            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title=" 内核月报">阿里内核月报</a>
             
           </li>
         
@@ -719,14 +539,12 @@ select * from group_t;
 	
 	
 	<section class="info">
-		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
-			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。欢迎交流。 <br/>
+			</p>
 	</section>
 	 
 	<div class="social-font" class="clearfix">
 		
-		
-		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
 		
 		
 		

@@ -19,7 +19,7 @@
 <meta property="og:description" content="Put PowerDNS to Practice PowerDNS is proud to be an open source product for DNS parsing . It is one such marvelous open alternative domain name system (DNS). PowerDNS is notably in use at some of the">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2015-03-30T05:50:53.000Z">
-<meta property="article:modified_time" content="2024-03-02T09:18:29.285Z">
+<meta property="article:modified_time" content="2024-03-03T02:19:42.620Z">
 <meta property="article:author" content="ruichao.lin">
 <meta property="article:tag" content="PowerDNS">
 <meta property="article:tag" content="DNS">
@@ -109,181 +109,37 @@
 <p>PowerDNS is proud to be an open source product for DNS parsing . It is one such marvelous open alternative domain name system (DNS). PowerDNS is notably in use at some of the largest ISPs and websites in the world, such as AOL, Shaw Cable, and even Wikipedia. Its compact codebase and focus on security, scalability, and reliability make it a great name server choice. PowerDNS is jam packed with features that would impress any network or system admin. </p>
 </blockquote>
 <p>###Good things : </p>
-<pre><code>    Authoritative DNS server (hosting)
-    Resolving DNS server (caching)
-    API to provision zones and records
-    DNSSEC support (as of 3.x)
-    Web-based management options
-    DNS data stored in plaintext (BIND compatible)
-    IPv4 and IPv6, UDP/TCP, 100% compliant
-    MySQL, PostgreSQL, Microsoft SQL Server, Oracle, Sybase database back ends
-    Load balancing/failover algorithms
-    SNMP support
-    Remotely pollable statistics for real-time graphing
-    Optional built-in web server
-    Debugging tools
-    Support for Linux, BSD, Unix
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Authoritative DNS server (hosting)</span><br><span class="line">Resolving DNS server (caching)</span><br><span class="line">API to provision zones and records</span><br><span class="line">DNSSEC support (as of 3.x)</span><br><span class="line">Web-based management options</span><br><span class="line">DNS data stored in plaintext (BIND compatible)</span><br><span class="line">IPv4 and IPv6, UDP/TCP, 100% compliant</span><br><span class="line">MySQL, PostgreSQL, Microsoft SQL Server, Oracle, Sybase database back ends</span><br><span class="line">Load balancing/failover algorithms</span><br><span class="line">SNMP support</span><br><span class="line">Remotely pollable statistics for real-time graphing</span><br><span class="line">Optional built-in web server</span><br><span class="line">Debugging tools</span><br><span class="line">Support for Linux, BSD, Unix</span><br></pre></td></tr></table></figure>
+
 <p>##Key components of PowerDNS </p>
 <h3 id="The-Authoritative-Server"><a href="#The-Authoritative-Server" class="headerlink" title="The Authoritative Server"></a>The Authoritative Server</h3><p>角色 : </p>
-<h4 id="1-Primary-server"><a href="#1-Primary-server" class="headerlink" title="1. Primary server"></a>1. Primary server</h4><pre><code>Sometimes called a master server, which is the original and definitive 
-source for all zone records for a domain.
-</code></pre>
-<h4 id="2-The-secondary-name-server"><a href="#2-The-secondary-name-server" class="headerlink" title="2. The secondary name server"></a>2. The secondary name server</h4><pre><code>Often called a slave server, is an identical replica used to provide redundancy and high availability.
-Like any service as vital as DNS, you should build redundancy into your infrastructure. That means at 
-least two or more of everything, or you will need much more than two aspirins to deal with the 
-headaches caused by downtime.
-</code></pre>
-<h3 id="The-PowerDNS-recursor"><a href="#The-PowerDNS-recursor" class="headerlink" title="The PowerDNS recursor"></a>The PowerDNS recursor</h3><pre><code>Simply provides caching or a standalone recursive resolver for clients accessing your network or the 
-greater Internet (i.e., it is your first line of DNS for client machines). Recall that it isn’t 
-authoritative but simply provides query resolution to the network client resolver (the client-side
-portion used to perform DNS queries) on your local machine.
-</code></pre>
-<h4 id="The-PowerDNS-recursor-supports"><a href="#The-PowerDNS-recursor-supports" class="headerlink" title="The PowerDNS recursor supports:"></a>The PowerDNS recursor supports:</h4><pre><code>All relevant standards
-Advanced anti-spoofing measures
-Reconfiguration without downtime
-Plain BIND zone files for “resolved hosting”
-Question interception, answer reconditioning, NXDOMAIN redirection
--(including “block lists” and security measures)
-The rec_control utility, an API for direct control of the PowerDNS recursor and to output data 
--to MRTG and RDD for pretty network graphs
-Local and remote access
-DNS64
-</code></pre>
+<h4 id="1-Primary-server"><a href="#1-Primary-server" class="headerlink" title="1. Primary server"></a>1. Primary server</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Sometimes called a master server, which is the original and definitive </span><br><span class="line">source for all zone records for a domain.</span><br></pre></td></tr></table></figure>
+<h4 id="2-The-secondary-name-server"><a href="#2-The-secondary-name-server" class="headerlink" title="2. The secondary name server"></a>2. The secondary name server</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Often called a slave server, is an identical replica used to provide redundancy and high availability.</span><br><span class="line">Like any service as vital as DNS, you should build redundancy into your infrastructure. That means at </span><br><span class="line">least two or more of everything, or you will need much more than two aspirins to deal with the </span><br><span class="line">headaches caused by downtime.</span><br></pre></td></tr></table></figure>
+
+<h3 id="The-PowerDNS-recursor"><a href="#The-PowerDNS-recursor" class="headerlink" title="The PowerDNS recursor"></a>The PowerDNS recursor</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Simply provides caching or a standalone recursive resolver for clients accessing your network or the </span><br><span class="line">greater Internet (i.e., it is your first line of DNS for client machines). Recall that it isn’t </span><br><span class="line">authoritative but simply provides query resolution to the network client resolver (the client-side</span><br><span class="line">portion used to perform DNS queries) on your local machine.</span><br></pre></td></tr></table></figure>
+<h4 id="The-PowerDNS-recursor-supports"><a href="#The-PowerDNS-recursor-supports" class="headerlink" title="The PowerDNS recursor supports:"></a>The PowerDNS recursor supports:</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">All relevant standards</span><br><span class="line">Advanced anti-spoofing measures</span><br><span class="line">Reconfiguration without downtime</span><br><span class="line">Plain BIND zone files for “resolved hosting”</span><br><span class="line">Question interception, answer reconditioning, NXDOMAIN redirection</span><br><span class="line">-(including “block lists” and security measures)</span><br><span class="line">The rec_control utility, an API for direct control of the PowerDNS recursor and to output data </span><br><span class="line">-to MRTG and RDD for pretty network graphs</span><br><span class="line">Local and remote access</span><br><span class="line">DNS64</span><br></pre></td></tr></table></figure>
 <p>##Installing the PowerDNS </p>
-<h3 id="install"><a href="#install" class="headerlink" title="install"></a>install</h3><pre><code>yum install wget
-wget http://soft.laozuo.org/powerdns/epel-release-6-8.noarch.rpm
-rpm -Uvh ./epel-release-6-8.noarch.rpm
-yum install pdns pdns-backend-mysql
-</code></pre>
+<h3 id="install"><a href="#install" class="headerlink" title="install"></a>install</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">yum install wget</span><br><span class="line">wget http://soft.laozuo.org/powerdns/epel-release-6-8.noarch.rpm</span><br><span class="line">rpm -Uvh ./epel-release-6-8.noarch.rpm</span><br><span class="line">yum install pdns pdns-backend-mysql</span><br></pre></td></tr></table></figure>
+
 <h3 id="configure"><a href="#configure" class="headerlink" title="configure"></a>configure</h3><p>BackEnd: MySQL </p>
-<pre><code>create database powerdnsdb; 
-GRANT ALL ON powerdns.* TO &#39;pownerdns&#39;@&#39;localhost&#39; IDENTIFIED BY &#39;pownerdns&#39;;
-FLUSH PRIVILEGES;
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">create database powerdnsdb; </span><br><span class="line">GRANT ALL ON powerdns.* TO &#x27;pownerdns&#x27;@&#x27;localhost&#x27; IDENTIFIED BY &#x27;pownerdns&#x27;;</span><br><span class="line">FLUSH PRIVILEGES;</span><br></pre></td></tr></table></figure>
 <p>SQL : </p>
-<pre><code>CREATE TABLE domains (
-  id                    INT AUTO_INCREMENT,
-  name                  VARCHAR(255) NOT NULL,
-  master                VARCHAR(128) DEFAULT NULL,
-  last_check            INT DEFAULT NULL,
-  type                  VARCHAR(6) NOT NULL,
-  notified_serial       INT DEFAULT NULL,
-  account               VARCHAR(40) DEFAULT NULL,
-  PRIMARY KEY (id)
-) Engine=InnoDB;    
-CREATE UNIQUE INDEX name_index ON domains(name);    
-
-CREATE TABLE records (
-  id                    INT AUTO_INCREMENT,
-  domain_id             INT DEFAULT NULL,
-  name                  VARCHAR(255) DEFAULT NULL,
-  type                  VARCHAR(10) DEFAULT NULL,
-  content               VARCHAR(64000) DEFAULT NULL,
-  ttl                   INT DEFAULT NULL,
-  prio                  INT DEFAULT NULL,
-  change_date           INT DEFAULT NULL,
-  disabled              TINYINT(1) DEFAULT 0,
-  ordername             VARCHAR(255) BINARY DEFAULT NULL,
-  auth                  TINYINT(1) DEFAULT 1,
-  PRIMARY KEY (id)
-) Engine=InnoDB;    
-CREATE INDEX nametype_index ON records(name,type);
-CREATE INDEX domain_id ON records(domain_id);
-CREATE INDEX recordorder ON records (domain_id, ordername); 
-
-CREATE TABLE supermasters (
-  ip                    VARCHAR(64) NOT NULL,
-  nameserver            VARCHAR(255) NOT NULL,
-  account               VARCHAR(40) NOT NULL,
-  PRIMARY KEY (ip, nameserver)
-) Engine=InnoDB;    
-
-CREATE TABLE comments (
-  id                    INT AUTO_INCREMENT,
-  domain_id             INT NOT NULL,
-  name                  VARCHAR(255) NOT NULL,
-  type                  VARCHAR(10) NOT NULL,
-  modified_at           INT NOT NULL,
-  account               VARCHAR(40) NOT NULL,
-  comment               VARCHAR(64000) NOT NULL,
-  PRIMARY KEY (id)
-) Engine=InnoDB;    
-CREATE INDEX comments_domain_id_idx ON comments (domain_id);
-CREATE INDEX comments_name_type_idx ON comments (name, type);
-CREATE INDEX comments_order_idx ON comments (domain_id, modified_at);   
-
-CREATE TABLE domainmetadata (
-  id                    INT AUTO_INCREMENT,
-  domain_id             INT NOT NULL,
-  kind                  VARCHAR(32),
-  content               TEXT,
-  PRIMARY KEY (id)
-) Engine=InnoDB;    
-CREATE INDEX domainmetadata_idx ON domainmetadata (domain_id, kind);    
-
-CREATE TABLE cryptokeys (
-  id                    INT AUTO_INCREMENT,
-  domain_id             INT NOT NULL,
-  flags                 INT NOT NULL,
-  active                BOOL,
-  content               TEXT,
-  PRIMARY KEY(id)
-) Engine=InnoDB;    
-CREATE INDEX domainidindex ON cryptokeys(domain_id);    
-
-CREATE TABLE tsigkeys (
-  id                    INT AUTO_INCREMENT,
-  name                  VARCHAR(255),
-  algorithm             VARCHAR(50),
-  secret                VARCHAR(255),
-  PRIMARY KEY (id)
-) Engine=InnoDB;    
-CREATE UNIQUE INDEX namealgoindex ON tsigkeys(name, algorithm);
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE domains (</span><br><span class="line">  id                    INT AUTO_INCREMENT,</span><br><span class="line">  name                  VARCHAR(255) NOT NULL,</span><br><span class="line">  master                VARCHAR(128) DEFAULT NULL,</span><br><span class="line">  last_check            INT DEFAULT NULL,</span><br><span class="line">  type                  VARCHAR(6) NOT NULL,</span><br><span class="line">  notified_serial       INT DEFAULT NULL,</span><br><span class="line">  account               VARCHAR(40) DEFAULT NULL,</span><br><span class="line">  PRIMARY KEY (id)</span><br><span class="line">) Engine=InnoDB;    </span><br><span class="line">CREATE UNIQUE INDEX name_index ON domains(name);    </span><br><span class="line"></span><br><span class="line">CREATE TABLE records (</span><br><span class="line">  id                    INT AUTO_INCREMENT,</span><br><span class="line">  domain_id             INT DEFAULT NULL,</span><br><span class="line">  name                  VARCHAR(255) DEFAULT NULL,</span><br><span class="line">  type                  VARCHAR(10) DEFAULT NULL,</span><br><span class="line">  content               VARCHAR(64000) DEFAULT NULL,</span><br><span class="line">  ttl                   INT DEFAULT NULL,</span><br><span class="line">  prio                  INT DEFAULT NULL,</span><br><span class="line">  change_date           INT DEFAULT NULL,</span><br><span class="line">  disabled              TINYINT(1) DEFAULT 0,</span><br><span class="line">  ordername             VARCHAR(255) BINARY DEFAULT NULL,</span><br><span class="line">  auth                  TINYINT(1) DEFAULT 1,</span><br><span class="line">  PRIMARY KEY (id)</span><br><span class="line">) Engine=InnoDB;    </span><br><span class="line">CREATE INDEX nametype_index ON records(name,type);</span><br><span class="line">CREATE INDEX domain_id ON records(domain_id);</span><br><span class="line">CREATE INDEX recordorder ON records (domain_id, ordername); </span><br><span class="line"></span><br><span class="line">CREATE TABLE supermasters (</span><br><span class="line">  ip                    VARCHAR(64) NOT NULL,</span><br><span class="line">  nameserver            VARCHAR(255) NOT NULL,</span><br><span class="line">  account               VARCHAR(40) NOT NULL,</span><br><span class="line">  PRIMARY KEY (ip, nameserver)</span><br><span class="line">) Engine=InnoDB;    </span><br><span class="line"></span><br><span class="line">CREATE TABLE comments (</span><br><span class="line">  id                    INT AUTO_INCREMENT,</span><br><span class="line">  domain_id             INT NOT NULL,</span><br><span class="line">  name                  VARCHAR(255) NOT NULL,</span><br><span class="line">  type                  VARCHAR(10) NOT NULL,</span><br><span class="line">  modified_at           INT NOT NULL,</span><br><span class="line">  account               VARCHAR(40) NOT NULL,</span><br><span class="line">  comment               VARCHAR(64000) NOT NULL,</span><br><span class="line">  PRIMARY KEY (id)</span><br><span class="line">) Engine=InnoDB;    </span><br><span class="line">CREATE INDEX comments_domain_id_idx ON comments (domain_id);</span><br><span class="line">CREATE INDEX comments_name_type_idx ON comments (name, type);</span><br><span class="line">CREATE INDEX comments_order_idx ON comments (domain_id, modified_at);   </span><br><span class="line"></span><br><span class="line">CREATE TABLE domainmetadata (</span><br><span class="line">  id                    INT AUTO_INCREMENT,</span><br><span class="line">  domain_id             INT NOT NULL,</span><br><span class="line">  kind                  VARCHAR(32),</span><br><span class="line">  content               TEXT,</span><br><span class="line">  PRIMARY KEY (id)</span><br><span class="line">) Engine=InnoDB;    </span><br><span class="line">CREATE INDEX domainmetadata_idx ON domainmetadata (domain_id, kind);    </span><br><span class="line"></span><br><span class="line">CREATE TABLE cryptokeys (</span><br><span class="line">  id                    INT AUTO_INCREMENT,</span><br><span class="line">  domain_id             INT NOT NULL,</span><br><span class="line">  flags                 INT NOT NULL,</span><br><span class="line">  active                BOOL,</span><br><span class="line">  content               TEXT,</span><br><span class="line">  PRIMARY KEY(id)</span><br><span class="line">) Engine=InnoDB;    </span><br><span class="line">CREATE INDEX domainidindex ON cryptokeys(domain_id);    </span><br><span class="line"></span><br><span class="line">CREATE TABLE tsigkeys (</span><br><span class="line">  id                    INT AUTO_INCREMENT,</span><br><span class="line">  name                  VARCHAR(255),</span><br><span class="line">  algorithm             VARCHAR(50),</span><br><span class="line">  secret                VARCHAR(255),</span><br><span class="line">  PRIMARY KEY (id)</span><br><span class="line">) Engine=InnoDB;    </span><br><span class="line">CREATE UNIQUE INDEX namealgoindex ON tsigkeys(name, algorithm);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>RECORD :  </p>
-<pre><code>*************************** 258. row ***************************
-       id: 649
-domain_id: 1
-     name: ruiaylin2.sjz.autohome.com.cn
-     type: A
-  content: 192.168.xx.xxx
-      ttl: 86400
-     prio: 0
-change_date: 1425371097
- disabled: 0
-ordername: NULL
-     auth: 1 
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">*************************** 258. row ***************************</span><br><span class="line">       id: 649</span><br><span class="line">domain_id: 1</span><br><span class="line">     name: ruiaylin2.sjz.autohome.com.cn</span><br><span class="line">     type: A</span><br><span class="line">  content: 192.168.xx.xxx</span><br><span class="line">      ttl: 86400</span><br><span class="line">     prio: 0</span><br><span class="line">change_date: 1425371097</span><br><span class="line"> disabled: 0</span><br><span class="line">ordername: NULL</span><br><span class="line">     auth: 1 </span><br></pre></td></tr></table></figure>
+
 <p>ADD DNS :</p>
-<pre><code>insert into records(
-domain_id, name, type, content, ttl, prio,change_date, disabled,  ordername, auth
-) values (
-1, &#39;ruiaylin3.sjz.autohome.com.cn&#39; , &#39;A&#39; , &#39;192.168.xx.xx&#39; , 86400, 0 , 1425371097 ,0,&#39;&#39;,1
-) ;
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">insert into records(</span><br><span class="line">domain_id, name, type, content, ttl, prio,change_date, disabled,  ordername, auth</span><br><span class="line">) values (</span><br><span class="line">1, &#x27;ruiaylin3.sjz.autohome.com.cn&#x27; , &#x27;A&#x27; , &#x27;192.168.xx.xx&#x27; , 86400, 0 , 1425371097 ,0,&#x27;&#x27;,1</span><br><span class="line">) ;</span><br></pre></td></tr></table></figure>
 <p>core variables : </p>
-<pre><code>forward-zones=autohome.com.cn=192.168.xxx.xxxx;192.168.xxx.xxx
-local-address=0.0.0.0
-max-cache-ttl=120  // dns cache invalid time 
-// other variables use the default value 
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">forward-zones=autohome.com.cn=192.168.xxx.xxxx;192.168.xxx.xxx</span><br><span class="line">local-address=0.0.0.0</span><br><span class="line">max-cache-ttl=120  // dns cache invalid time </span><br><span class="line">// other variables use the default value </span><br></pre></td></tr></table></figure>
 <p>##Installing the PowerDNS Recursor </p>
-<h3 id="CentOS-安装-recursor"><a href="#CentOS-安装-recursor" class="headerlink" title="CentOS 安装 recursor :"></a>CentOS 安装 recursor :</h3><pre><code>yum -y install pdns pdns-backend-mysql pdns-recursor
-</code></pre>
-<h3 id="configure-1"><a href="#configure-1" class="headerlink" title="configure :"></a>configure :</h3><pre><code>launch=gmysql
-gmysql-host=192.168.xxx.xxx
-gmysql-user=xxx
-gmysql-password=xxx
-gmysql-dbname=powerdnsdb 
-max-cache-ttl=120  // dns cache invalid time 
-// other variables use the default value 
-</code></pre>
-<h3 id="manage-recursor-service-："><a href="#manage-recursor-service-：" class="headerlink" title="manage recursor service ："></a>manage recursor service ：</h3><pre><code> service pdns-recursor start / stop 
-</code></pre>
+<h3 id="CentOS-安装-recursor"><a href="#CentOS-安装-recursor" class="headerlink" title="CentOS 安装 recursor :"></a>CentOS 安装 recursor :</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum -y install pdns pdns-backend-mysql pdns-recursor</span><br></pre></td></tr></table></figure>
+<h3 id="configure-1"><a href="#configure-1" class="headerlink" title="configure :"></a>configure :</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">launch=gmysql</span><br><span class="line">gmysql-host=192.168.xxx.xxx</span><br><span class="line">gmysql-user=xxx</span><br><span class="line">gmysql-password=xxx</span><br><span class="line">gmysql-dbname=powerdnsdb </span><br><span class="line">max-cache-ttl=120  // dns cache invalid time </span><br><span class="line">// other variables use the default value </span><br></pre></td></tr></table></figure>
+
+<h3 id="manage-recursor-service-："><a href="#manage-recursor-service-：" class="headerlink" title="manage recursor service ："></a>manage recursor service ：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service pdns-recursor start / stop </span><br></pre></td></tr></table></figure>
+
 <h2 id="Performance-and-Tuning"><a href="#Performance-and-Tuning" class="headerlink" title="Performance and Tuning"></a>Performance and Tuning</h2><p>We can reference the docs : <a target="_blank" rel="noopener" href="https://doc.powerdns.com/md/authoritative/performance/#performance-and-tuning">https://doc.powerdns.com/md/authoritative/performance/#performance-and-tuning</a></p>
-<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><pre><code>powerDNS is a alternative DNS for OPS basic service . Happy to use it ! 
-</code></pre>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>powerDNS is a alternative DNS for OPS basic service . Happy to use it ! </p>
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -357,12 +213,6 @@ max-cache-ttl=120  // dns cache invalid time
 <aside class="clearfix">
 
   
-<div class="github-card">
-<p class="asidetitle">Github 名片</p>
-<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
-<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
-</div>
-
 
 
   
@@ -460,11 +310,11 @@ max-cache-ttl=120  // dns cache invalid time
 			
 		
 			
-				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
 			
 		
 			
@@ -476,15 +326,15 @@ max-cache-ttl=120  // dns cache invalid time
 			
 		
 			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
 			
 		
 		</ul>
@@ -497,7 +347,7 @@ max-cache-ttl=120  // dns cache invalid time
         
           <li>
             
-            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title=" 内核月报">阿里内核月报</a>
             
           </li>
         
@@ -598,14 +448,12 @@ max-cache-ttl=120  // dns cache invalid time
 	
 	
 	<section class="info">
-		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
-			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。欢迎交流。 <br/>
+			</p>
 	</section>
 	 
 	<div class="social-font" class="clearfix">
 		
-		
-		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
 		
 		
 		

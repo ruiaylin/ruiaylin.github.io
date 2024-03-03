@@ -19,7 +19,7 @@
 <meta property="og:description" content="Xtrabackup 备份原理备份对任何系统来讲都是非常重要的一部分。作为一名DBA尤其如此，很多场景下必须要通过备份恢复数据，比如数据库升级，或者规模搭建备库等等。今天我们就谈谈备份恢复这个话题。众所周知备份分为冷备和热备，冷备:在数据库offline的情况下进行的备份，备份过程中是不可提供服务的；热备则是online的一种备份方式，热备过程中db对外正常提供服务 。今天主要是针对mysql数据">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2014-05-22T08:39:15.000Z">
-<meta property="article:modified_time" content="2024-03-02T09:18:29.305Z">
+<meta property="article:modified_time" content="2024-03-03T02:26:08.172Z">
 <meta property="article:author" content="ruichao.lin">
 <meta property="article:tag" content="Xtrabackup">
 <meta name="twitter:card" content="summary">
@@ -113,48 +113,25 @@
 <p>任务一：</p>
 </blockquote>
 <p>xtrabackup会在后台开启一个log-copying的线程，该线程会对redo log file进行监视，并把从lsn1(lsn1是Xtrabackup在启动时会从redo log file中获取最近一次的checkpoint对应的log sequence number lsn1 )开始增加的数据块（日志记录）不断的复制到备份集中一个叫xtrabackup_logfile的文件里面。日志copy操作，会在整个备份过程中一直进行，因为备份集做恢复的时候需要从lsn1开始到备份结束时所有日志记录，恢复原理就是 crash recover 的过程。 </p>
-<pre><code>注：
-log-copying 线程每一秒都会去 check 事务日志，看是否有新写入的需要copy走的日志项.但是有种可能性：
-log-copying 线程的copy的速度比写入redofile 的速度慢，有可能事务日志循环一周，造成会有一部分日志
-还没有被读取就被覆盖了,此时 log—copying 线程会报错，备份失败。
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">注：</span><br><span class="line">log-copying 线程每一秒都会去 check 事务日志，看是否有新写入的需要copy走的日志项.但是有种可能性：</span><br><span class="line">log-copying 线程的copy的速度比写入redofile 的速度慢，有可能事务日志循环一周，造成会有一部分日志</span><br><span class="line">还没有被读取就被覆盖了,此时 log—copying 线程会报错，备份失败。</span><br></pre></td></tr></table></figure>
+
 <p>… </p>
 <hr>
 <blockquote>
 <p>任务二：</p>
 </blockquote>
 <p>xtrabackup在进行copy redo 日志的同时会copy innodb的data file ， 当然这不是简单的复制，它使用了跟innodb类似的方式访问数据文件,访问数据字典，并以数据页为单位来进行copy。具体的细节如下：</p>
-<pre><code>  xtrabackup是以读写的方式打开数据文件的，尽管它不会修改数据。这是因为它使用内置的innodb的lib库
-来访问数据文件的，也隐含了你要用对数据文件有读写权限的用户来进行备份。innodb的lib库使用读写方式打
-开是因为正常情况下代开文件就预示着写数据。
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">  xtrabackup是以读写的方式打开数据文件的，尽管它不会修改数据。这是因为它使用内置的innodb的lib库</span><br><span class="line">来访问数据文件的，也隐含了你要用对数据文件有读写权限的用户来进行备份。innodb的lib库使用读写方式打</span><br><span class="line">开是因为正常情况下代开文件就预示着写数据。</span><br><span class="line"></span><br><span class="line">  在copy数据到备份目标目录的过程中，xtrabackup 每次读取1M数据（不可配置），copy日志文件的时候，</span><br><span class="line">每次读写512字节，同样不可以配置。数据读取之后，xtrabackup会对这1M的缓存数据块进行扫描，并对每一个</span><br><span class="line">数据页使用buf_page_is_corrupted()函数进行验证，看起是否损坏，如果page损坏了，对其重新读取并重新</span><br><span class="line">验证。如果重读10次都失败了，本次备份失败，那么备份失败。</span><br><span class="line">注 ： (It skips this check on the doublewrite buffer)</span><br></pre></td></tr></table></figure>
 
-  在copy数据到备份目标目录的过程中，xtrabackup 每次读取1M数据（不可配置），copy日志文件的时候，
-每次读写512字节，同样不可以配置。数据读取之后，xtrabackup会对这1M的缓存数据块进行扫描，并对每一个
-数据页使用buf_page_is_corrupted()函数进行验证，看起是否损坏，如果page损坏了，对其重新读取并重新
-验证。如果重读10次都失败了，本次备份失败，那么备份失败。
-注 ： (It skips this check on the doublewrite buffer)
-</code></pre>
 <h4 id="xtraback备份结尾"><a href="#xtraback备份结尾" class="headerlink" title="xtraback备份结尾"></a>xtraback备份结尾</h4><p>当数据文件复制完成，xtrabackup 会停掉log-copying线程，并在备份目录下创建一个<br>xtrabackup_checkpoints 的文件，该文件包含备份的类型，还有备份开始时的log sequence number，还有结束时的log sequence number 。备份过程中，我们会看到数据文件copy信息，也会看到日志复制线程重复的扫描日志文件，并进程copy的信息，信息如下： </p>
-<pre><code>&gt;&gt; log scanned up to (3646475465483)
-&gt;&gt; log scanned up to (3646475517369)
-&gt;&gt; log scanned up to (3646475581716)
-&gt;&gt; log scanned up to (3646475636841)
-&gt;&gt; log scanned up to (3646475718082)
-&gt;&gt; log scanned up to (3646475988095)
-&gt;&gt; log scanned up to (3646476048286)
-&gt;&gt; log scanned up to (3646476102877)
-&gt;&gt; log scanned up to (3646476140854)
-[01] Copying /usr/local/mysql/var/ibdata1
-    to /usr/local/mysql/Backups/2011-04-18_21-11-15/ibdata1
-[01]        ...done
-the log file thread repeatedly scanning the log files and copying from it
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt; log scanned up to (3646475465483)</span><br><span class="line">&gt;&gt; log scanned up to (3646475517369)</span><br><span class="line">&gt;&gt; log scanned up to (3646475581716)</span><br><span class="line">&gt;&gt; log scanned up to (3646475636841)</span><br><span class="line">&gt;&gt; log scanned up to (3646475718082)</span><br><span class="line">&gt;&gt; log scanned up to (3646475988095)</span><br><span class="line">&gt;&gt; log scanned up to (3646476048286)</span><br><span class="line">&gt;&gt; log scanned up to (3646476102877)</span><br><span class="line">&gt;&gt; log scanned up to (3646476140854)</span><br><span class="line">[01] Copying /usr/local/mysql/var/ibdata1</span><br><span class="line">    to /usr/local/mysql/Backups/2011-04-18_21-11-15/ibdata1</span><br><span class="line">[01]        ...done</span><br><span class="line">the log file thread repeatedly scanning the log files and copying from it</span><br></pre></td></tr></table></figure>
+
 <blockquote>
 <p>注 ： xtrabackup 的使用方式见之前的blog，最好参看官方文档</p>
 </blockquote>
 <p>…</p>
 <h3 id="一点感悟"><a href="#一点感悟" class="headerlink" title="一点感悟"></a>一点感悟</h3><hr>
-<p>  本文主要分析了一下xtrabackup工具的备份原理，以及备份过程中的细节。很多时候，作为DBA，把项目做好，支持好<br>的同时，技术细节也要把控到位 … 加油， boy</p>
+<p>本文主要分析了一下xtrabackup工具的备份原理，以及备份过程中的细节。很多时候，作为DBA，把项目做好，支持好<br>的同时，技术细节也要把控到位 … 加油， boy</p>
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -228,12 +205,6 @@ the log file thread repeatedly scanning the log files and copying from it
 <aside class="clearfix">
 
   
-<div class="github-card">
-<p class="asidetitle">Github 名片</p>
-<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
-<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
-</div>
-
 
 
   
@@ -331,11 +302,11 @@ the log file thread repeatedly scanning the log files and copying from it
 			
 		
 			
-				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
 			
 		
 			
@@ -347,15 +318,15 @@ the log file thread repeatedly scanning the log files and copying from it
 			
 		
 			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
 			
 		
 		</ul>
@@ -368,7 +339,7 @@ the log file thread repeatedly scanning the log files and copying from it
         
           <li>
             
-            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title=" 内核月报">阿里内核月报</a>
             
           </li>
         
@@ -469,14 +440,12 @@ the log file thread repeatedly scanning the log files and copying from it
 	
 	
 	<section class="info">
-		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
-			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。欢迎交流。 <br/>
+			</p>
 	</section>
 	 
 	<div class="social-font" class="clearfix">
 		
-		
-		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
 		
 		
 		

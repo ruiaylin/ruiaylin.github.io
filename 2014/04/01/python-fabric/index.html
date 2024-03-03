@@ -19,7 +19,7 @@
 <meta property="og:description" content="Fabric 部署工具Fabric 是基于 SSH 协议的 Python 工具，相比传统的 ssh&#x2F;scp 方式，用 Python 的语法写管理命令更易读也更容易扩展，管理单台或者多台机器犹如本地操作一般。 官网地址：http:&#x2F;&#x2F;fabfile.org 安装方法这里不在说明，推荐使用：pip 或者 easy_install 来安装。  传统维护方法：  $ ssh x.x.x.x &amp;#">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2014-04-01T08:34:03.000Z">
-<meta property="article:modified_time" content="2024-03-02T09:18:29.299Z">
+<meta property="article:modified_time" content="2024-03-03T02:20:08.079Z">
 <meta property="article:author" content="ruichao.lin">
 <meta property="article:tag" content="Fabric">
 <meta name="twitter:card" content="summary">
@@ -137,53 +137,13 @@ fab -f             -- 指定入口文件，fab默认入口文件是：fabfile/fa
 <blockquote>
 <p>常用的函数：</p>
 </blockquote>
-<pre><code>local(&#39;pwd&#39;)                     -- 执行本地命令
-lcd(&#39;/tmp&#39;)                      -- 切换本地目录
-cd(&#39;/tmp&#39;)                       -- 切换远程目录
-run(&#39;uname -a&#39;)                  -- 执行远程命令
-sudo(&#39;/etc/init.d/nginx start&#39;)  -- 执行远程sudo，注意pty选项
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">local(&#x27;pwd&#x27;)                     -- 执行本地命令</span><br><span class="line">lcd(&#x27;/tmp&#x27;)                      -- 切换本地目录</span><br><span class="line">cd(&#x27;/tmp&#x27;)                       -- 切换远程目录</span><br><span class="line">run(&#x27;uname -a&#x27;)                  -- 执行远程命令</span><br><span class="line">sudo(&#x27;/etc/init.d/nginx start&#x27;)  -- 执行远程sudo，注意pty选项</span><br></pre></td></tr></table></figure>
 <p>示例1：管理远程 nginx 服务</p>
-<pre><code>$ cat fabfile.py
-from fabric.api import *
-@task
-def nginx_start():
-    &#39;&#39;&#39; nginx start &#39;&#39;&#39;
-sudo(&#39;/etc/init.d/nginx start&#39;) 
-@task
-def nginx_stop():
-    &#39;&#39;&#39; nginx stop &#39;&#39;&#39;
-    sudo(&#39;/etc/init.d/nginx stop&#39;)
-
-$ fab --list      -- 查看可用命令
-Available commands:
-
-nginx_start  nginx start 
-nginx_stop   nginx stop
-
-$ fab -H x.x.x.x nginx_start  -- 启动 nginx
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">$ cat fabfile.py</span><br><span class="line">from fabric.api import *</span><br><span class="line">@task</span><br><span class="line">def nginx_start():</span><br><span class="line">    &#x27;&#x27;&#x27; nginx start &#x27;&#x27;&#x27;</span><br><span class="line">sudo(&#x27;/etc/init.d/nginx start&#x27;) </span><br><span class="line">@task</span><br><span class="line">def nginx_stop():</span><br><span class="line">    &#x27;&#x27;&#x27; nginx stop &#x27;&#x27;&#x27;</span><br><span class="line">    sudo(&#x27;/etc/init.d/nginx stop&#x27;)</span><br><span class="line"></span><br><span class="line">$ fab --list      -- 查看可用命令</span><br><span class="line">Available commands:</span><br><span class="line"></span><br><span class="line">nginx_start  nginx start </span><br><span class="line">nginx_stop   nginx stop</span><br><span class="line"></span><br><span class="line">$ fab -H x.x.x.x nginx_start  -- 启动 nginx</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>示例2：基于角色</p>
 </blockquote>
-<pre><code>$ cat fabfile.py
-from fabric.api import *
-env.roledefs = &#123;&#39;nginx&#39;: [&#39;x.x.x.x&#39;, &#39;y.y.y.y&#39;], &#39;mysql&#39;: &#39;z.z.z.z&#39;&#125;
-@task
-def mysql_start()
-    &#39;&#39;&#39; mysql start &#39;&#39;&#39;
-    sudo(&#39;/etc/init.d/mysql start&#39;)
-    
-$ fab --list      -- 查看可用命令
-Available commands 
-
-    nginx_start  nginx start 
-    nginx_stop   nginx stop
-    mysql_start  mysql start
-
-$ fab -R nginx nginx_start  -- 启动 nginx
-$ fab -R mysql mysql_start  -- 启动 mysql
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">$ cat fabfile.py</span><br><span class="line">from fabric.api import *</span><br><span class="line">env.roledefs = &#123;&#x27;nginx&#x27;: [&#x27;x.x.x.x&#x27;, &#x27;y.y.y.y&#x27;], &#x27;mysql&#x27;: &#x27;z.z.z.z&#x27;&#125;</span><br><span class="line">@task</span><br><span class="line">def mysql_start()</span><br><span class="line">    &#x27;&#x27;&#x27; mysql start &#x27;&#x27;&#x27;</span><br><span class="line">    sudo(&#x27;/etc/init.d/mysql start&#x27;)</span><br><span class="line">    </span><br><span class="line">$ fab --list      -- 查看可用命令</span><br><span class="line">Available commands </span><br><span class="line"></span><br><span class="line">    nginx_start  nginx start </span><br><span class="line">    nginx_stop   nginx stop</span><br><span class="line">    mysql_start  mysql start</span><br><span class="line"></span><br><span class="line">$ fab -R nginx nginx_start  -- 启动 nginx</span><br><span class="line">$ fab -R mysql mysql_start  -- 启动 mysql</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>示例3：混合本地和远程操作</p>
 </blockquote>
@@ -262,12 +222,6 @@ $ fab -R mysql mysql_start  -- 启动 mysql
 <aside class="clearfix">
 
   
-<div class="github-card">
-<p class="asidetitle">Github 名片</p>
-<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
-<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
-</div>
-
 
 
   
@@ -365,11 +319,11 @@ $ fab -R mysql mysql_start  -- 启动 mysql
 			
 		
 			
-				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
 			
 		
 			
@@ -381,15 +335,15 @@ $ fab -R mysql mysql_start  -- 启动 mysql
 			
 		
 			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
 			
 		
 		</ul>
@@ -402,7 +356,7 @@ $ fab -R mysql mysql_start  -- 启动 mysql
         
           <li>
             
-            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title=" 内核月报">阿里内核月报</a>
             
           </li>
         
@@ -503,14 +457,12 @@ $ fab -R mysql mysql_start  -- 启动 mysql
 	
 	
 	<section class="info">
-		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
-			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。欢迎交流。 <br/>
+			</p>
 	</section>
 	 
 	<div class="social-font" class="clearfix">
 		
-		
-		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
 		
 		
 		

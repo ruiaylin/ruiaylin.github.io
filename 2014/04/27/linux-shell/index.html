@@ -19,7 +19,7 @@
 <meta property="og:description" content="作为一个运维工程师（数据库工程师） ，管理和维护成百上千台服务器是很正常的事情，脚本就成为了不可或缺的工具，shell是最基本的了，工作中经常用到，自己讲偶尔犯错的部分记录一下，警示自己。另外，shell 是Linux原生的交互工具，使用方便，简单，可以在运维工作中 ，大大的提高工作效率，对日常简单的任务都可以由shell处理 ， 哈哈 。 当然也有不合适的地方。比如说：   需要比数组更复杂的">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2014-04-27T08:31:22.000Z">
-<meta property="article:modified_time" content="2024-03-02T09:18:29.290Z">
+<meta property="article:modified_time" content="2024-03-03T02:08:49.654Z">
 <meta property="article:author" content="ruichao.lin">
 <meta property="article:tag" content="Shell">
 <meta name="twitter:card" content="summary">
@@ -186,15 +186,7 @@ done
 <h4 id="5-function-，shell-定义函数非常方便"><a href="#5-function-，shell-定义函数非常方便" class="headerlink" title="5. function ，shell 定义函数非常方便"></a>5. function ，shell 定义函数非常方便</h4><blockquote>
 <p>把相同的功能模块定义为function ， 可以提高代码的重用性和可读性,如下读取文件代码 ： </p>
 </blockquote>
-<pre><code>GetFileLines() &#123;     
-    local sum=0
-    local line=””
-    while read line ; do
-        sum=$(($&#123;sum&#125; + $&#123;line&#125;))
-    done
-    echo $&#123;sum&#125;
-&#125; 
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">GetFileLines() &#123;     </span><br><span class="line">    local sum=0</span><br><span class="line">    local line=””</span><br><span class="line">    while read line ; do</span><br><span class="line">        sum=$(($&#123;sum&#125; + $&#123;line&#125;))</span><br><span class="line">    done</span><br><span class="line">    echo $&#123;sum&#125;</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
 <h4 id="6-用-替代"><a href="#6-用-替代" class="headerlink" title="6. 用[]替代[]"></a>6. 用<a href="%E5%8F%8C%E5%B1%82%E4%B8%AD%E6%8B%AC%E5%8F%B7">[]</a>替代[]</h4><blockquote>
 <p>使用[[]]能避免像异常的文件扩展名之类的问题，而且能带来很多语法上的改进<br>，而且还增加了很多新功能：</p>
 </blockquote>
@@ -242,51 +234,19 @@ done
 abc*)  &lt;action&gt; ;;
 esac
 </code></pre>
-<h4 id="7-字符串操作"><a href="#7-字符串操作" class="headerlink" title="7. 字符串操作"></a>7. 字符串操作</h4><pre><code>$&#123;#string&#125;                              $string的长度 
-$&#123;string:position&#125;                      从位置$position开始提取子串
-$&#123;string:position:length&#125;               从位置$position开始,长度为$length的子串
-$&#123;string#substring&#125;                     从开头, 删除最短匹配$substring的子串
-$&#123;string##substring&#125;                    从开头, 删除最长匹配$substring的子串
-$&#123;string%substring&#125;                     从结尾, 删除最短匹配$substring的子串
-$&#123;string%%substring&#125;                    从结尾, 删除最长匹配$substring的子串
-$&#123;string/substring/replacement&#125;        $replacement,替换第一个匹配的$substring
-$&#123;string//substring/replacement&#125;       $replacement, 代替所有匹配的$substring
-$&#123;string/#substring/replacement&#125;       $string的前缀匹配$substring ,替换
-$&#123;string/%substring/replacement&#125;       $string的后缀匹配$substring, 替换
-</code></pre>
+<h4 id="7-字符串操作"><a href="#7-字符串操作" class="headerlink" title="7. 字符串操作"></a>7. 字符串操作</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$&#123;#string&#125;                              $string的长度 </span><br><span class="line">$&#123;string:position&#125;                      从位置$position开始提取子串</span><br><span class="line">$&#123;string:position:length&#125;               从位置$position开始,长度为$length的子串</span><br><span class="line">$&#123;string#substring&#125;                     从开头, 删除最短匹配$substring的子串</span><br><span class="line">$&#123;string##substring&#125;                    从开头, 删除最长匹配$substring的子串</span><br><span class="line">$&#123;string%substring&#125;                     从结尾, 删除最短匹配$substring的子串</span><br><span class="line">$&#123;string%%substring&#125;                    从结尾, 删除最长匹配$substring的子串</span><br><span class="line">$&#123;string/substring/replacement&#125;        $replacement,替换第一个匹配的$substring</span><br><span class="line">$&#123;string//substring/replacement&#125;       $replacement, 代替所有匹配的$substring</span><br><span class="line">$&#123;string/#substring/replacement&#125;       $string的前缀匹配$substring ,替换</span><br><span class="line">$&#123;string/%substring/replacement&#125;       $string的后缀匹配$substring, 替换</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>Bash里有各种各样操作字符串的方式<br>基本用户</p>
 </blockquote>
-<pre><code>    f=&quot;path1/path2/file.ext&quot; 
-    len=&quot;$&#123;#f&#125;&quot; # = 20 (字符串长度) 
-    # 切片操作: $&#123;&lt;var&gt;:&lt;start&gt;&#125; or $&#123;&lt;var&gt;:&lt;start&gt;:&lt;length&gt;&#125;
-    slice1=&quot;$&#123;f:6&#125;&quot; # = &quot;path2/file.ext&quot;
-    slice2=&quot;$&#123;f:6:5&#125;&quot; # = &quot;path2&quot;
-    slice3=&quot;$&#123;f: -8&#125;&quot; # = &quot;file.ext&quot;(注意：&quot;-&quot;前有空格)
-    pos=6
-    len=5
-    slice4=&quot;$&#123;f:$&#123;pos&#125;:$&#123;len&#125;&#125;&quot; # = &quot;path2&quot;
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">f=&quot;path1/path2/file.ext&quot; </span><br><span class="line">len=&quot;$&#123;#f&#125;&quot; # = 20 (字符串长度) </span><br><span class="line"># 切片操作: $&#123;&lt;var&gt;:&lt;start&gt;&#125; or $&#123;&lt;var&gt;:&lt;start&gt;:&lt;length&gt;&#125;</span><br><span class="line">slice1=&quot;$&#123;f:6&#125;&quot; # = &quot;path2/file.ext&quot;</span><br><span class="line">slice2=&quot;$&#123;f:6:5&#125;&quot; # = &quot;path2&quot;</span><br><span class="line">slice3=&quot;$&#123;f: -8&#125;&quot; # = &quot;file.ext&quot;(注意：&quot;-&quot;前有空格)</span><br><span class="line">pos=6</span><br><span class="line">len=5</span><br><span class="line">slice4=&quot;$&#123;f:$&#123;pos&#125;:$&#123;len&#125;&#125;&quot; # = &quot;path2&quot;</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>替换操作</p>
 </blockquote>
-<pre><code>f=&quot;path1/path2/file.ext&quot; 
-single_subst=&quot;$&#123;f/path?/x&#125;&quot;   # = &quot;x/path2/file.ext&quot;
-global_subst=&quot;$&#123;f//path?/x&#125;&quot;  # = &quot;x/x/file.ext&quot; 
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">f=&quot;path1/path2/file.ext&quot; </span><br><span class="line">single_subst=&quot;$&#123;f/path?/x&#125;&quot;   # = &quot;x/path2/file.ext&quot;</span><br><span class="line">global_subst=&quot;$&#123;f//path?/x&#125;&quot;  # = &quot;x/x/file.ext&quot; </span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>删除头部或尾部 </p>
 </blockquote>
-<pre><code>f=&quot;path1/path2/file.ext&quot;
-# 删除字符串头部
-extension=&quot;$&#123;f#*.&#125;&quot;  # = &quot;ext&quot;
-# 以贪婪匹配方式删除字符串头部
-filename=&quot;$&#123;f##*/&#125;&quot;  # = &quot;file.ext&quot;
-# 删除字符串尾部
-dirname=&quot;$&#123;f%/*&#125;&quot;    # = &quot;path1/path2&quot; 
-# 以贪婪匹配方式删除字符串尾部
-root=&quot;$&#123;f%%/*&#125;&quot;      # = &quot;path1&quot;
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">f=&quot;path1/path2/file.ext&quot;</span><br><span class="line"># 删除字符串头部</span><br><span class="line">extension=&quot;$&#123;f#*.&#125;&quot;  # = &quot;ext&quot;</span><br><span class="line"># 以贪婪匹配方式删除字符串头部</span><br><span class="line">filename=&quot;$&#123;f##*/&#125;&quot;  # = &quot;file.ext&quot;</span><br><span class="line"># 删除字符串尾部</span><br><span class="line">dirname=&quot;$&#123;f%/*&#125;&quot;    # = &quot;path1/path2&quot; </span><br><span class="line"># 以贪婪匹配方式删除字符串尾部</span><br><span class="line">root=&quot;$&#123;f%%/*&#125;&quot;      # = &quot;path1&quot;</span><br></pre></td></tr></table></figure>
 <h4 id="8-分割字符串"><a href="#8-分割字符串" class="headerlink" title="8.分割字符串"></a>8.分割字符串</h4><blockquote>
 <p>假设变量$str的值为foo-bar-baz，如果你想按-分割成多个段并遍历它，可以使用read命令，<br>并且设置 IFS 的值为-:</p>
 </blockquote>
@@ -304,8 +264,8 @@ root=&quot;$&#123;f%%/*&#125;&quot;      # = &quot;path1&quot;
 </code></pre>
 <h4 id="10-去除行尾的最后一个字符"><a href="#10-去除行尾的最后一个字符" class="headerlink" title="10.去除行尾的最后一个字符"></a>10.去除行尾的最后一个字符</h4><pre><code>awk -F &quot;&quot; -v OFS=&quot;&quot;  &#39;$NF=&quot;&quot; &#123;print&#125;1&#39;
 </code></pre>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><pre><code>shell 使用比较方便，系统原生，属于轻量级脚本，但是不得不承认，语法上面不如Python 简洁，另外shell 用起来很多地方容易出错。 
-</code></pre>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell 使用比较方便，系统原生，属于轻量级脚本，但是不得不承认，语法上面不如Python 简洁，另外shell 用起来很多地方容易出错。 </span><br></pre></td></tr></table></figure>
+
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -379,12 +339,6 @@ root=&quot;$&#123;f%%/*&#125;&quot;      # = &quot;path1&quot;
 <aside class="clearfix">
 
   
-<div class="github-card">
-<p class="asidetitle">Github 名片</p>
-<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
-<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
-</div>
-
 
 
   
@@ -482,11 +436,11 @@ root=&quot;$&#123;f%%/*&#125;&quot;      # = &quot;path1&quot;
 			
 		
 			
-				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
 			
 		
 			
@@ -498,15 +452,15 @@ root=&quot;$&#123;f%%/*&#125;&quot;      # = &quot;path1&quot;
 			
 		
 			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
 			
 		
 		</ul>
@@ -519,7 +473,7 @@ root=&quot;$&#123;f%%/*&#125;&quot;      # = &quot;path1&quot;
         
           <li>
             
-            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title=" 内核月报">阿里内核月报</a>
             
           </li>
         
@@ -620,14 +574,12 @@ root=&quot;$&#123;f%%/*&#125;&quot;      # = &quot;path1&quot;
 	
 	
 	<section class="info">
-		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
-			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。欢迎交流。 <br/>
+			</p>
 	</section>
 	 
 	<div class="social-font" class="clearfix">
 		
-		
-		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
 		
 		
 		

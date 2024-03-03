@@ -11,15 +11,15 @@
     
 
     
-    <meta name="description" content="MHA 维护命令SSH登陆检查masterha_check_ssh --conf&#x3D;&#x2F;mha&#x2F;mha_groups&#x2F;app1.cnf  REPL 健康检查masterha_check_repl --conf&#x3D;&#x2F;mha&#x2F;mha_groups&#x2F;app1.cnf  启动MHA监控进程nohup masterha_manager --conf&#x3D;&#x2F;mha&#x2F;mha_groups&#x2F;app1.cnf &gt; &#x2F;t">
+    <meta name="description" content="MHA 维护命令SSH登陆检查1masterha_check_ssh --conf&#x3D;&#x2F;mha&#x2F;mha_groups&#x2F;app1.cnf REPL 健康检查1masterha_check_repl --conf&#x3D;&#x2F;mha&#x2F;mha_groups&#x2F;app1.cnf 启动MHA监控进程1nohup masterha_manager --conf&#x3D;&#x2F;mha&#x2F;mha_groups&#x2F;app1.cnf &gt; &#x2F;">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【 MHA 】Management&amp;Maintain">
 <meta property="og:url" content="http://ruiaylin.github.io/2015/03/05/mha-manager/index.html">
 <meta property="og:site_name" content="ruiayLin&#39;s Blog">
-<meta property="og:description" content="MHA 维护命令SSH登陆检查masterha_check_ssh --conf&#x3D;&#x2F;mha&#x2F;mha_groups&#x2F;app1.cnf  REPL 健康检查masterha_check_repl --conf&#x3D;&#x2F;mha&#x2F;mha_groups&#x2F;app1.cnf  启动MHA监控进程nohup masterha_manager --conf&#x3D;&#x2F;mha&#x2F;mha_groups&#x2F;app1.cnf &gt; &#x2F;t">
+<meta property="og:description" content="MHA 维护命令SSH登陆检查1masterha_check_ssh --conf&#x3D;&#x2F;mha&#x2F;mha_groups&#x2F;app1.cnf REPL 健康检查1masterha_check_repl --conf&#x3D;&#x2F;mha&#x2F;mha_groups&#x2F;app1.cnf 启动MHA监控进程1nohup masterha_manager --conf&#x3D;&#x2F;mha&#x2F;mha_groups&#x2F;app1.cnf &gt; &#x2F;">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2015-03-05T05:50:53.000Z">
-<meta property="article:modified_time" content="2024-03-02T09:18:29.292Z">
+<meta property="article:modified_time" content="2024-03-03T02:11:37.251Z">
 <meta property="article:author" content="ruichao.lin">
 <meta property="article:tag" content="MySQL">
 <meta property="article:tag" content="MHA">
@@ -105,19 +105,13 @@
 		
 		</div>
 		
-		<h4 id="MHA-维护命令"><a href="#MHA-维护命令" class="headerlink" title="MHA 维护命令"></a>MHA 维护命令</h4><h5 id="SSH登陆检查"><a href="#SSH登陆检查" class="headerlink" title="SSH登陆检查"></a>SSH登陆检查</h5><pre><code>masterha_check_ssh --conf=/mha/mha_groups/app1.cnf
-</code></pre>
-<h5 id="REPL-健康检查"><a href="#REPL-健康检查" class="headerlink" title="REPL 健康检查"></a>REPL 健康检查</h5><pre><code>masterha_check_repl --conf=/mha/mha_groups/app1.cnf
-</code></pre>
-<h5 id="启动MHA监控进程"><a href="#启动MHA监控进程" class="headerlink" title="启动MHA监控进程"></a>启动MHA监控进程</h5><pre><code>nohup masterha_manager --conf=/mha/mha_groups/app1.cnf &gt; /tmp/mha_manager.log  &lt; /dev/null 2&gt;&amp;1 &amp; 
-</code></pre>
+		<h4 id="MHA-维护命令"><a href="#MHA-维护命令" class="headerlink" title="MHA 维护命令"></a>MHA 维护命令</h4><h5 id="SSH登陆检查"><a href="#SSH登陆检查" class="headerlink" title="SSH登陆检查"></a>SSH登陆检查</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">masterha_check_ssh --conf=/mha/mha_groups/app1.cnf</span><br></pre></td></tr></table></figure>
+<h5 id="REPL-健康检查"><a href="#REPL-健康检查" class="headerlink" title="REPL 健康检查"></a>REPL 健康检查</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">masterha_check_repl --conf=/mha/mha_groups/app1.cnf</span><br></pre></td></tr></table></figure>
+<h5 id="启动MHA监控进程"><a href="#启动MHA监控进程" class="headerlink" title="启动MHA监控进程"></a>启动MHA监控进程</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nohup masterha_manager --conf=/mha/mha_groups/app1.cnf &gt; /tmp/mha_manager.log  &lt; /dev/null 2&gt;&amp;1 &amp; </span><br></pre></td></tr></table></figure>
 <p>–ignore_fail_on_start 即使有节点宕掉也能启动mha</p>
-<pre><code>masterha_manager --conf=/mha/mha_groups/app1.cnf  --ignore_fail_on_start &gt;  /tmp/mha_manager.log  &lt; /dev/null 2&gt;&amp;1 &amp; 
-</code></pre>
-<h5 id="检查监控进程的状态"><a href="#检查监控进程的状态" class="headerlink" title="检查监控进程的状态"></a>检查监控进程的状态</h5><pre><code>masterha_check_status --conf=/mha/mha_groups/app1.cnf
-</code></pre>
-<h5 id="停止监控进程"><a href="#停止监控进程" class="headerlink" title="停止监控进程"></a>停止监控进程</h5><pre><code>masterha_stop  --conf=/mha/mha_groups/app1.cnf
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">masterha_manager --conf=/mha/mha_groups/app1.cnf  --ignore_fail_on_start &gt;  /tmp/mha_manager.log  &lt; /dev/null 2&gt;&amp;1 &amp; </span><br></pre></td></tr></table></figure>
+<h5 id="检查监控进程的状态"><a href="#检查监控进程的状态" class="headerlink" title="检查监控进程的状态"></a>检查监控进程的状态</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">masterha_check_status --conf=/mha/mha_groups/app1.cnf</span><br></pre></td></tr></table></figure>
+<h5 id="停止监控进程"><a href="#停止监控进程" class="headerlink" title="停止监控进程"></a>停止监控进程</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">masterha_stop  --conf=/mha/mha_groups/app1.cnf</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>注意</p>
 </blockquote>
@@ -126,20 +120,15 @@
 </code></pre>
 <p>也可以加上参数–ignore_last_failover</p>
 <h4 id="人为手工切换failover"><a href="#人为手工切换failover" class="headerlink" title="人为手工切换failover"></a>人为手工切换failover</h4><p>masterha_manager没有开启，可以通过手工failover：</p>
-<pre><code>masterha_master_switch --conf=/mha/mha_groups/app1.cnf --dead_master_host=192.168.224.14 --dead_master_port=3307 --master_state=dead --new_master_host=192.168.224.13  --new_master_port=3307 --ignore_last_failover
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">masterha_master_switch --conf=/mha/mha_groups/app1.cnf --dead_master_host=192.168.224.14 --dead_master_port=3307 --master_state=dead --new_master_host=192.168.224.13  --new_master_port=3307 --ignore_last_failover</span><br></pre></td></tr></table></figure>
 <h4 id="手动正常切换"><a href="#手动正常切换" class="headerlink" title="手动正常切换"></a>手动正常切换</h4><p>人为在线切换之前需要停掉 mha监控进程：</p>
-<pre><code>masterha_stop --conf=/mha/mha_groups/app1.cnf
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">masterha_stop --conf=/mha/mha_groups/app1.cnf</span><br></pre></td></tr></table></figure>
 <p>然后手动切换</p>
-<pre><code>masterha_master_switch --conf=/mha/mha_groups/app1.cnf --master_state=alive  --new_master_host=192.168.224.14  --new_master_port=3307  --orig_master_is_new_slave
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">masterha_master_switch --conf=/mha/mha_groups/app1.cnf --master_state=alive  --new_master_host=192.168.224.14  --new_master_port=3307  --orig_master_is_new_slave</span><br></pre></td></tr></table></figure>
 <p>或者</p>
-<pre><code>masterha_master_switch --conf=/etc/app1.cnf --master_state=alive --new_master_host=192.168.119.74 --orig_master_is_new_slave --running_updates_limit=10000
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">masterha_master_switch --conf=/etc/app1.cnf --master_state=alive --new_master_host=192.168.119.74 --orig_master_is_new_slave --running_updates_limit=10000</span><br></pre></td></tr></table></figure>
 <p>或者：</p>
-<pre><code>masterha_master_switch --conf=/mha/mha_groups/app1.cnf --master_state=alive   --orig_master_is_new_slave
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">masterha_master_switch --conf=/mha/mha_groups/app1.cnf --master_state=alive   --orig_master_is_new_slave</span><br></pre></td></tr></table></figure>
 <p>–orig_master_is_new_slave 将原master变为slave节点 </p>
 <p>–running_updates_limit&#x3D;10000 切换时候选master如果有延迟的话，mha切换不能成功，加上此参数表示延迟在此时间范围内都可切换（单位为s）  </p>
 <h4 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h4><p>MHA 总体还是比较简单的，测试过程中没有出过太多问题， 接下来我们会针对，内部DNS和MHA结合的部分来进行大致的代码实现。</p>
@@ -216,12 +205,6 @@
 <aside class="clearfix">
 
   
-<div class="github-card">
-<p class="asidetitle">Github 名片</p>
-<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
-<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
-</div>
-
 
 
   
@@ -319,11 +302,11 @@
 			
 		
 			
-				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
 			
 		
 			
@@ -335,15 +318,15 @@
 			
 		
 			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
 			
 		
 		</ul>
@@ -356,7 +339,7 @@
         
           <li>
             
-            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title=" 内核月报">阿里内核月报</a>
             
           </li>
         
@@ -457,14 +440,12 @@
 	
 	
 	<section class="info">
-		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
-			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。欢迎交流。 <br/>
+			</p>
 	</section>
 	 
 	<div class="social-font" class="clearfix">
 		
-		
-		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
 		
 		
 		

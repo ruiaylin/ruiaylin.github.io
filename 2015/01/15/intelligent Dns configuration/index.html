@@ -22,7 +22,7 @@
 <meta property="og:image" content="http://bind-dlz.sourceforge.net/images/practices/best_practices_3.gif">
 <meta property="og:image" content="http://bind-dlz.sourceforge.net/images/practices/worst_practices_1.gif">
 <meta property="article:published_time" content="2015-01-15T08:50:53.000Z">
-<meta property="article:modified_time" content="2024-03-02T09:18:29.289Z">
+<meta property="article:modified_time" content="2024-03-03T02:08:11.646Z">
 <meta property="article:author" content="ruichao.lin">
 <meta property="article:tag" content="DNS">
 <meta property="article:tag" content="BIND">
@@ -132,29 +132,13 @@
 </blockquote>
 <p><img src="http://bind-dlz.sourceforge.net/images/practices/worst_practices_1.gif" alt="Bad Practise 2 " title="Bad practise"></p>
 <h2 id="BIND-DLZ安装配置"><a href="#BIND-DLZ安装配置" class="headerlink" title="BIND-DLZ安装配置"></a>BIND-DLZ安装配置</h2><h3 id="安装-bind-最新版本-bind-9-10-1"><a href="#安装-bind-最新版本-bind-9-10-1" class="headerlink" title="安装 bind 最新版本 bind-9.10.1"></a>安装 bind 最新版本 bind-9.10.1</h3><p>安装 bind,由于公司用的 percona 版本的数据库，需要设置一些 client的lib包</p>
-<pre><code>ln -s  /usr/local/mysql/lib/libperconaserverclient.so /lib64/libmysqlclient.so
-cd /tmp/
-wget ftp://ftp.isc.org/isc/bind9/9.10.1-P1/bind-9.10.1-P1.tar.gz
-tar zxvf bind-9.10.1-P1.tar.gz
-cd bind-9.10.1-P1
-./configure --with-dlz-mysql --enable-largefile --enable-threads=no --prefix=/usr/local/bind --with-openssl=/usr/local/openssl/
-注：禁掉线程;--with-openssl=  你的 openssl安装的相关目录有可能是/usr
-make -j4 &amp;&amp; make install
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ln -s  /usr/local/mysql/lib/libperconaserverclient.so /lib64/libmysqlclient.so</span><br><span class="line">cd /tmp/</span><br><span class="line">wget ftp://ftp.isc.org/isc/bind9/9.10.1-P1/bind-9.10.1-P1.tar.gz</span><br><span class="line">tar zxvf bind-9.10.1-P1.tar.gz</span><br><span class="line">cd bind-9.10.1-P1</span><br><span class="line">./configure --with-dlz-mysql --enable-largefile --enable-threads=no --prefix=/usr/local/bind --with-openssl=/usr/local/openssl/</span><br><span class="line">注：禁掉线程;--with-openssl=  你的 openssl安装的相关目录有可能是/usr</span><br><span class="line">make -j4 &amp;&amp; make install</span><br></pre></td></tr></table></figure>
 <ul>
 <li>至此 bind 安装完毕</li>
 </ul>
-<h3 id="配置bind"><a href="#配置bind" class="headerlink" title="配置bind"></a>配置bind</h3><h4 id="生成named的配置"><a href="#生成named的配置" class="headerlink" title="生成named的配置"></a>生成named的配置</h4><pre><code>cd /usr/local/bind/etc
-../sbin/rndc-confgen -r /dev/urandom &gt;rndc.conf
-tail -n10 rndc.conf | head -n9 | sed -e s/#\//g&gt;named.conf
-</code></pre>
-<h4 id="在named-conf中添加配置文件"><a href="#在named-conf中添加配置文件" class="headerlink" title="在named.conf中添加配置文件"></a>在named.conf中添加配置文件</h4><pre><code>include &quot;/usr/local/bind/etc/CHINANET.acl&quot;; //联通ACL
-include &quot;/usr/local/bind/etc/CNC.acl&quot;;      //电信ACL
-include &quot;/usr/local/bind/etc/view.conf&quot;;    //DLZ相关的配置
-</code></pre>
-<h4 id="下载联通和电信的配置："><a href="#下载联通和电信的配置：" class="headerlink" title="下载联通和电信的配置："></a>下载联通和电信的配置：</h4><pre><code>wget http://www.centos.bz/wp-content/uploads/2012/02/CHINANET.acl
-wget http://www.centos.bz/wp-content/uploads/2012/02/CNC.acl
-</code></pre>
+<h3 id="配置bind"><a href="#配置bind" class="headerlink" title="配置bind"></a>配置bind</h3><h4 id="生成named的配置"><a href="#生成named的配置" class="headerlink" title="生成named的配置"></a>生成named的配置</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd /usr/local/bind/etc</span><br><span class="line">../sbin/rndc-confgen -r /dev/urandom &gt;rndc.conf</span><br><span class="line">tail -n10 rndc.conf | head -n9 | sed -e s/#\//g&gt;named.conf</span><br></pre></td></tr></table></figure>
+<h4 id="在named-conf中添加配置文件"><a href="#在named-conf中添加配置文件" class="headerlink" title="在named.conf中添加配置文件"></a>在named.conf中添加配置文件</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">include &quot;/usr/local/bind/etc/CHINANET.acl&quot;; //联通ACL</span><br><span class="line">include &quot;/usr/local/bind/etc/CNC.acl&quot;;      //电信ACL</span><br><span class="line">include &quot;/usr/local/bind/etc/view.conf&quot;;    //DLZ相关的配置</span><br></pre></td></tr></table></figure>
+<h4 id="下载联通和电信的配置："><a href="#下载联通和电信的配置：" class="headerlink" title="下载联通和电信的配置："></a>下载联通和电信的配置：</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wget http://www.centos.bz/wp-content/uploads/2012/02/CHINANET.acl</span><br><span class="line">wget http://www.centos.bz/wp-content/uploads/2012/02/CNC.acl</span><br></pre></td></tr></table></figure>
 <h4 id="配置view"><a href="#配置view" class="headerlink" title="配置view"></a>配置view</h4><p>和也就是 DLZ的核心，官网MySQL driver文档 <a target="_blank" rel="noopener" href="http://bind-dlz.sourceforge.net/mysql_driver.html">link</a> 还可以查看其它类型的数据库的对应文档。</p>
 <ol>
 <li><p>搭建mysql数据库，并构建复制环境</p>
@@ -167,143 +151,30 @@ wget http://www.centos.bz/wp-content/uploads/2012/02/CNC.acl
 <blockquote>
 <p>官方配置</p>
 </blockquote>
-<pre><code>dlz &quot;Mysql zone&quot; &#123;
-   database &quot;mysql
-   &#123;host=localhost dbname=dns_data ssl=tRue&#125;
-   &#123;select zone from dns_records where zone = &#39;%zone%&#39;&#125;
-   &#123;select ttl, type, mx_priority, case when lower(type)=&#39;txt&#39; then concat(&#39;\&quot;&#39;, data, &#39;\&quot;&#39;)
-        else data end from dns_records where zone = &#39;%zone%&#39; and host = &#39;%record%&#39;
-        and not (type = &#39;SOA&#39; or type = &#39;NS&#39;)&#125;
-   &#123;select ttl, type, mx_priority, data, resp_person, serial, refresh, retry, expire, minimum
-        from dns_records where zone = &#39;%zone%&#39; and (type = &#39;SOA&#39; or type=&#39;NS&#39;)&#125;
-   &#123;select ttl, type, host, mx_priority, data, resp_person, serial, refresh, retry, expire,
-        minimum from dns_records where zone = &#39;%zone%&#39; and not (type = &#39;SOA&#39; or type = &#39;NS&#39;)&#125;
-   &#123;select zone from xfr_table where zone = &#39;%zone%&#39; and client = &#39;%client%&#39;&#125;
-   &#123;update data_count set count = count + 1 where zone =&#39;%zone%&#39;&#125;&quot;;
-&#125;;
-</code></pre>
-<blockquote>
-<p>我们的配置</p>
-</blockquote>
-<pre><code> view &quot;CHINANET_view&quot; &#123;
-  match-clients  &#123; CHINANET; &#125;;
-  allow-query-cache &#123; none; &#125;;
-  allow-recursion &#123; none; &#125;;
-  allow-transfer &#123; none; &#125;;
-  recursion no;
-    dlz &quot;Mysql zone&quot; &#123;
-    database &quot;mysql
-    &#123;host=192.168.19.134 dbname=dnsdb ssl=false port=3307 user=dnsdata pass=dnsdata&#125;
-    &#123;select zone from dns_records where zone = &#39;%zone%&#39; and  view = &#39;any&#39; limit 1&#125;
-    &#123;select ttl,type,mx_priority,case when lower(type)=&#39;txt&#39; then concat(&#39;\&quot;&#39;,data,&#39;\&quot;&#39;) when lower(type)    =  &#39;soa&#39;  then   concat_ws(&#39; &#39;,  data,  resp_person,  serial,  refresh,  retry,  expire,  minimum)   else   data   end   as   mydata   from   dns_records where zone = &#39;%zone%&#39;   and host = &#39;%record%&#39; and view=(select view from dns_records where zone = &#39;%zone%&#39; and host = &#39;%record%&#39; and (view=&#39;CHINANET&#39; or view=&#39;any&#39;) order by priority asc limit 1)&#125;&quot;;
-    &#125;;
-&#125;;
-view &quot;CNC_view&quot; &#123;
-  match-clients  &#123; CNC; &#125;;
-  allow-query-cache &#123; none; &#125;;
-  allow-recursion &#123; none; &#125;;
-  allow-transfer &#123; none; &#125;;
-  recursion no;
-    dlz &quot;Mysql zone&quot; &#123;
-    database &quot;mysql
-    &#123;host=192.168.19.134 dbname=dnsdb ssl=false port=3307 user=dnsdata pass=dnsdata&#125;
-    &#123;select zone from dns_records where zone = &#39;%zone%&#39; and  view = &#39;any&#39; limit 1&#125;
-    &#123;select ttl,type,mx_priority,case when lower(type)=&#39;txt&#39; then concat(&#39;\&quot;&#39;,data,&#39;\&quot;&#39;) when lower(type)    =  &#39;soa&#39;  then   concat_ws(&#39; &#39;,  data,  resp_person,  serial,  refresh,  retry,  expire,  minimum)   else   data   end   as   mydata   from   dns_records where zone = &#39;%zone%&#39;   and host = &#39;%record%&#39; and view=(select view from dns_records where zone = &#39;%zone%&#39; and host = &#39;%record%&#39; and (view=&#39;CNC&#39; or view=&#39;any&#39;) order by priority asc limit 1)&#125;&quot;;
-    &#125;;
-&#125;;
-view &quot;any_view&quot; &#123;
-  match-clients  &#123; any; &#125;;
-  allow-query-cache &#123; none; &#125;;
-  allow-recursion &#123; none; &#125;;
-  allow-transfer &#123; none; &#125;;
-  recursion no;
-    dlz &quot;Mysql zone&quot; &#123;
-    database &quot;mysql
-    &#123;host=192.168.19.134 dbname=dnsdb ssl=false port=3307 user=dnsdata pass=dnsdata&#125;
-    &#123;select zone from dns_records where zone = &#39;%zone%&#39; and  view = &#39;any&#39; limit 1&#125;
-    &#123;select ttl,type,mx_priority,case when lower(type)=&#39;txt&#39; then concat(&#39;\&quot;&#39;,data,&#39;\&quot;&#39;) when lower(type)    =  &#39;soa&#39;  then   concat_ws(&#39; &#39;,  data,  resp_person,  serial,  refresh,  retry,  expire,  minimum)   else   data   end   as   mydata   from   dns_records where zone = &#39;%zone%&#39;   and host = &#39;%record%&#39; and view = &#39;any&#39;&#125;&quot;;
-    &#125;;
-&#125;;
-</code></pre>
 </li>
 </ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">dlz &quot;Mysql zone&quot; &#123;</span><br><span class="line">   database &quot;mysql</span><br><span class="line">   &#123;host=localhost dbname=dns_data ssl=tRue&#125;</span><br><span class="line">   &#123;select zone from dns_records where zone = &#x27;%zone%&#x27;&#125;</span><br><span class="line">   &#123;select ttl, type, mx_priority, case when lower(type)=&#x27;txt&#x27; then concat(&#x27;\&quot;&#x27;, data, &#x27;\&quot;&#x27;)</span><br><span class="line">        else data end from dns_records where zone = &#x27;%zone%&#x27; and host = &#x27;%record%&#x27;</span><br><span class="line">        and not (type = &#x27;SOA&#x27; or type = &#x27;NS&#x27;)&#125;</span><br><span class="line">   &#123;select ttl, type, mx_priority, data, resp_person, serial, refresh, retry, expire, minimum</span><br><span class="line">        from dns_records where zone = &#x27;%zone%&#x27; and (type = &#x27;SOA&#x27; or type=&#x27;NS&#x27;)&#125;</span><br><span class="line">   &#123;select ttl, type, host, mx_priority, data, resp_person, serial, refresh, retry, expire,</span><br><span class="line">        minimum from dns_records where zone = &#x27;%zone%&#x27; and not (type = &#x27;SOA&#x27; or type = &#x27;NS&#x27;)&#125;</span><br><span class="line">   &#123;select zone from xfr_table where zone = &#x27;%zone%&#x27; and client = &#x27;%client%&#x27;&#125;</span><br><span class="line">   &#123;update data_count set count = count + 1 where zone =&#x27;%zone%&#x27;&#125;&quot;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<pre><code>&gt; 我们的配置
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"> view &quot;CHINANET_view&quot; &#123;</span><br><span class="line">  match-clients  &#123; CHINANET; &#125;;</span><br><span class="line">  allow-query-cache &#123; none; &#125;;</span><br><span class="line">  allow-recursion &#123; none; &#125;;</span><br><span class="line">  allow-transfer &#123; none; &#125;;</span><br><span class="line">  recursion no;</span><br><span class="line">    dlz &quot;Mysql zone&quot; &#123;</span><br><span class="line">    database &quot;mysql</span><br><span class="line">    &#123;host=192.168.19.134 dbname=dnsdb ssl=false port=3307 user=dnsdata pass=dnsdata&#125;</span><br><span class="line">    &#123;select zone from dns_records where zone = &#x27;%zone%&#x27; and  view = &#x27;any&#x27; limit 1&#125;</span><br><span class="line">    &#123;select ttl,type,mx_priority,case when lower(type)=&#x27;txt&#x27; then concat(&#x27;\&quot;&#x27;,data,&#x27;\&quot;&#x27;) when lower(type)    =  &#x27;soa&#x27;  then   concat_ws(&#x27; &#x27;,  data,  resp_person,  serial,  refresh,  retry,  expire,  minimum)   else   data   end   as   mydata   from   dns_records where zone = &#x27;%zone%&#x27;   and host = &#x27;%record%&#x27; and view=(select view from dns_records where zone = &#x27;%zone%&#x27; and host = &#x27;%record%&#x27; and (view=&#x27;CHINANET&#x27; or view=&#x27;any&#x27;) order by priority asc limit 1)&#125;&quot;;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;;</span><br><span class="line">view &quot;CNC_view&quot; &#123;</span><br><span class="line">  match-clients  &#123; CNC; &#125;;</span><br><span class="line">  allow-query-cache &#123; none; &#125;;</span><br><span class="line">  allow-recursion &#123; none; &#125;;</span><br><span class="line">  allow-transfer &#123; none; &#125;;</span><br><span class="line">  recursion no;</span><br><span class="line">    dlz &quot;Mysql zone&quot; &#123;</span><br><span class="line">    database &quot;mysql</span><br><span class="line">    &#123;host=192.168.19.134 dbname=dnsdb ssl=false port=3307 user=dnsdata pass=dnsdata&#125;</span><br><span class="line">    &#123;select zone from dns_records where zone = &#x27;%zone%&#x27; and  view = &#x27;any&#x27; limit 1&#125;</span><br><span class="line">    &#123;select ttl,type,mx_priority,case when lower(type)=&#x27;txt&#x27; then concat(&#x27;\&quot;&#x27;,data,&#x27;\&quot;&#x27;) when lower(type)    =  &#x27;soa&#x27;  then   concat_ws(&#x27; &#x27;,  data,  resp_person,  serial,  refresh,  retry,  expire,  minimum)   else   data   end   as   mydata   from   dns_records where zone = &#x27;%zone%&#x27;   and host = &#x27;%record%&#x27; and view=(select view from dns_records where zone = &#x27;%zone%&#x27; and host = &#x27;%record%&#x27; and (view=&#x27;CNC&#x27; or view=&#x27;any&#x27;) order by priority asc limit 1)&#125;&quot;;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;;</span><br><span class="line">view &quot;any_view&quot; &#123;</span><br><span class="line">  match-clients  &#123; any; &#125;;</span><br><span class="line">  allow-query-cache &#123; none; &#125;;</span><br><span class="line">  allow-recursion &#123; none; &#125;;</span><br><span class="line">  allow-transfer &#123; none; &#125;;</span><br><span class="line">  recursion no;</span><br><span class="line">    dlz &quot;Mysql zone&quot; &#123;</span><br><span class="line">    database &quot;mysql</span><br><span class="line">    &#123;host=192.168.19.134 dbname=dnsdb ssl=false port=3307 user=dnsdata pass=dnsdata&#125;</span><br><span class="line">    &#123;select zone from dns_records where zone = &#x27;%zone%&#x27; and  view = &#x27;any&#x27; limit 1&#125;</span><br><span class="line">    &#123;select ttl,type,mx_priority,case when lower(type)=&#x27;txt&#x27; then concat(&#x27;\&quot;&#x27;,data,&#x27;\&quot;&#x27;) when lower(type)    =  &#x27;soa&#x27;  then   concat_ws(&#x27; &#x27;,  data,  resp_person,  serial,  refresh,  retry,  expire,  minimum)   else   data   end   as   mydata   from   dns_records where zone = &#x27;%zone%&#x27;   and host = &#x27;%record%&#x27; and view = &#x27;any&#x27;&#125;&quot;;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</code></pre>
 <h3 id="Debug-测试"><a href="#Debug-测试" class="headerlink" title="Debug 测试"></a>Debug 测试</h3><blockquote>
 <p>使用debug模式启动 bind 服务，可以看到终端会有相关的输出，如果没有报错，说明配置正常。</p>
 </blockquote>
-<pre><code>/usr/local/bind/sbin/named -uroot -g -d 9
-</code></pre>
-<h3 id="启动Bind服务"><a href="#启动Bind服务" class="headerlink" title="启动Bind服务"></a>启动Bind服务</h3><h4 id="Reload-配置"><a href="#Reload-配置" class="headerlink" title="Reload 配置"></a>Reload 配置</h4><pre><code>#命令
-/usr/local/bind/sbin/rndc reload #重载 named.conf 相关配置文件
-#结果
-[root@mytestdb02 etc]# /usr/local/bind/sbin/rndc reload
-server reload successful
-</code></pre>
-<h4 id="启动服务"><a href="#启动服务" class="headerlink" title="启动服务"></a>启动服务</h4><pre><code>#启动 bind 服务.
-/usr/local/bind/sbin/named -uroot -c /usr/local/bind/etc/named.conf 
-#结果
-[root@mytestdb02 etc]# /usr/local/bind/sbin/named -uroot -c /usr/local/bind/etc/named.conf
-[root@mytestdb02 etc]# ps -ef |grep named
-root     12811     1  0 01:18 ?        00:00:00 /usr/local/bind/sbin/named -uroot -g -d 9
-root     16477     1  0 17:00 ?        00:00:00 /usr/local/bind/sbin/named -uroot -c /usr/local/bind/etc/named.conf
-root     16479 16398  0 17:00 pts/1    00:00:00 grep named
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/bind/sbin/named -uroot -g -d 9</span><br></pre></td></tr></table></figure>
+<h3 id="启动Bind服务"><a href="#启动Bind服务" class="headerlink" title="启动Bind服务"></a>启动Bind服务</h3><h4 id="Reload-配置"><a href="#Reload-配置" class="headerlink" title="Reload 配置"></a>Reload 配置</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#命令</span><br><span class="line">/usr/local/bind/sbin/rndc reload #重载 named.conf 相关配置文件</span><br><span class="line">#结果</span><br><span class="line">[root@mytestdb02 etc]# /usr/local/bind/sbin/rndc reload</span><br><span class="line">server reload successful</span><br></pre></td></tr></table></figure>
+<h4 id="启动服务"><a href="#启动服务" class="headerlink" title="启动服务"></a>启动服务</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#启动 bind 服务.</span><br><span class="line">/usr/local/bind/sbin/named -uroot -c /usr/local/bind/etc/named.conf </span><br><span class="line">#结果</span><br><span class="line">[root@mytestdb02 etc]# /usr/local/bind/sbin/named -uroot -c /usr/local/bind/etc/named.conf</span><br><span class="line">[root@mytestdb02 etc]# ps -ef |grep named</span><br><span class="line">root     12811     1  0 01:18 ?        00:00:00 /usr/local/bind/sbin/named -uroot -g -d 9</span><br><span class="line">root     16477     1  0 17:00 ?        00:00:00 /usr/local/bind/sbin/named -uroot -c /usr/local/bind/etc/named.conf</span><br><span class="line">root     16479 16398  0 17:00 pts/1    00:00:00 grep named</span><br></pre></td></tr></table></figure>
+
 <h3 id="配置DNS-记录"><a href="#配置DNS-记录" class="headerlink" title="配置DNS 记录"></a>配置DNS 记录</h3><ol>
-<li><p>配置soa记录</p>
-</li>
-<li><p>配置ns1 ns2</p>
-</li>
-<li><p>配置dns记录<br>  -SOA(起始授权机构)：此记录指定区域的起点。它所包含的信息有区域名、区域管理员电子邮件<br>  地址，以及指示辅 DNS 服务器如何更新区域数据文件的设置等<br>  -NS(名称服务器)：此记录指定负责给定区域的名称服务器<br>  -A(主机)： 此记录列出特定主机名的 IP 地址。</p>
-<pre><code> INSERT INTO `dns_records` (`zone`,   `host`,   `type`,   `data`,   `ttl` , `mx_priority`, `refresh`, `retry`, `expire`, `minimum`, `serial`, `resp_person`, `primary_ns`, `data_count`) VALUES    
-  (&#39;opsdnstest.com&#39;, &#39;@&#39;, &#39;SOA&#39;, &#39;ns1.opsdnstest.com.&#39;, 10,   NULL, 3600, 3600, 86400, 10, 2008082700, &#39;root.opsdnstest.com.&#39;, &#39;ns1.opsdnstest.com.&#39;, 0);
- #--@ NS
- INSERT INTO `dns_records` (`zone`, `host`, `type`, `data`) 
-  VALUES (&#39;opsdnstest.com&#39;, &#39;@&#39;, &#39;NS&#39;, &#39;ns1.opsdnstest.com.&#39;);
- #--NS A
- INSERT INTO `dns_records` (`zone`, `host`, `type`, `data`) 
-  VALUES (&#39;opsdnstest.com&#39;, &#39;ns1&#39;, &#39;A&#39;, &#39;192.168.19.135&#39;);
- # --A
- INSERT INTO `dns_records` (`zone`, `host`, `type`, `data`, `ttl`, `view`,`priority`)  VALUES   
-  (&#39;opsdnstest.com&#39;, &#39;db&#39; , &#39;A&#39;, &#39;192.168.19.135&#39;, 3600, &#39;any&#39;,200),
-  (&#39;opsdnstest.com&#39;, &#39;app&#39;, &#39;A&#39;, &#39;192.168.19.134&#39;, 3600, &#39;any&#39;,200), 
-  (&#39;opsdnstest.com&#39;, &#39;dev&#39;, &#39;A&#39;, &#39;192.168.19.132&#39;, 3600, &#39;any&#39;,255);
-</code></pre>
-</li>
-<li><p>验证dns 配置</p>
-<pre><code> 配置机器的 /etc/resolv.conf 
- [root@mytestdb01 ~]# cat /etc/resolv.conf 
- # Generated by NetworkManager
- domain opsdnstest
- search opsdnstest.com
- nameserver 192.168.19.132   
- ping db.opsdnstest.com
- [root@mytestdb01 ~]# ping db.opsdnstest.com  
- PING db.opsdnstest.com (192.168.19.135) 56(84) bytes of data.
- 64 bytes from 192.168.19.135: icmp_seq=1 ttl=64 time=0.044 ms
- 64 bytes from 192.168.19.135: icmp_seq=2 ttl=64 time=0.034 ms
- 64 bytes from 192.168.19.135: icmp_seq=3 ttl=64 time=0.030 ms
- ^C
- ping dev.opsdnstest.com
- [root@mytestdb01 ~]# ping dev.opsdnstest.com
- PING dev.opsdnstest.com (192.168.19.132) 56(84) bytes of data.
- 64 bytes from 192.168.19.132: icmp_seq=1 ttl=64 time=0.519 ms
- 64 bytes from 192.168.19.132: icmp_seq=2 ttl=64 time=0.517 ms
- ^C
- ping app.opsdnstest.com
- [root@mytestdb01 ~]# ping app.opsdnstest.com
- 、PING app.opsdnstest.com (192.168.19.134) 56(84) bytes of data.
- 64 bytes from 192.168.19.134: icmp_seq=1 ttl=64 time=2.16 ms
- 64 bytes from 192.168.19.134: icmp_seq=2 ttl=64 time=0.227 ms
- ^C
-</code></pre>
-</li>
-</ol>
+<li>配置soa记录</li>
+<li>配置ns1 ns2</li>
+<li>配置dns记录<br>  -SOA(起始授权机构)：此记录指定区域的起点。它所包含的信息有区域名、区域管理员电子邮件<br>  地址，以及指示辅 DNS 服务器如何更新区域数据文件的设置等<br>  -NS(名称服务器)：此记录指定负责给定区域的名称服务器<br>  -A(主机)： 此记录列出特定主机名的 IP 地址。<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">INSERT INTO `dns_records` (`zone`,   `host`,   `type`,   `data`,   `ttl` , `mx_priority`, `refresh`, `retry`, `expire`, `minimum`, `serial`, `resp_person`, `primary_ns`, `data_count`) VALUES    </span><br><span class="line"> (&#x27;opsdnstest.com&#x27;, &#x27;@&#x27;, &#x27;SOA&#x27;, &#x27;ns1.opsdnstest.com.&#x27;, 10,   NULL, 3600, 3600, 86400, 10, 2008082700, &#x27;root.opsdnstest.com.&#x27;, &#x27;ns1.opsdnstest.com.&#x27;, 0);</span><br><span class="line">#--@ NS</span><br><span class="line">INSERT INTO `dns_records` (`zone`, `host`, `type`, `data`) </span><br><span class="line"> VALUES (&#x27;opsdnstest.com&#x27;, &#x27;@&#x27;, &#x27;NS&#x27;, &#x27;ns1.opsdnstest.com.&#x27;);</span><br><span class="line">#--NS A</span><br><span class="line">INSERT INTO `dns_records` (`zone`, `host`, `type`, `data`) </span><br><span class="line"> VALUES (&#x27;opsdnstest.com&#x27;, &#x27;ns1&#x27;, &#x27;A&#x27;, &#x27;192.168.19.135&#x27;);</span><br><span class="line"># --A</span><br><span class="line">INSERT INTO `dns_records` (`zone`, `host`, `type`, `data`, `ttl`, `view`,`priority`)  VALUES   </span><br><span class="line"> (&#x27;opsdnstest.com&#x27;, &#x27;db&#x27; , &#x27;A&#x27;, &#x27;192.168.19.135&#x27;, 3600, &#x27;any&#x27;,200),</span><br><span class="line"> (&#x27;opsdnstest.com&#x27;, &#x27;app&#x27;, &#x27;A&#x27;, &#x27;192.168.19.134&#x27;, 3600, &#x27;any&#x27;,200), </span><br><span class="line"> (&#x27;opsdnstest.com&#x27;, &#x27;dev&#x27;, &#x27;A&#x27;, &#x27;192.168.19.132&#x27;, 3600, &#x27;any&#x27;,255);</span><br></pre></td></tr></table></figure></li>
+<li>验证dns 配置<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">配置机器的 /etc/resolv.conf </span><br><span class="line">[root@mytestdb01 ~]# cat /etc/resolv.conf </span><br><span class="line"># Generated by NetworkManager</span><br><span class="line">domain opsdnstest</span><br><span class="line">search opsdnstest.com</span><br><span class="line">nameserver 192.168.19.132   </span><br><span class="line">ping db.opsdnstest.com</span><br><span class="line">[root@mytestdb01 ~]# ping db.opsdnstest.com  </span><br><span class="line">PING db.opsdnstest.com (192.168.19.135) 56(84) bytes of data.</span><br><span class="line">64 bytes from 192.168.19.135: icmp_seq=1 ttl=64 time=0.044 ms</span><br><span class="line">64 bytes from 192.168.19.135: icmp_seq=2 ttl=64 time=0.034 ms</span><br><span class="line">64 bytes from 192.168.19.135: icmp_seq=3 ttl=64 time=0.030 ms</span><br><span class="line">^C</span><br><span class="line">ping dev.opsdnstest.com</span><br><span class="line">[root@mytestdb01 ~]# ping dev.opsdnstest.com</span><br><span class="line">PING dev.opsdnstest.com (192.168.19.132) 56(84) bytes of data.</span><br><span class="line">64 bytes from 192.168.19.132: icmp_seq=1 ttl=64 time=0.519 ms</span><br><span class="line">64 bytes from 192.168.19.132: icmp_seq=2 ttl=64 time=0.517 ms</span><br><span class="line">^C</span><br><span class="line">ping app.opsdnstest.com</span><br><span class="line">[root@mytestdb01 ~]# ping app.opsdnstest.com</span><br><span class="line">、PING app.opsdnstest.com (192.168.19.134) 56(84) bytes of data.</span><br><span class="line">64 bytes from 192.168.19.134: icmp_seq=1 ttl=64 time=2.16 ms</span><br><span class="line">64 bytes from 192.168.19.134: icmp_seq=2 ttl=64 time=0.227 ms</span><br><span class="line">^C</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>至此基本的Bind DLZ的构建已经完成，接下来我会整理一套 DNS原理架构的文章。以及真正的企业实施方案。</p>
 </blockquote>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><pre><code>DNS强大，使用广泛，本文主要结合bind 和dlz 一起来搭建内部域名服务器，
-对企业内部提供解决方案。关于架构和HA方案，将会在后续不补充...
-</code></pre>
-  
+</li>
+</ol>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DNS强大，使用广泛，本文主要结合bind 和dlz 一起来搭建内部域名服务器，</span><br><span class="line">对企业内部提供解决方案。关于架构和HA方案，将会在后续不补充...</span><br></pre></td></tr></table></figure>  
 	</div>
 		<footer class="article-footer clearfix">
 <div class="article-catetags">
@@ -376,12 +247,6 @@ root     16479 16398  0 17:00 pts/1    00:00:00 grep named
 <aside class="clearfix">
 
   
-<div class="github-card">
-<p class="asidetitle">Github 名片</p>
-<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
-<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
-</div>
-
 
 
   
@@ -479,11 +344,11 @@ root     16479 16398  0 17:00 pts/1    00:00:00 grep named
 			
 		
 			
-				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
 			
 		
 			
@@ -495,15 +360,15 @@ root     16479 16398  0 17:00 pts/1    00:00:00 grep named
 			
 		
 			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
 			
 		
 		</ul>
@@ -516,7 +381,7 @@ root     16479 16398  0 17:00 pts/1    00:00:00 grep named
         
           <li>
             
-            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title=" 内核月报">阿里内核月报</a>
             
           </li>
         
@@ -617,14 +482,12 @@ root     16479 16398  0 17:00 pts/1    00:00:00 grep named
 	
 	
 	<section class="info">
-		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
-			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。欢迎交流。 <br/>
+			</p>
 	</section>
 	 
 	<div class="social-font" class="clearfix">
 		
-		
-		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
 		
 		
 		

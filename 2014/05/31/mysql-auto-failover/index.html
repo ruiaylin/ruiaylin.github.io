@@ -19,7 +19,7 @@
 <meta property="og:description" content="MySQL自动failover介绍 mysql5.6支持以全局统一事务ID（GTID)为基础的复制，当在主库上提交事务或者被从库应用时， 可以定位和追踪每一个事务，可以通过使用–gtid-mode 和–enforce-gtid-consistency 参数启动复制可以开启GTIDs 这也是mysql官方提供的工具集utilities中的自动failover的一个基础，今天我们一步一步的来使用mys">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2014-05-30T21:03:27.000Z">
-<meta property="article:modified_time" content="2024-03-02T09:18:29.293Z">
+<meta property="article:modified_time" content="2024-03-03T02:14:27.873Z">
 <meta property="article:author" content="ruichao.lin">
 <meta property="article:tag" content="Autofailover">
 <meta name="twitter:card" content="summary">
@@ -114,390 +114,66 @@ localhost：3308 （ slave  ）
 localhost：3309 （ slave  ）
 </code></pre>
 <h4 id="第一步安装mysql-DB"><a href="#第一步安装mysql-DB" class="headerlink" title="第一步安装mysql DB"></a>第一步安装mysql DB</h4><p>从官方网站下载 &gt;&#x3D; 5.6.10 的mysql dmg版本。安装到系统中之后，配置好path 和 mysql_base</p>
-<pre><code>export MYSQL_BASE=/usr/local/mysql
-export DYLD_LIBRARY_PATH=&quot;$DYLD_LIBRARY_PATH:/usr/local/mysql/lib&quot; #for python 
-export PATH=$MYSQL_BASE/bin:$PATH 
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">export MYSQL_BASE=/usr/local/mysql</span><br><span class="line">export DYLD_LIBRARY_PATH=&quot;$DYLD_LIBRARY_PATH:/usr/local/mysql/lib&quot; #for python </span><br><span class="line">export PATH=$MYSQL_BASE/bin:$PATH </span><br></pre></td></tr></table></figure>
+
 <h4 id="第二步-初始化mysql-DB"><a href="#第二步-初始化mysql-DB" class="headerlink" title="第二步 初始化mysql DB"></a>第二步 初始化mysql DB</h4><p>配置my.cnf文件</p>
-<pre><code>[client]
-port=3309
-socket=/data/mysql3309/run/mysql.sock
-[mysql]
-port=3309
-prompt=\\u@\\d \\r:\\m:\\s&gt;
-default-character-set=gbk
-[mysqld]
-report_host=localhost
-explicit_defaults_for_timestamp=true
-default-storage-engine=INNODB
-master-info-repository=TABLE
-#dir
-innodb_log_group_home_dir=/logs/mysql3309/iblog
-innodb_data_home_dir=/logs/mysql3309/iblog
-basedir=/usr/local/mysql/
-datadir=/data/mysql3309/data
-tmpdir=/data/mysql3309/tmp
-slave_load_tmpdir=/data/mysql3309/tmp
-log-error=/data/mysql3309/log/alert.log
-slow_query_log_file=/data/mysql3309/log/slow.log
-relay_log_info_file=/logs/mysql3309/binlog/relay-log.info
-master-info-file=/logs/mysql3309/binlog/master.info
-socket=/data/mysql3309/run/mysql.sock
-log-bin=/logs/mysql3309/binlog/binlog
-relay-log=/logs/mysql3309/binlog/relaylog
-lower_case_table_names=2
-#innodb
-innodb_log_files_in_group=4
-innodb_log_file_size=20M
-innodb_buffer_pool_size=256m
-innodb_open_files=65535
-innodb_flush_log_at_trx_commit=2
-innodb_max_dirty_pages_pct=50
-innodb_io_capacity=100
-innodb_read_io_threads=2
-innodb_write_io_threads=4
-innodb_file_format=Barracuda
-innodb_file_per_table=1
-innodb_thread_concurrency=10
-innodb_change_buffering=inserts
-innodb_adaptive_flushing=1
-innodb_stats_on_metadata=0
-innodb_additional_mem_pool_size=10M
-innodb_flush_method=O_DIRECT
-innodb_log_buffer_size=10M
-transaction-isolation = READ-COMMITTED
-query_cache_type=0
-sync_binlog=100
-max_binlog_size =50M
-binlog_cache_size=5M
-binlog-format=ROW
-expire_logs_days=7
-#gtid
-gtid-mode=on
-log-slave-updates=true
-enforce-gtid-consistency=true
-long_query_time=1
-slow_query_log=1
-skip-slave-start
-server_id=1
-#timeout
-connect_timeout=30
-delayed_insert_timeout =300
-innodb_lock_wait_timeout=50
-innodb_rollback_on_timeout=OFF
-net_read_timeout=30
-net_write_timeout=60
-slave_net_timeout=30
-port=3309
-skip-name-resolve
-max_connect_errors=1500
-connect_timeout=30
-max_allowed_packet=24M
-#myisam
-concurrent_insert=2
-key_buffer_size=8M
-sort_buffer_size=4M
-join_buffer_size=4M
-read_buffer_size=4M
-myisam_sort_buffer_size=20M
-#common
-character-set-server=gbk
-skip-external-locking
-read_rnd_buffer_size=5M
-safe-user-create
-local-infile=0
-[mysqld_safe]
-pid-file=/data/mysql3309/run/mysqld.pid
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br></pre></td><td class="code"><pre><span class="line">[client]</span><br><span class="line">port=3309</span><br><span class="line">socket=/data/mysql3309/run/mysql.sock</span><br><span class="line">[mysql]</span><br><span class="line">port=3309</span><br><span class="line">prompt=\\u@\\d \\r:\\m:\\s&gt;</span><br><span class="line">default-character-set=gbk</span><br><span class="line">[mysqld]</span><br><span class="line">report_host=localhost</span><br><span class="line">explicit_defaults_for_timestamp=true</span><br><span class="line">default-storage-engine=INNODB</span><br><span class="line">master-info-repository=TABLE</span><br><span class="line">#dir</span><br><span class="line">innodb_log_group_home_dir=/logs/mysql3309/iblog</span><br><span class="line">innodb_data_home_dir=/logs/mysql3309/iblog</span><br><span class="line">basedir=/usr/local/mysql/</span><br><span class="line">datadir=/data/mysql3309/data</span><br><span class="line">tmpdir=/data/mysql3309/tmp</span><br><span class="line">slave_load_tmpdir=/data/mysql3309/tmp</span><br><span class="line">log-error=/data/mysql3309/log/alert.log</span><br><span class="line">slow_query_log_file=/data/mysql3309/log/slow.log</span><br><span class="line">relay_log_info_file=/logs/mysql3309/binlog/relay-log.info</span><br><span class="line">master-info-file=/logs/mysql3309/binlog/master.info</span><br><span class="line">socket=/data/mysql3309/run/mysql.sock</span><br><span class="line">log-bin=/logs/mysql3309/binlog/binlog</span><br><span class="line">relay-log=/logs/mysql3309/binlog/relaylog</span><br><span class="line">lower_case_table_names=2</span><br><span class="line">#innodb</span><br><span class="line">innodb_log_files_in_group=4</span><br><span class="line">innodb_log_file_size=20M</span><br><span class="line">innodb_buffer_pool_size=256m</span><br><span class="line">innodb_open_files=65535</span><br><span class="line">innodb_flush_log_at_trx_commit=2</span><br><span class="line">innodb_max_dirty_pages_pct=50</span><br><span class="line">innodb_io_capacity=100</span><br><span class="line">innodb_read_io_threads=2</span><br><span class="line">innodb_write_io_threads=4</span><br><span class="line">innodb_file_format=Barracuda</span><br><span class="line">innodb_file_per_table=1</span><br><span class="line">innodb_thread_concurrency=10</span><br><span class="line">innodb_change_buffering=inserts</span><br><span class="line">innodb_adaptive_flushing=1</span><br><span class="line">innodb_stats_on_metadata=0</span><br><span class="line">innodb_additional_mem_pool_size=10M</span><br><span class="line">innodb_flush_method=O_DIRECT</span><br><span class="line">innodb_log_buffer_size=10M</span><br><span class="line">transaction-isolation = READ-COMMITTED</span><br><span class="line">query_cache_type=0</span><br><span class="line">sync_binlog=100</span><br><span class="line">max_binlog_size =50M</span><br><span class="line">binlog_cache_size=5M</span><br><span class="line">binlog-format=ROW</span><br><span class="line">expire_logs_days=7</span><br><span class="line">#gtid</span><br><span class="line">gtid-mode=on</span><br><span class="line">log-slave-updates=true</span><br><span class="line">enforce-gtid-consistency=true</span><br><span class="line">long_query_time=1</span><br><span class="line">slow_query_log=1</span><br><span class="line">skip-slave-start</span><br><span class="line">server_id=1</span><br><span class="line">#timeout</span><br><span class="line">connect_timeout=30</span><br><span class="line">delayed_insert_timeout =300</span><br><span class="line">innodb_lock_wait_timeout=50</span><br><span class="line">innodb_rollback_on_timeout=OFF</span><br><span class="line">net_read_timeout=30</span><br><span class="line">net_write_timeout=60</span><br><span class="line">slave_net_timeout=30</span><br><span class="line">port=3309</span><br><span class="line">skip-name-resolve</span><br><span class="line">max_connect_errors=1500</span><br><span class="line">connect_timeout=30</span><br><span class="line">max_allowed_packet=24M</span><br><span class="line">#myisam</span><br><span class="line">concurrent_insert=2</span><br><span class="line">key_buffer_size=8M</span><br><span class="line">sort_buffer_size=4M</span><br><span class="line">join_buffer_size=4M</span><br><span class="line">read_buffer_size=4M</span><br><span class="line">myisam_sort_buffer_size=20M</span><br><span class="line">#common</span><br><span class="line">character-set-server=gbk</span><br><span class="line">skip-external-locking</span><br><span class="line">read_rnd_buffer_size=5M</span><br><span class="line">safe-user-create</span><br><span class="line">local-infile=0</span><br><span class="line">[mysqld_safe]</span><br><span class="line">pid-file=/data/mysql3309/run/mysqld.pid</span><br></pre></td></tr></table></figure>
 <p>其中：    report_host&#x3D;localhost<br>          explicit_defaults_for_timestamp&#x3D;true<br>          gtid-mode&#x3D;on log-slave-updates&#x3D;true<br>          enforce-gtid-consistency&#x3D;true<br>    是必须的；注意四个实例的server_id 不能一样。</p>
 <p>配置每个实例的环境变量</p>
-<pre><code>alias my3306=&#39;export MYSQL_HOME=/data/mysql3306/&#39;
-alias my3307=&#39;export MYSQL_HOME=/data/mysql3307/&#39;
-alias my3308=&#39;export MYSQL_HOME=/data/mysql3308/&#39;
-alias my3309=&#39;export MYSQL_HOME=/data/mysql3309/&#39;
-alias dbasql=&#39;mysql -uroot -proot&#39;
-alias nsql=&#39;mysql &#39;
-alias alert=&#39;tail -100f $MYSQL_HOME/log/alert.log&#39;
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">alias my3306=&#x27;export MYSQL_HOME=/data/mysql3306/&#x27;</span><br><span class="line">alias my3307=&#x27;export MYSQL_HOME=/data/mysql3307/&#x27;</span><br><span class="line">alias my3308=&#x27;export MYSQL_HOME=/data/mysql3308/&#x27;</span><br><span class="line">alias my3309=&#x27;export MYSQL_HOME=/data/mysql3309/&#x27;</span><br><span class="line">alias dbasql=&#x27;mysql -uroot -proot&#x27;</span><br><span class="line">alias nsql=&#x27;mysql &#x27;</span><br><span class="line">alias alert=&#x27;tail -100f $MYSQL_HOME/log/alert.log&#x27;</span><br></pre></td></tr></table></figure>
 <p>初始化每一个实例(以3309为例子) 创建目录，赋权</p>
-<pre><code>mkdir -p /data/mysql3309/&#123;data,tmp,run,log&#125;
-mkdir -p /log/mysql3309/&#123;iblog,binlog&#125;
-chmod -R 777 /data/mysql3309/
-chmod -R 777 /logs/mysql3309/
-chmod 644  /data/mysql3309/my.cnf
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p /data/mysql3309/&#123;data,tmp,run,log&#125;</span><br><span class="line">mkdir -p /log/mysql3309/&#123;iblog,binlog&#125;</span><br><span class="line">chmod -R 777 /data/mysql3309/</span><br><span class="line">chmod -R 777 /logs/mysql3309/</span><br><span class="line">chmod 644  /data/mysql3309/my.cnf</span><br></pre></td></tr></table></figure>
 <p>create database </p>
-<pre><code>/usr/local/mysql/scripts/mysql_install_db --defaults-file=/data/mysql3309/my.cnf --basedir=/usr/local/mysql --datadir=/data/mysql3309/data  --user=root
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/mysql/scripts/mysql_install_db --defaults-file=/data/mysql3309/my.cnf --basedir=/usr/local/mysql --datadir=/data/mysql3309/data  --user=root</span><br></pre></td></tr></table></figure>
 <p>启动实例</p>
-<pre><code>export MYSQL_HOME=/data/mysql3309/
-mysqld_safe &amp;
-</code></pre>
-<h4 id="第三步构建复制结构"><a href="#第三步构建复制结构" class="headerlink" title="第三步构建复制结构"></a>第三步构建复制结构</h4><pre><code>mysqlreplicate  --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3307 --rpl-user=repl:repl -vv
-mysqlreplicate  --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3308 --rpl-user=repl:repl -vv
-mysqlreplicate  --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3309 --rpl-user=repl:repl -vv
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">export MYSQL_HOME=/data/mysql3309/</span><br><span class="line">mysqld_safe &amp;</span><br></pre></td></tr></table></figure>
+<h4 id="第三步构建复制结构"><a href="#第三步构建复制结构" class="headerlink" title="第三步构建复制结构"></a>第三步构建复制结构</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mysqlreplicate  --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3307 --rpl-user=repl:repl -vv</span><br><span class="line">mysqlreplicate  --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3308 --rpl-user=repl:repl -vv</span><br><span class="line">mysqlreplicate  --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3309 --rpl-user=repl:repl -vv</span><br></pre></td></tr></table></figure>
 <p>执行日志如下： </p>
-<pre><code>$ mysqlreplicate  --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3307 --rpl-user=repl:repl -vv
-# master on 127.0.0.1: ... connected.
-# slave on 127.0.0.1: ... connected.
-# master id = 2
-#  slave id = 3
-# master uuid = c23c028a-dc35-11e3-9ecf-fa53af763fd8
-#  slave uuid = c2350336-dc35-11e3-9ecf-c98b5f3b0a82
-# Checking InnoDB statistics for type and version conflicts.
-# Checking storage engines...
-# Checking for binary logging on master...
-# Setting up replication...
-# Connecting slave to master...
-# CHANGE MASTER TO MASTER_HOST = &#39;127.0.0.1&#39;, MASTER_USER = &#39;repl&#39;, MASTER_PASSWORD = &#39;repl&#39;, MASTER_PORT = 3306, MASTER_AUTO_POSITION=1
-# Starting slave from master&#39;s last position...
-# IO status: Waiting for master to send event
-# IO thread running: Yes
-# IO error: None
-# SQL thread running: Yes
-# SQL error: None
-# ...done.
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">$ mysqlreplicate  --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3307 --rpl-user=repl:repl -vv</span><br><span class="line"># master on 127.0.0.1: ... connected.</span><br><span class="line"># slave on 127.0.0.1: ... connected.</span><br><span class="line"># master id = 2</span><br><span class="line">#  slave id = 3</span><br><span class="line"># master uuid = c23c028a-dc35-11e3-9ecf-fa53af763fd8</span><br><span class="line">#  slave uuid = c2350336-dc35-11e3-9ecf-c98b5f3b0a82</span><br><span class="line"># Checking InnoDB statistics for type and version conflicts.</span><br><span class="line"># Checking storage engines...</span><br><span class="line"># Checking for binary logging on master...</span><br><span class="line"># Setting up replication...</span><br><span class="line"># Connecting slave to master...</span><br><span class="line"># CHANGE MASTER TO MASTER_HOST = &#x27;127.0.0.1&#x27;, MASTER_USER = &#x27;repl&#x27;, MASTER_PASSWORD = &#x27;repl&#x27;, MASTER_PORT = 3306, MASTER_AUTO_POSITION=1</span><br><span class="line"># Starting slave from master&#x27;s last position...</span><br><span class="line"># IO status: Waiting for master to send event</span><br><span class="line"># IO thread running: Yes</span><br><span class="line"># IO error: None</span><br><span class="line"># SQL thread running: Yes</span><br><span class="line"># SQL error: None</span><br><span class="line"># ...done.</span><br></pre></td></tr></table></figure>
 <p>查看复制结构</p>
-<pre><code>ruiayLinSunnydeMacBook-Pro-2:manages root# mysqlrplshow --master=root:root@localhost:3306 --discover-slaves-login=root:root -v
-# master on localhost: ... connected.
-# Finding slaves for master: localhost:3306
-# Replication Topology Graph
-localhost:3306 (MASTER)
-   |
-   +--- localhost:3307 [IO: Yes, SQL: Yes] - (SLAVE)
-   |
-   +--- localhost:3308 [IO: Yes, SQL: Yes] - (SLAVE)
-   |
-   +--- localhost:3309 [IO: Yes, SQL: Yes] - (SLAVE)
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">ruiayLinSunnydeMacBook-Pro-2:manages root# mysqlrplshow --master=root:root@localhost:3306 --discover-slaves-login=root:root -v</span><br><span class="line"># master on localhost: ... connected.</span><br><span class="line"># Finding slaves for master: localhost:3306</span><br><span class="line"># Replication Topology Graph</span><br><span class="line">localhost:3306 (MASTER)</span><br><span class="line">   |</span><br><span class="line">   +--- localhost:3307 [IO: Yes, SQL: Yes] - (SLAVE)</span><br><span class="line">   |</span><br><span class="line">   +--- localhost:3308 [IO: Yes, SQL: Yes] - (SLAVE)</span><br><span class="line">   |</span><br><span class="line">   +--- localhost:3309 [IO: Yes, SQL: Yes] - (SLAVE)</span><br></pre></td></tr></table></figure>
 <p>至此我们的环境已经搭建完成。</p>
 <h3 id="mysql-utilities的几个常用命令"><a href="#mysql-utilities的几个常用命令" class="headerlink" title="mysql utilities的几个常用命令"></a>mysql utilities的几个常用命令</h3><p>检查复制环境：</p>
-<pre><code>mysqlrplcheck --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3307 -s
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqlrplcheck --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3307 -s</span><br></pre></td></tr></table></figure>
 <p>—&gt;:检查日志</p>
-<pre><code>ruiayLinSunny at ruiayLinSunnydeMacBook-Pro-2 in ~
-$ mysqlrplcheck --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3307 -s
-# master on 127.0.0.1: ... connected.
-# slave on 127.0.0.1: ... connected.
-Test Description                                                     Status
----------------------------------------------------------------------------
-Checking for binary logging on master                                [pass]
-Are there binlog exceptions?                                         [pass]
-Replication user exists?                                             [pass]
-Checking server_id values                                            [pass]
-Checking server_uuid values                                          [pass]
-Is slave connected to master?                                        [pass]
-Check master information file                                        [pass]
-Checking InnoDB compatibility                                        [pass]
-Checking storage engines compatibility                               [pass]
-Checking lower_case_table_names settings                             [pass]
-Checking slave delay (seconds behind master)                         [pass]
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">ruiayLinSunny at ruiayLinSunnydeMacBook-Pro-2 in ~</span><br><span class="line">$ mysqlrplcheck --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3307 -s</span><br><span class="line"># master on 127.0.0.1: ... connected.</span><br><span class="line"># slave on 127.0.0.1: ... connected.</span><br><span class="line">Test Description                                                     Status</span><br><span class="line">---------------------------------------------------------------------------</span><br><span class="line">Checking for binary logging on master                                [pass]</span><br><span class="line">Are there binlog exceptions?                                         [pass]</span><br><span class="line">Replication user exists?                                             [pass]</span><br><span class="line">Checking server_id values                                            [pass]</span><br><span class="line">Checking server_uuid values                                          [pass]</span><br><span class="line">Is slave connected to master?                                        [pass]</span><br><span class="line">Check master information file                                        [pass]</span><br><span class="line">Checking InnoDB compatibility                                        [pass]</span><br><span class="line">Checking storage engines compatibility                               [pass]</span><br><span class="line">Checking lower_case_table_names settings                             [pass]</span><br><span class="line">Checking slave delay (seconds behind master)                         [pass]</span><br></pre></td></tr></table></figure>
 <p>检查复制健康状态：</p>
-<pre><code>mysqlrpladmin --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3307 health
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqlrpladmin --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3307 health</span><br></pre></td></tr></table></figure>
 <p>—&gt;: 检查日志</p>
-<pre><code>$ mysqlrpladmin --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3307 health
-# Checking privileges.
-#
-# Replication Topology Health:
-+------------+-------+---------+--------+------------+---------+
-| host       | port  | role    | state  | gtid_mode  | health  |
-+------------+-------+---------+--------+------------+---------+
-| 127.0.0.1  | 3306  | MASTER  | UP     | ON         | OK      |
-| 127.0.0.1  | 3307  | SLAVE   | UP     | ON         | OK      |
-+------------+-------+---------+--------+------------+---------+
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$ mysqlrpladmin --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3307 health</span><br><span class="line"># Checking privileges.</span><br><span class="line">#</span><br><span class="line"># Replication Topology Health:</span><br><span class="line">+------------+-------+---------+--------+------------+---------+</span><br><span class="line">| host       | port  | role    | state  | gtid_mode  | health  |</span><br><span class="line">+------------+-------+---------+--------+------------+---------+</span><br><span class="line">| 127.0.0.1  | 3306  | MASTER  | UP     | ON         | OK      |</span><br><span class="line">| 127.0.0.1  | 3307  | SLAVE   | UP     | ON         | OK      |</span><br><span class="line">+------------+-------+---------+--------+------------+---------+</span><br></pre></td></tr></table></figure>
+
 <p>显示整体拓扑结构：</p>
-<pre><code>mysqlrplshow --master=root:root@127.0.0.1:3306  --discover-slaves-login=root:root -v
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqlrplshow --master=root:root@127.0.0.1:3306  --discover-slaves-login=root:root -v</span><br></pre></td></tr></table></figure>
 <p>—&gt;: 检查结果</p>
-<pre><code>ruiaylinydembp2:manages root# mysqlrplshow --master=root:root@localhost:3306 --discover-slaves-login=root:root
-# master on localhost: ... connected.
-# Finding slaves for master: localhost:3306 
-# Replication Topology Graph
-localhost:3306 (MASTER)
-   |
-   +--- localhost:3307 - (SLAVE)
-   |
-   +--- localhost:3308 - (SLAVE)
-   |
-   +--- localhost:3309 - (SLAVE)
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">ruiaylinydembp2:manages root# mysqlrplshow --master=root:root@localhost:3306 --discover-slaves-login=root:root</span><br><span class="line"># master on localhost: ... connected.</span><br><span class="line"># Finding slaves for master: localhost:3306 </span><br><span class="line"># Replication Topology Graph</span><br><span class="line">localhost:3306 (MASTER)</span><br><span class="line">   |</span><br><span class="line">   +--- localhost:3307 - (SLAVE)</span><br><span class="line">   |</span><br><span class="line">   +--- localhost:3308 - (SLAVE)</span><br><span class="line">   |</span><br><span class="line">   +--- localhost:3309 - (SLAVE)</span><br></pre></td></tr></table></figure>
 <p>通过 mysqlrpladmin 来打开和关闭复制</p>
-<pre><code>mysqlrpladmin --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3308 start
-mysqlrpladmin --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3308 stop
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysqlrpladmin --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3308 start</span><br><span class="line">mysqlrpladmin --master=root:root@127.0.0.1:3306 --slave=root:root@127.0.0.1:3308 stop</span><br></pre></td></tr></table></figure>
 <p>以上是几个比较常用的工具，每一个具体工具详细内容，请自行看文档，呵呵</p>
-<h3 id="自动和手动-failover"><a href="#自动和手动-failover" class="headerlink" title="自动和手动 failover"></a>自动和手动 failover</h3><h4 id="自动-failover"><a href="#自动-failover" class="headerlink" title="自动 failover"></a>自动 failover</h4><pre><code>mysqlfailover --master=root:root@127.0.0.1:3306 --candidates=root:root@127.0.0.1:3307  --discover-slaves-login=root:root
-</code></pre>
+<h3 id="自动和手动-failover"><a href="#自动和手动-failover" class="headerlink" title="自动和手动 failover"></a>自动和手动 failover</h3><h4 id="自动-failover"><a href="#自动-failover" class="headerlink" title="自动 failover"></a>自动 failover</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqlfailover --master=root:root@127.0.0.1:3306 --candidates=root:root@127.0.0.1:3307  --discover-slaves-login=root:root</span><br></pre></td></tr></table></figure>
 <p>执行这个命令之后，会在当前终端打开failover check的终端， like this ： </p>
-<pre><code>### mysqlfailover --master=root:root@127.0.0.1:3306 --candidates=root:root@127.0.0.1:3307  --discover-slaves-login=root:root
-
-MySQL Replication Failover Utility
-Failover Mode = auto     Next Interval = Sat May 31 16:05:59 2014
-
-Master Information
-------------------
-Binary Log File  Position  Binlog_Do_DB  Binlog_Ignore_DB  
-binlog.000009    191                                       
-
-GTID Executed Set
-dd1f65aa-e2d0-11e3-89e3-7f8d49c2f173:1-14
-
-Replication Health Status
-+------------+-------+---------+--------+------------+---------+
-| host       | port  | role    | state  | gtid_mode  | health  |
-+------------+-------+---------+--------+------------+---------+
-| 127.0.0.1  | 3306  | MASTER  | UP     | ON         | OK      |
-| localhost  | 3307  | SLAVE   | UP     | ON         | OK      |
-| localhost  | 3308  | SLAVE   | UP     | ON         | OK      |
-| localhost  | 3309  | SLAVE   | UP     | ON         | OK      |
-+------------+-------+---------+--------+------------+---------+
-
-Q-quit R-refresh H-health G-GTID Lists U-UUIDs
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">### mysqlfailover --master=root:root@127.0.0.1:3306 --candidates=root:root@127.0.0.1:3307  --discover-slaves-login=root:root</span><br><span class="line"></span><br><span class="line">MySQL Replication Failover Utility</span><br><span class="line">Failover Mode = auto     Next Interval = Sat May 31 16:05:59 2014</span><br><span class="line"></span><br><span class="line">Master Information</span><br><span class="line">------------------</span><br><span class="line">Binary Log File  Position  Binlog_Do_DB  Binlog_Ignore_DB  </span><br><span class="line">binlog.000009    191                                       </span><br><span class="line"></span><br><span class="line">GTID Executed Set</span><br><span class="line">dd1f65aa-e2d0-11e3-89e3-7f8d49c2f173:1-14</span><br><span class="line"></span><br><span class="line">Replication Health Status</span><br><span class="line">+------------+-------+---------+--------+------------+---------+</span><br><span class="line">| host       | port  | role    | state  | gtid_mode  | health  |</span><br><span class="line">+------------+-------+---------+--------+------------+---------+</span><br><span class="line">| 127.0.0.1  | 3306  | MASTER  | UP     | ON         | OK      |</span><br><span class="line">| localhost  | 3307  | SLAVE   | UP     | ON         | OK      |</span><br><span class="line">| localhost  | 3308  | SLAVE   | UP     | ON         | OK      |</span><br><span class="line">| localhost  | 3309  | SLAVE   | UP     | ON         | OK      |</span><br><span class="line">+------------+-------+---------+--------+------------+---------+</span><br><span class="line"></span><br><span class="line">Q-quit R-refresh H-health G-GTID Lists U-UUIDs</span><br></pre></td></tr></table></figure>
 <p>另外开一个终端<br>执行 ：</p>
-<pre><code>mysqladmin  -uroot -proot shutdown
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqladmin  -uroot -proot shutdown</span><br></pre></td></tr></table></figure>
 <p>failover终端：</p>
-<pre><code>### mysqlfailover --master=root:root@127.0.0.1:3306 --candidates=root:root@127.0.0.1:3307  --discover-slaves-login=root:root
-Master Information
-------------------
-Binary Log File  Position  Binlog_Do_DB  Binlog_Ignore_DB
-binlog.000008    191
-
-GTID Executed Set
-dd1f65aa-e2d0-11e3-89e3-7f8d49c2f173:1-14
-
-Master GTID Executed Set
-+------------+-------+---------+--------+------------+---------+
-| host       | port  | role    | state  | gtid_mode  | health  |
-+------------+-------+---------+--------+------------+---------+
-| 127.0.0.1  | 3306  | MASTER  | UP     | ON         | OK      |
-| localhost  | 3307  | SLAVE   | UP     | ON         | OK      |
-| localhost  | 3308  | SLAVE   | UP     | ON         | OK      |
-| localhost  | 3309  | SLAVE   | UP     | ON         | OK      |
-+------------+-------+---------+--------+------------+---------+
-
-Q-quit R-refresh H-health G-GTID Lists U-UUIDs
-Failed to reconnect to the master after 3 attemps.
-
-Failover starting in &#39;auto&#39; mode...
-# Candidate slave 127.0.0.1:3307 will become the new master.
-# Checking slaves status (before failover).
-# Preparing candidate for failover.
-# Creating replication user if it does not exist.
-# Stopping slaves.
-# Performing STOP on all slaves.
-# Switching slaves to new master.
-# Disconnecting new master as slave.
-# Starting slaves.
-# Performing START on all slaves.
-# Checking slaves for errors.
-# Failover complete.
-# Discovering slaves for master at 127.0.0.1:3307
-Failover console will restart in 5 seconds.
-
-Q-quit R-refresh H-health G-GTID Lists U-UUIDs
-# Discovering slaves for master at 127.0.0.1:3307
-MySQL Replication Failover Utility
-Failover Mode = auto     Next Interval = Sat May 31 15:01:00 2014
-Master Information
-------------------
-Binary Log File  Position  Binlog_Do_DB  Binlog_Ignore_DB
-binlog.000005    191
-
-GTID Executed Set
-dd1f65aa-e2d0-11e3-89e3-7f8d49c2f173:1-14
-
-Master GTID Executed Set
-+------------+-------+---------+--------+------------+---------+
-| host       | port  | role    | state  | gtid_mode  | health  |
-+------------+-------+---------+--------+------------+---------+
-| 127.0.0.1  | 3307  | MASTER  | UP     | ON         | OK      |
-| localhost  | 3308  | SLAVE   | UP     | ON         | OK      |
-| localhost  | 3309  | SLAVE   | UP     | ON         | OK      |
-+------------+-------+---------+--------+------------+---------+
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">### mysqlfailover --master=root:root@127.0.0.1:3306 --candidates=root:root@127.0.0.1:3307  --discover-slaves-login=root:root</span><br><span class="line">Master Information</span><br><span class="line">------------------</span><br><span class="line">Binary Log File  Position  Binlog_Do_DB  Binlog_Ignore_DB</span><br><span class="line">binlog.000008    191</span><br><span class="line"></span><br><span class="line">GTID Executed Set</span><br><span class="line">dd1f65aa-e2d0-11e3-89e3-7f8d49c2f173:1-14</span><br><span class="line"></span><br><span class="line">Master GTID Executed Set</span><br><span class="line">+------------+-------+---------+--------+------------+---------+</span><br><span class="line">| host       | port  | role    | state  | gtid_mode  | health  |</span><br><span class="line">+------------+-------+---------+--------+------------+---------+</span><br><span class="line">| 127.0.0.1  | 3306  | MASTER  | UP     | ON         | OK      |</span><br><span class="line">| localhost  | 3307  | SLAVE   | UP     | ON         | OK      |</span><br><span class="line">| localhost  | 3308  | SLAVE   | UP     | ON         | OK      |</span><br><span class="line">| localhost  | 3309  | SLAVE   | UP     | ON         | OK      |</span><br><span class="line">+------------+-------+---------+--------+------------+---------+</span><br><span class="line"></span><br><span class="line">Q-quit R-refresh H-health G-GTID Lists U-UUIDs</span><br><span class="line">Failed to reconnect to the master after 3 attemps.</span><br><span class="line"></span><br><span class="line">Failover starting in &#x27;auto&#x27; mode...</span><br><span class="line"># Candidate slave 127.0.0.1:3307 will become the new master.</span><br><span class="line"># Checking slaves status (before failover).</span><br><span class="line"># Preparing candidate for failover.</span><br><span class="line"># Creating replication user if it does not exist.</span><br><span class="line"># Stopping slaves.</span><br><span class="line"># Performing STOP on all slaves.</span><br><span class="line"># Switching slaves to new master.</span><br><span class="line"># Disconnecting new master as slave.</span><br><span class="line"># Starting slaves.</span><br><span class="line"># Performing START on all slaves.</span><br><span class="line"># Checking slaves for errors.</span><br><span class="line"># Failover complete.</span><br><span class="line"># Discovering slaves for master at 127.0.0.1:3307</span><br><span class="line">Failover console will restart in 5 seconds.</span><br><span class="line"></span><br><span class="line">Q-quit R-refresh H-health G-GTID Lists U-UUIDs</span><br><span class="line"># Discovering slaves for master at 127.0.0.1:3307</span><br><span class="line">MySQL Replication Failover Utility</span><br><span class="line">Failover Mode = auto     Next Interval = Sat May 31 15:01:00 2014</span><br><span class="line">Master Information</span><br><span class="line">------------------</span><br><span class="line">Binary Log File  Position  Binlog_Do_DB  Binlog_Ignore_DB</span><br><span class="line">binlog.000005    191</span><br><span class="line"></span><br><span class="line">GTID Executed Set</span><br><span class="line">dd1f65aa-e2d0-11e3-89e3-7f8d49c2f173:1-14</span><br><span class="line"></span><br><span class="line">Master GTID Executed Set</span><br><span class="line">+------------+-------+---------+--------+------------+---------+</span><br><span class="line">| host       | port  | role    | state  | gtid_mode  | health  |</span><br><span class="line">+------------+-------+---------+--------+------------+---------+</span><br><span class="line">| 127.0.0.1  | 3307  | MASTER  | UP     | ON         | OK      |</span><br><span class="line">| localhost  | 3308  | SLAVE   | UP     | ON         | OK      |</span><br><span class="line">| localhost  | 3309  | SLAVE   | UP     | ON         | OK      |</span><br><span class="line">+------------+-------+---------+--------+------------+---------+</span><br></pre></td></tr></table></figure>
 <p>master down 了之后，3307 实例接管成为了master </p>
 <p>切换收尾：<br>    启动 3306 实例，也就是老的master ； 调整复制链路 ，使 3306 成为新的slave； </p>
-<pre><code>mysqld_safe &amp;
-mysqlreplicate  --master=root:root@127.0.0.1:3307 --slave=root:root@127.0.0.1:3306 --rpl-user=repl:repl -vv
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysqld_safe &amp;</span><br><span class="line">mysqlreplicate  --master=root:root@127.0.0.1:3307 --slave=root:root@127.0.0.1:3306 --rpl-user=repl:repl -vv</span><br></pre></td></tr></table></figure>
 <h4 id="手动-failover"><a href="#手动-failover" class="headerlink" title="手动 failover"></a>手动 failover</h4><p>此时我们的链路是如下样子：</p>
-<pre><code>GTID Executed Set
-dd1f65aa-e2d0-11e3-89e3-7f8d49c2f173:1-14
-Master GTID Executed Set
-+------------+-------+---------+--------+------------+---------+
-| host       | port  | role    | state  | gtid_mode  | health  |
-+------------+-------+---------+--------+------------+---------+
-| 127.0.0.1  | 3307  | MASTER  | UP     | ON         | OK      |
-| localhost  | 3306  | SLAVE   | UP     | ON         | OK      |
-| localhost  | 3308  | SLAVE   | UP     | ON         | OK      |
-| localhost  | 3309  | SLAVE   | UP     | ON         | OK      |
-+------------+-------+---------+--------+------------+---------+
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">GTID Executed Set</span><br><span class="line">dd1f65aa-e2d0-11e3-89e3-7f8d49c2f173:1-14</span><br><span class="line">Master GTID Executed Set</span><br><span class="line">+------------+-------+---------+--------+------------+---------+</span><br><span class="line">| host       | port  | role    | state  | gtid_mode  | health  |</span><br><span class="line">+------------+-------+---------+--------+------------+---------+</span><br><span class="line">| 127.0.0.1  | 3307  | MASTER  | UP     | ON         | OK      |</span><br><span class="line">| localhost  | 3306  | SLAVE   | UP     | ON         | OK      |</span><br><span class="line">| localhost  | 3308  | SLAVE   | UP     | ON         | OK      |</span><br><span class="line">| localhost  | 3309  | SLAVE   | UP     | ON         | OK      |</span><br><span class="line">+------------+-------+---------+--------+------------+---------+</span><br></pre></td></tr></table></figure>
 <p>我们执行手动切换： </p>
-<pre><code>mysqlrpladmin --master=root:root@127.0.0.1:3307 --new-master=root:root@127.0.0.1:3306 --discover-slaves-login=root:root --demote-master switchover
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqlrpladmin --master=root:root@127.0.0.1:3307 --new-master=root:root@127.0.0.1:3306 --discover-slaves-login=root:root --demote-master switchover</span><br></pre></td></tr></table></figure>
 <p>—&gt;：日志输出</p>
-<pre><code>ruiayLinSunnydeMacBook-Pro-2:~ root# mysqlrpladmin --master=root:root@127.0.0.1:3307 --new-master=root:root@127.0.0.1:3306 --discover-slaves-login=root:root --demote-master switchover
-# Discovering slaves for master at 127.0.0.1:3307
-# Discovering slave at localhost:3306
-# Found slave: localhost:3306
-# Discovering slave at localhost:3308
-# Found slave: localhost:3308
-# Discovering slave at localhost:3309
-# Found slave: localhost:3309
-# Checking privileges.
-# WARNING: You may be mixing host names and IP addresses. This may result in negative status reporting if your DNS services do not support reverse name lookup.
-# Performing switchover from master at 127.0.0.1:3307 to slave at 127.0.0.1:3306.
-# Checking candidate slave prerequisites.
-# Checking slaves configuration to master.
-# Waiting for slaves to catch up to old master.
-# Stopping slaves.
-# Performing STOP on all slaves.
-# Demoting old master to be a slave to the new master.
-# Switching slaves to new master.
-# Starting all slaves.
-# Performing START on all slaves.
-# Checking slaves for errors.
-# Switchover complete.
-#
-# Replication Topology Health:
-+------------+-------+---------+--------+------------+---------+
-| host       | port  | role    | state  | gtid_mode  | health  |
-+------------+-------+---------+--------+------------+---------+
-| 127.0.0.1  | 3306  | MASTER  | UP     | ON         | OK      |
-| 127.0.0.1  | 3307  | SLAVE   | UP     | ON         | OK      |
-| localhost  | 3308  | SLAVE   | UP     | ON         | OK      |
-| localhost  | 3309  | SLAVE   | UP     | ON         | OK      |
-+------------+-------+---------+--------+------------+---------+
-# ...done.
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">ruiayLinSunnydeMacBook-Pro-2:~ root# mysqlrpladmin --master=root:root@127.0.0.1:3307 --new-master=root:root@127.0.0.1:3306 --discover-slaves-login=root:root --demote-master switchover</span><br><span class="line"># Discovering slaves for master at 127.0.0.1:3307</span><br><span class="line"># Discovering slave at localhost:3306</span><br><span class="line"># Found slave: localhost:3306</span><br><span class="line"># Discovering slave at localhost:3308</span><br><span class="line"># Found slave: localhost:3308</span><br><span class="line"># Discovering slave at localhost:3309</span><br><span class="line"># Found slave: localhost:3309</span><br><span class="line"># Checking privileges.</span><br><span class="line"># WARNING: You may be mixing host names and IP addresses. This may result in negative status reporting if your DNS services do not support reverse name lookup.</span><br><span class="line"># Performing switchover from master at 127.0.0.1:3307 to slave at 127.0.0.1:3306.</span><br><span class="line"># Checking candidate slave prerequisites.</span><br><span class="line"># Checking slaves configuration to master.</span><br><span class="line"># Waiting for slaves to catch up to old master.</span><br><span class="line"># Stopping slaves.</span><br><span class="line"># Performing STOP on all slaves.</span><br><span class="line"># Demoting old master to be a slave to the new master.</span><br><span class="line"># Switching slaves to new master.</span><br><span class="line"># Starting all slaves.</span><br><span class="line"># Performing START on all slaves.</span><br><span class="line"># Checking slaves for errors.</span><br><span class="line"># Switchover complete.</span><br><span class="line">#</span><br><span class="line"># Replication Topology Health:</span><br><span class="line">+------------+-------+---------+--------+------------+---------+</span><br><span class="line">| host       | port  | role    | state  | gtid_mode  | health  |</span><br><span class="line">+------------+-------+---------+--------+------------+---------+</span><br><span class="line">| 127.0.0.1  | 3306  | MASTER  | UP     | ON         | OK      |</span><br><span class="line">| 127.0.0.1  | 3307  | SLAVE   | UP     | ON         | OK      |</span><br><span class="line">| localhost  | 3308  | SLAVE   | UP     | ON         | OK      |</span><br><span class="line">| localhost  | 3309  | SLAVE   | UP     | ON         | OK      |</span><br><span class="line">+------------+-------+---------+--------+------------+---------+</span><br><span class="line"># ...done.</span><br></pre></td></tr></table></figure>
 <p>执行切换成功之后，重新check 链路：</p>
-<pre><code>ruiayLinSunnydeMacBook-Pro-2:~ root# mysqlrplshow --master=root:root@127.0.0.1:3306  --discover-slaves-login=root:root -v
-# master on 127.0.0.1: ... connected.
-# Finding slaves for master: 127.0.0.1:3306
-# Replication Topology Graph
-127.0.0.1:3306 (MASTER)
-   |
-   +--- localhost:3307 [IO: Yes, SQL: Yes] - (SLAVE)
-   |
-   +--- localhost:3308 [IO: Yes, SQL: Yes] - (SLAVE)
-   |
-   +--- localhost:3309 [IO: Yes, SQL: Yes] - (SLAVE)
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">ruiayLinSunnydeMacBook-Pro-2:~ root# mysqlrplshow --master=root:root@127.0.0.1:3306  --discover-slaves-login=root:root -v</span><br><span class="line"># master on 127.0.0.1: ... connected.</span><br><span class="line"># Finding slaves for master: 127.0.0.1:3306</span><br><span class="line"># Replication Topology Graph</span><br><span class="line">127.0.0.1:3306 (MASTER)</span><br><span class="line">   |</span><br><span class="line">   +--- localhost:3307 [IO: Yes, SQL: Yes] - (SLAVE)</span><br><span class="line">   |</span><br><span class="line">   +--- localhost:3308 [IO: Yes, SQL: Yes] - (SLAVE)</span><br><span class="line">   |</span><br><span class="line">   +--- localhost:3309 [IO: Yes, SQL: Yes] - (SLAVE)</span><br></pre></td></tr></table></figure>
 <p>手动切换完成 ， end </p>
 <blockquote>
 <p>mysqlfailover 可以以Deamon的方式启动，还可以指定 –log&#x3D;LOG_FILE 打印到日志文件中</p>
 </blockquote>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><pre><code>mysql新版本的功能真的很让人鼓舞兴奋，作为一个dba尤然，继续学习，继续进步，才是硬道理 ...
-持续研究和学习 mysql 数据库，做一个好dba， 一个好数据架构师 ...
-</code></pre>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql新版本的功能真的很让人鼓舞兴奋，作为一个dba尤然，继续学习，继续进步，才是硬道理 ...</span><br><span class="line">持续研究和学习 mysql 数据库，做一个好dba， 一个好数据架构师 ...</span><br></pre></td></tr></table></figure>
+
+
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -571,12 +247,6 @@ Master GTID Executed Set
 <aside class="clearfix">
 
   
-<div class="github-card">
-<p class="asidetitle">Github 名片</p>
-<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
-<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
-</div>
-
 
 
   
@@ -674,11 +344,11 @@ Master GTID Executed Set
 			
 		
 			
-				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
 			
 		
 			
@@ -690,15 +360,15 @@ Master GTID Executed Set
 			
 		
 			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
 			
 		
 		</ul>
@@ -711,7 +381,7 @@ Master GTID Executed Set
         
           <li>
             
-            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title=" 内核月报">阿里内核月报</a>
             
           </li>
         
@@ -812,14 +482,12 @@ Master GTID Executed Set
 	
 	
 	<section class="info">
-		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
-			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。欢迎交流。 <br/>
+			</p>
 	</section>
 	 
 	<div class="social-font" class="clearfix">
 		
-		
-		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
 		
 		
 		

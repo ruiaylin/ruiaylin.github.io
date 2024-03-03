@@ -19,7 +19,7 @@
 <meta property="og:description" content="MHA Overview MHA performs automating master failover and slave promotion with minimal downtime, usually within 10-30 seconds. MHA prevents replication consistency problems and saves on expenses of hav">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2015-03-03T05:50:53.000Z">
-<meta property="article:modified_time" content="2024-03-02T09:18:29.292Z">
+<meta property="article:modified_time" content="2024-03-03T02:10:33.732Z">
 <meta property="article:author" content="ruichao.lin">
 <meta property="article:tag" content="MySQL">
 <meta property="article:tag" content="MHA">
@@ -119,299 +119,51 @@
 <blockquote>
 <p>Centos 6.x : </p>
 </blockquote>
-<pre><code>yum  -y install perl-DBD-MySQL perl-Config-Tiny perl-Log-Dispatch perl-Parallel-ForkManager perl-Config-IniFiles  ncftp perl-Params-Validate  perl-CPAN perl-Test-Mock-LWP.noarch perl-LWP-Authen-Negotiate.noarch perl-devel 
-yum install perl-ExtUtils-CBuilder perl-ExtUtils-MakeMaker
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum  -y install perl-DBD-MySQL perl-Config-Tiny perl-Log-Dispatch perl-Parallel-ForkManager perl-Config-IniFiles  ncftp perl-Params-Validate  perl-CPAN perl-Test-Mock-LWP.noarch perl-LWP-Authen-Negotiate.noarch perl-devel </span><br><span class="line">yum install perl-ExtUtils-CBuilder perl-ExtUtils-MakeMaker</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>Centos 7 </p>
 </blockquote>
-<pre><code>yum -y install perl-CPAN
-perl -MCPAN -e &quot;install Config::Tiny&quot;
-perl -MCPAN -e &quot;install Log::Dispatch&quot;
-perl -MCPAN -e &quot;install Parallel::ForkManager&quot;
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">yum -y install perl-CPAN</span><br><span class="line">perl -MCPAN -e &quot;install Config::Tiny&quot;</span><br><span class="line">perl -MCPAN -e &quot;install Log::Dispatch&quot;</span><br><span class="line">perl -MCPAN -e &quot;install Parallel::ForkManager&quot;</span><br></pre></td></tr></table></figure>
 <h4 id="INSTALL-MHA"><a href="#INSTALL-MHA" class="headerlink" title="INSTALL MHA"></a>INSTALL MHA</h4><ul>
-<li><p>download the rpm packages</p>
-<pre><code>  mha4mysql-manager-0.56-0.el6.noarch.rpm
-  mha4mysql-node-0.56-0.el6.noarch.rpm 
-</code></pre>
-</li>
-<li><p>rpm -ivh pk-name to install </p>
-<pre><code>  [root@mytaskdb ~]# rpm -ivh mha4mysql-node-0.56-0.el6.noarch.rpm  
-  Preparing...                ########################################### [100%]
- 1:mha4mysql-node         ########################################### [100%]
-  [root@mytaskdb ~]# rpm -ivh mha4mysql-manager-0.56-0.el6.noarch.rpm  
-  Preparing...                ########################################### [100%]
- 1:mha4mysql-manager      ########################################### [100%]
-  [root@mytaskdb ~]#  
-</code></pre>
-</li>
-<li><p>Centos 7 </p>
-<pre><code>  tar zxvf mha4mysql-manager-0.56.tar.gz  
-  cd mha4mysql-manager-0.56/
-  perl Makefile.PL 
-  make 
-  make install
-</code></pre>
-</li>
+<li>download the rpm packages<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">        mha4mysql-manager-0.56-0.el6.noarch.rpm</span><br><span class="line">        mha4mysql-node-0.56-0.el6.noarch.rpm </span><br><span class="line">```   </span><br><span class="line">- rpm -ivh pk-name to install </span><br><span class="line">```   </span><br><span class="line">        [root@mytaskdb ~]# rpm -ivh mha4mysql-node-0.56-0.el6.noarch.rpm  </span><br><span class="line">        Preparing...                ########################################### [100%]</span><br><span class="line">       1:mha4mysql-node         ########################################### [100%]</span><br><span class="line">        [root@mytaskdb ~]# rpm -ivh mha4mysql-manager-0.56-0.el6.noarch.rpm  </span><br><span class="line">        Preparing...                ########################################### [100%]</span><br><span class="line">       1:mha4mysql-manager      ########################################### [100%]</span><br><span class="line">        [root@mytaskdb ~]#  </span><br></pre></td></tr></table></figure></li>
+<li>Centos 7 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tar zxvf mha4mysql-manager-0.56.tar.gz  </span><br><span class="line">cd mha4mysql-manager-0.56/</span><br><span class="line">perl Makefile.PL </span><br><span class="line">make </span><br><span class="line">make install </span><br></pre></td></tr></table></figure></li>
 </ul>
 <h3 id="CONFIGURE-MHA"><a href="#CONFIGURE-MHA" class="headerlink" title="CONFIGURE MHA"></a>CONFIGURE MHA</h3><blockquote>
 <p>每个DB节点创建用户 ：</p>
 </blockquote>
-<pre><code>grant all privileges on *.* to mha_test@&#39;192.168.19.%&#39; identified by &#39;123456&#39; ; 
-flush privileges ;
-</code></pre>
-<h4 id="configure-file"><a href="#configure-file" class="headerlink" title="configure file"></a>configure file</h4><pre><code>[server default]
-manager_workdir=/root/mhatest
-manager_log=/root/mhatest/manager.log
-ssh_user=root
-user=mha_test
-password=123456
-ssh_user=root
-repl_user=repl    
-repl_password=repl  
-ping_interval=2
-shutdown_script=&quot;&quot;
-master_ip_online_change_script=&quot;&quot;
-report_script=&quot;&quot;    
-[server1]
-hostname=192.168.19.134
-master_binlog_dir=/log/mysql3306/binlog
-candidate_master=1
-[server2]
-hostname=192.168.19.132
-master_binlog_dir=/log/mysql3306/binlog
-candidate_master=1
-[server3]
-hostname=192.168.19.135
-master_binlog_dir=/log/mysql3306/binlog
-candidate_master=1 
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">grant all privileges on *.* to mha_test@&#x27;192.168.19.%&#x27; identified by &#x27;123456&#x27; ; </span><br><span class="line">flush privileges ;</span><br></pre></td></tr></table></figure>
+<h4 id="configure-file"><a href="#configure-file" class="headerlink" title="configure file"></a>configure file</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">[server default]</span><br><span class="line">manager_workdir=/root/mhatest</span><br><span class="line">manager_log=/root/mhatest/manager.log</span><br><span class="line">ssh_user=root</span><br><span class="line">user=mha_test</span><br><span class="line">password=123456</span><br><span class="line">ssh_user=root</span><br><span class="line">repl_user=repl    </span><br><span class="line">repl_password=repl  </span><br><span class="line">ping_interval=2</span><br><span class="line">shutdown_script=&quot;&quot;</span><br><span class="line">master_ip_online_change_script=&quot;&quot;</span><br><span class="line">report_script=&quot;&quot;    </span><br><span class="line">[server1]</span><br><span class="line">hostname=192.168.19.134</span><br><span class="line">master_binlog_dir=/log/mysql3306/binlog</span><br><span class="line">candidate_master=1</span><br><span class="line">[server2]</span><br><span class="line">hostname=192.168.19.132</span><br><span class="line">master_binlog_dir=/log/mysql3306/binlog</span><br><span class="line">candidate_master=1</span><br><span class="line">[server3]</span><br><span class="line">hostname=192.168.19.135</span><br><span class="line">master_binlog_dir=/log/mysql3306/binlog</span><br><span class="line">candidate_master=1 </span><br></pre></td></tr></table></figure>
+
 <h4 id="配置多个HA组"><a href="#配置多个HA组" class="headerlink" title="配置多个HA组"></a>配置多个HA组</h4><h5 id="配置一个全局的配置文件"><a href="#配置一个全局的配置文件" class="headerlink" title="配置一个全局的配置文件"></a>配置一个全局的配置文件</h5><p>file：  &#x2F;etc&#x2F;masterha_default.cnf </p>
-<pre><code>[server default]
-ssh_user=root
-user=mha_test
-password=123456
-repl_user=repl    
-repl_password=4E1uJaIuc  
-ping_interval=2 
-master_ip_online_change_script=&quot;&quot; 
-master_binlog_dir= /log/mysql3306/binlog
-remote_workdir=/data/log/masterha
-secondary_check_script= masterha_secondary_check -s remote_host1 -s remote_host2
-master_ip_failover_script=/script/masterha/master_ip_failover
-shutdown_script= /script/masterha/power_manager
-report_script= /script/masterha/send_master_failover_mail
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[server default]</span><br><span class="line">ssh_user=root</span><br><span class="line">user=mha_test</span><br><span class="line">password=123456</span><br><span class="line">repl_user=repl    </span><br><span class="line">repl_password=4E1uJaIuc  </span><br><span class="line">ping_interval=2 </span><br><span class="line">master_ip_online_change_script=&quot;&quot; </span><br><span class="line">master_binlog_dir= /log/mysql3306/binlog</span><br><span class="line">remote_workdir=/data/log/masterha</span><br><span class="line">secondary_check_script= masterha_secondary_check -s remote_host1 -s remote_host2</span><br><span class="line">master_ip_failover_script=/script/masterha/master_ip_failover</span><br><span class="line">shutdown_script= /script/masterha/power_manager</span><br><span class="line">report_script= /script/masterha/send_master_failover_mail</span><br></pre></td></tr></table></figure>
+
 <h5 id="HA-group-1"><a href="#HA-group-1" class="headerlink" title="HA group 1:"></a>HA group 1:</h5><blockquote>
 <p>cat &#x2F;etc&#x2F;app1.cnf</p>
 </blockquote>
-<pre><code>[server default]
-manager_workdir=/var/log/masterha/app1
-manager_log=/var/log/masterha/app1/app1.log
-[server1]
-hostname=host1
-candidate_master=1
-[server2]
-hostname=host2
-candidate_master=1
-[server3]
-hostname=host3 
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[server default]</span><br><span class="line">manager_workdir=/var/log/masterha/app1</span><br><span class="line">manager_log=/var/log/masterha/app1/app1.log</span><br><span class="line">[server1]</span><br><span class="line">hostname=host1</span><br><span class="line">candidate_master=1</span><br><span class="line">[server2]</span><br><span class="line">hostname=host2</span><br><span class="line">candidate_master=1</span><br><span class="line">[server3]</span><br><span class="line">hostname=host3 </span><br></pre></td></tr></table></figure>
 <h5 id="HA-group-2"><a href="#HA-group-2" class="headerlink" title="HA group 2 :"></a>HA group 2 :</h5><p>cat &#x2F;etc&#x2F;app2.cnf</p>
-<pre><code>[server default]
-manager_workdir=/var/log/masterha/app2
-manager_log=/var/log/masterha/app2/app2.log
-[server1]
-hostname=host11
-candidate_master=1
-[server2]
-hostname=host12
-candidate_master=1
-[server3]
-hostname=host13
-[server4]
-hostname=host14
-no_master=1
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[server default]</span><br><span class="line">manager_workdir=/var/log/masterha/app2</span><br><span class="line">manager_log=/var/log/masterha/app2/app2.log</span><br><span class="line">[server1]</span><br><span class="line">hostname=host11</span><br><span class="line">candidate_master=1</span><br><span class="line">[server2]</span><br><span class="line">hostname=host12</span><br><span class="line">candidate_master=1</span><br><span class="line">[server3]</span><br><span class="line">hostname=host13</span><br><span class="line">[server4]</span><br><span class="line">hostname=host14</span><br><span class="line">no_master=1</span><br></pre></td></tr></table></figure>
+
 <h3 id="验证MHA"><a href="#验证MHA" class="headerlink" title="验证MHA"></a>验证MHA</h3><blockquote>
 <p>使用以下命令来进行验证： </p>
 </blockquote>
-<pre><code>masterha_check_ssh  --conf=/root/mhatest/app1.cnf
-masterha_check_repl --conf=/root/mhatest/app1.cnf
-masterha_manager    --conf=/root/mhatest/app1.cnf
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">masterha_check_ssh  --conf=/root/mhatest/app1.cnf</span><br><span class="line">masterha_check_repl --conf=/root/mhatest/app1.cnf</span><br><span class="line">masterha_manager    --conf=/root/mhatest/app1.cnf</span><br></pre></td></tr></table></figure>
+
 <h4 id="CHECK-SSH"><a href="#CHECK-SSH" class="headerlink" title="CHECK SSH"></a>CHECK SSH</h4><blockquote>
 <p>  masterha_check_ssh  –conf&#x3D;&#x2F;root&#x2F;mhatest&#x2F;app1.cnf  </p>
 </blockquote>
-<pre><code>[root@masterham mhatest]# masterha_check_ssh  --conf=/root/mhatest/app1.cnf  
-Wed Mar  4 09:12:48 2015 - [info] Reading default configuration from /etc/masterha_default.cnf..
-Wed Mar  4 09:12:48 2015 - [info] Reading application default configuration from /root/mhatest/app1.cnf..
-Wed Mar  4 09:12:48 2015 - [info] Reading server configuration from /root/mhatest/app1.cnf..
-Wed Mar  4 09:12:48 2015 - [info] Starting SSH connection tests..
-Wed Mar  4 09:12:49 2015 - [debug] 
-Wed Mar  4 09:12:48 2015 - [debug]  Connecting via SSH from root@192.168.19.134(192.168.19.134:22) to root@192.168.19.135(192.168.19.135:22)..
-Wed Mar  4 09:12:48 2015 - [debug]   ok.
-Wed Mar  4 09:12:48 2015 - [debug]  Connecting via SSH from root@192.168.19.134(192.168.19.134:22) to root@192.168.19.136(192.168.19.136:22)..
-Wed Mar  4 09:12:49 2015 - [debug]   ok.
-Wed Mar  4 09:12:49 2015 - [debug] 
-Wed Mar  4 09:12:48 2015 - [debug]  Connecting via SSH from root@192.168.19.135(192.168.19.135:22) to root@192.168.19.134(192.168.19.134:22)..
-Wed Mar  4 09:12:49 2015 - [debug]   ok.
-Wed Mar  4 09:12:49 2015 - [debug]  Connecting via SSH from root@192.168.19.135(192.168.19.135:22) to root@192.168.19.136(192.168.19.136:22)..
-Wed Mar  4 09:12:49 2015 - [debug]   ok.
-Wed Mar  4 09:12:50 2015 - [debug] 
-Wed Mar  4 09:12:49 2015 - [debug]  Connecting via SSH from root@192.168.19.136(192.168.19.136:22) to root@192.168.19.134(192.168.19.134:22)..
-Wed Mar  4 09:12:49 2015 - [debug]   ok.
-Wed Mar  4 09:12:49 2015 - [debug]  Connecting via SSH from root@192.168.19.136(192.168.19.136:22) to root@192.168.19.135(192.168.19.135:22)..
-Wed Mar  4 09:12:50 2015 - [debug]   ok.
-Wed Mar  4 09:12:50 2015 - [info] All SSH connection tests passed successfully.
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">[root@masterham mhatest]# masterha_check_ssh  --conf=/root/mhatest/app1.cnf  </span><br><span class="line">Wed Mar  4 09:12:48 2015 - [info] Reading default configuration from /etc/masterha_default.cnf..</span><br><span class="line">Wed Mar  4 09:12:48 2015 - [info] Reading application default configuration from /root/mhatest/app1.cnf..</span><br><span class="line">Wed Mar  4 09:12:48 2015 - [info] Reading server configuration from /root/mhatest/app1.cnf..</span><br><span class="line">Wed Mar  4 09:12:48 2015 - [info] Starting SSH connection tests..</span><br><span class="line">Wed Mar  4 09:12:49 2015 - [debug] </span><br><span class="line">Wed Mar  4 09:12:48 2015 - [debug]  Connecting via SSH from root@192.168.19.134(192.168.19.134:22) to root@192.168.19.135(192.168.19.135:22)..</span><br><span class="line">Wed Mar  4 09:12:48 2015 - [debug]   ok.</span><br><span class="line">Wed Mar  4 09:12:48 2015 - [debug]  Connecting via SSH from root@192.168.19.134(192.168.19.134:22) to root@192.168.19.136(192.168.19.136:22)..</span><br><span class="line">Wed Mar  4 09:12:49 2015 - [debug]   ok.</span><br><span class="line">Wed Mar  4 09:12:49 2015 - [debug] </span><br><span class="line">Wed Mar  4 09:12:48 2015 - [debug]  Connecting via SSH from root@192.168.19.135(192.168.19.135:22) to root@192.168.19.134(192.168.19.134:22)..</span><br><span class="line">Wed Mar  4 09:12:49 2015 - [debug]   ok.</span><br><span class="line">Wed Mar  4 09:12:49 2015 - [debug]  Connecting via SSH from root@192.168.19.135(192.168.19.135:22) to root@192.168.19.136(192.168.19.136:22)..</span><br><span class="line">Wed Mar  4 09:12:49 2015 - [debug]   ok.</span><br><span class="line">Wed Mar  4 09:12:50 2015 - [debug] </span><br><span class="line">Wed Mar  4 09:12:49 2015 - [debug]  Connecting via SSH from root@192.168.19.136(192.168.19.136:22) to root@192.168.19.134(192.168.19.134:22)..</span><br><span class="line">Wed Mar  4 09:12:49 2015 - [debug]   ok.</span><br><span class="line">Wed Mar  4 09:12:49 2015 - [debug]  Connecting via SSH from root@192.168.19.136(192.168.19.136:22) to root@192.168.19.135(192.168.19.135:22)..</span><br><span class="line">Wed Mar  4 09:12:50 2015 - [debug]   ok.</span><br><span class="line">Wed Mar  4 09:12:50 2015 - [info] All SSH connection tests passed successfully.</span><br></pre></td></tr></table></figure>
 <h4 id="CHECK-REPL"><a href="#CHECK-REPL" class="headerlink" title="CHECK REPL"></a>CHECK REPL</h4><blockquote>
 <p> masterha_check_repl –conf&#x3D;&#x2F;root&#x2F;mhatest&#x2F;app1.cnf</p>
 </blockquote>
-<pre><code>[root@masterham mhatest]# masterha_check_repl --conf=/root/mhatest/app1.cnf
-Wed Mar  4 09:13:49 2015 - [info] Reading default configuration from /etc/masterha_default.cnf..
-Wed Mar  4 09:13:49 2015 - [info] Reading application default configuration from /root/mhatest/app1.cnf..
-Wed Mar  4 09:13:49 2015 - [info] Reading server configuration from /root/mhatest/app1.cnf..
-Wed Mar  4 09:13:49 2015 - [info] MHA::MasterMonitor version 0.56.
-Wed Mar  4 09:13:50 2015 - [info] GTID failover mode = 0
-Wed Mar  4 09:13:50 2015 - [info] Dead Servers:
-Wed Mar  4 09:13:50 2015 - [info] Alive Servers:
-Wed Mar  4 09:13:50 2015 - [info]   192.168.19.134(192.168.19.134:3306)
-Wed Mar  4 09:13:50 2015 - [info]   192.168.19.135(192.168.19.135:3306)
-Wed Mar  4 09:13:50 2015 - [info]   192.168.19.136(192.168.19.136:3306)
-Wed Mar  4 09:13:50 2015 - [info] Alive Slaves:
-Wed Mar  4 09:13:50 2015 - [info]   192.168.19.135(192.168.19.135:3306)  Version=5.6.19-67.0-log (oldest major version between slaves) log-bin:enabled
-Wed Mar  4 09:13:50 2015 - [info]     Replicating from 192.168.19.134(192.168.19.134:3306)
-Wed Mar  4 09:13:50 2015 - [info]   192.168.19.136(192.168.19.136:3306)  Version=5.6.19-67.0-log (oldest major version between slaves) log-bin:enabled
-Wed Mar  4 09:13:50 2015 - [info]     Replicating from 192.168.19.134(192.168.19.134:3306)
-Wed Mar  4 09:13:50 2015 - [info] Current Alive Master: 192.168.19.134(192.168.19.134:3306)
-Wed Mar  4 09:13:50 2015 - [info] Checking slave configurations..
-Wed Mar  4 09:13:50 2015 - [info] Checking replication filtering settings..
-Wed Mar  4 09:13:50 2015 - [info]  binlog_do_db= , binlog_ignore_db= 
-Wed Mar  4 09:13:50 2015 - [info]  Replication filtering check ok.
-Wed Mar  4 09:13:50 2015 - [info] GTID (with auto-pos) is not supported
-Wed Mar  4 09:13:50 2015 - [info] Starting SSH connection tests..
-Wed Mar  4 09:13:51 2015 - [info] All SSH connection tests passed successfully.
-Wed Mar  4 09:13:51 2015 - [info] Checking MHA Node version..
-Wed Mar  4 09:13:52 2015 - [info]  Version check ok.
-Wed Mar  4 09:13:52 2015 - [info] Checking SSH publickey authentication settings on the current master..
-Wed Mar  4 09:13:52 2015 - [info] HealthCheck: SSH to 192.168.19.134 is reachable.
-Wed Mar  4 09:13:52 2015 - [info] Master MHA Node version is 0.56.
-Wed Mar  4 09:13:52 2015 - [info] Checking recovery script configurations on 192.168.19.134(192.168.19.134:3306)..
-Wed Mar  4 09:13:52 2015 - [info]   Executing command: save_binary_logs --command=test --start_pos=4 --binlog_dir=/log/mysql3306/binlog --output_file=/var/tmp/save_binary_logs_test --manager_version=0.56 --start_file=binlog.000005 
-Wed Mar  4 09:13:52 2015 - [info]   Connecting to root@192.168.19.134(192.168.19.134:22).. 
-  Creating /var/tmp if not exists..    ok.
-  Checking output directory is accessible or not..
-   ok.
-  Binlog found at /log/mysql3306/binlog, up to binlog.000005
-Wed Mar  4 09:13:52 2015 - [info] Binlog setting check done.
-Wed Mar  4 09:13:52 2015 - [info] Checking SSH publickey authentication and checking recovery script configurations on all alive slave servers..
-Wed Mar  4 09:13:52 2015 - [info]   Executing command : apply_diff_relay_logs --command=test --slave_user=&#39;mha_test&#39; --slave_host=192.168.19.135 --slave_ip=192.168.19.135 --slave_port=3306 --workdir=/var/tmp --target_version=5.6.19-67.0-log --manager_version=0.56 --relay_dir=/log/mysql3306/binlog --current_relay_log=relaylog.3794333  --slave_pass=xxx
-Wed Mar  4 09:13:52 2015 - [info]   Connecting to root@192.168.19.135(192.168.19.135:22).. 
-  Checking slave recovery environment settings..
-    Relay log found at /log/mysql3306/binlog, up to relaylog.3794334
-    Temporary relay log file is /log/mysql3306/binlog/relaylog.3794334
-    Testing mysql connection and privileges..Warning: Using a password on the command line interface can be insecure.
- done.
-    Testing mysqlbinlog output.. done.
-    Cleaning up test file(s).. done.
-Wed Mar  4 09:13:52 2015 - [info]   Executing command : apply_diff_relay_logs --command=test --slave_user=&#39;mha_test&#39; --slave_host=192.168.19.136 --slave_ip=192.168.19.136 --slave_port=3306 --workdir=/var/tmp --target_version=5.6.19-67.0-log --manager_version=0.56 --relay_dir=/log/mysql3306/binlog --current_relay_log=relaylog.3794333  --slave_pass=xxx
-Wed Mar  4 09:13:52 2015 - [info]   Connecting to root@192.168.19.136(192.168.19.136:22).. 
-  Checking slave recovery environment settings..
-    Relay log found at /log/mysql3306/binlog, up to relaylog.3794334
-    Temporary relay log file is /log/mysql3306/binlog/relaylog.3794334
-    Testing mysql connection and privileges..Warning: Using a password on the command line interface can be insecure.
- done.
-    Testing mysqlbinlog output.. done.
-    Cleaning up test file(s).. done.
-Wed Mar  4 09:13:52 2015 - [info] Slaves settings check done.
-Wed Mar  4 09:13:52 2015 - [info] 
-192.168.19.134(192.168.19.134:3306) (current master)
- +--192.168.19.135(192.168.19.135:3306)
- +--192.168.19.136(192.168.19.136:3306) 
-Wed Mar  4 09:13:52 2015 - [info] Checking replication health on 192.168.19.135..
-Wed Mar  4 09:13:52 2015 - [info]  ok.
-Wed Mar  4 09:13:52 2015 - [info] Checking replication health on 192.168.19.136..
-Wed Mar  4 09:13:52 2015 - [info]  ok.
-Wed Mar  4 09:13:52 2015 - [warning] master_ip_failover_script is not defined.
-Wed Mar  4 09:13:52 2015 - [warning] shutdown_script is not defined.
-Wed Mar  4 09:13:52 2015 - [info] Got exit code 0 (Not master dead).    
-MySQL Replication Health is OK.
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line">[root@masterham mhatest]# masterha_check_repl --conf=/root/mhatest/app1.cnf</span><br><span class="line">Wed Mar  4 09:13:49 2015 - [info] Reading default configuration from /etc/masterha_default.cnf..</span><br><span class="line">Wed Mar  4 09:13:49 2015 - [info] Reading application default configuration from /root/mhatest/app1.cnf..</span><br><span class="line">Wed Mar  4 09:13:49 2015 - [info] Reading server configuration from /root/mhatest/app1.cnf..</span><br><span class="line">Wed Mar  4 09:13:49 2015 - [info] MHA::MasterMonitor version 0.56.</span><br><span class="line">Wed Mar  4 09:13:50 2015 - [info] GTID failover mode = 0</span><br><span class="line">Wed Mar  4 09:13:50 2015 - [info] Dead Servers:</span><br><span class="line">Wed Mar  4 09:13:50 2015 - [info] Alive Servers:</span><br><span class="line">Wed Mar  4 09:13:50 2015 - [info]   192.168.19.134(192.168.19.134:3306)</span><br><span class="line">Wed Mar  4 09:13:50 2015 - [info]   192.168.19.135(192.168.19.135:3306)</span><br><span class="line">Wed Mar  4 09:13:50 2015 - [info]   192.168.19.136(192.168.19.136:3306)</span><br><span class="line">Wed Mar  4 09:13:50 2015 - [info] Alive Slaves:</span><br><span class="line">Wed Mar  4 09:13:50 2015 - [info]   192.168.19.135(192.168.19.135:3306)  Version=5.6.19-67.0-log (oldest major version between slaves) log-bin:enabled</span><br><span class="line">Wed Mar  4 09:13:50 2015 - [info]     Replicating from 192.168.19.134(192.168.19.134:3306)</span><br><span class="line">Wed Mar  4 09:13:50 2015 - [info]   192.168.19.136(192.168.19.136:3306)  Version=5.6.19-67.0-log (oldest major version between slaves) log-bin:enabled</span><br><span class="line">Wed Mar  4 09:13:50 2015 - [info]     Replicating from 192.168.19.134(192.168.19.134:3306)</span><br><span class="line">Wed Mar  4 09:13:50 2015 - [info] Current Alive Master: 192.168.19.134(192.168.19.134:3306)</span><br><span class="line">Wed Mar  4 09:13:50 2015 - [info] Checking slave configurations..</span><br><span class="line">Wed Mar  4 09:13:50 2015 - [info] Checking replication filtering settings..</span><br><span class="line">Wed Mar  4 09:13:50 2015 - [info]  binlog_do_db= , binlog_ignore_db= </span><br><span class="line">Wed Mar  4 09:13:50 2015 - [info]  Replication filtering check ok.</span><br><span class="line">Wed Mar  4 09:13:50 2015 - [info] GTID (with auto-pos) is not supported</span><br><span class="line">Wed Mar  4 09:13:50 2015 - [info] Starting SSH connection tests..</span><br><span class="line">Wed Mar  4 09:13:51 2015 - [info] All SSH connection tests passed successfully.</span><br><span class="line">Wed Mar  4 09:13:51 2015 - [info] Checking MHA Node version..</span><br><span class="line">Wed Mar  4 09:13:52 2015 - [info]  Version check ok.</span><br><span class="line">Wed Mar  4 09:13:52 2015 - [info] Checking SSH publickey authentication settings on the current master..</span><br><span class="line">Wed Mar  4 09:13:52 2015 - [info] HealthCheck: SSH to 192.168.19.134 is reachable.</span><br><span class="line">Wed Mar  4 09:13:52 2015 - [info] Master MHA Node version is 0.56.</span><br><span class="line">Wed Mar  4 09:13:52 2015 - [info] Checking recovery script configurations on 192.168.19.134(192.168.19.134:3306)..</span><br><span class="line">Wed Mar  4 09:13:52 2015 - [info]   Executing command: save_binary_logs --command=test --start_pos=4 --binlog_dir=/log/mysql3306/binlog --output_file=/var/tmp/save_binary_logs_test --manager_version=0.56 --start_file=binlog.000005 </span><br><span class="line">Wed Mar  4 09:13:52 2015 - [info]   Connecting to root@192.168.19.134(192.168.19.134:22).. </span><br><span class="line">  Creating /var/tmp if not exists..    ok.</span><br><span class="line">  Checking output directory is accessible or not..</span><br><span class="line">   ok.</span><br><span class="line">  Binlog found at /log/mysql3306/binlog, up to binlog.000005</span><br><span class="line">Wed Mar  4 09:13:52 2015 - [info] Binlog setting check done.</span><br><span class="line">Wed Mar  4 09:13:52 2015 - [info] Checking SSH publickey authentication and checking recovery script configurations on all alive slave servers..</span><br><span class="line">Wed Mar  4 09:13:52 2015 - [info]   Executing command : apply_diff_relay_logs --command=test --slave_user=&#x27;mha_test&#x27; --slave_host=192.168.19.135 --slave_ip=192.168.19.135 --slave_port=3306 --workdir=/var/tmp --target_version=5.6.19-67.0-log --manager_version=0.56 --relay_dir=/log/mysql3306/binlog --current_relay_log=relaylog.3794333  --slave_pass=xxx</span><br><span class="line">Wed Mar  4 09:13:52 2015 - [info]   Connecting to root@192.168.19.135(192.168.19.135:22).. </span><br><span class="line">  Checking slave recovery environment settings..</span><br><span class="line">    Relay log found at /log/mysql3306/binlog, up to relaylog.3794334</span><br><span class="line">    Temporary relay log file is /log/mysql3306/binlog/relaylog.3794334</span><br><span class="line">    Testing mysql connection and privileges..Warning: Using a password on the command line interface can be insecure.</span><br><span class="line"> done.</span><br><span class="line">    Testing mysqlbinlog output.. done.</span><br><span class="line">    Cleaning up test file(s).. done.</span><br><span class="line">Wed Mar  4 09:13:52 2015 - [info]   Executing command : apply_diff_relay_logs --command=test --slave_user=&#x27;mha_test&#x27; --slave_host=192.168.19.136 --slave_ip=192.168.19.136 --slave_port=3306 --workdir=/var/tmp --target_version=5.6.19-67.0-log --manager_version=0.56 --relay_dir=/log/mysql3306/binlog --current_relay_log=relaylog.3794333  --slave_pass=xxx</span><br><span class="line">Wed Mar  4 09:13:52 2015 - [info]   Connecting to root@192.168.19.136(192.168.19.136:22).. </span><br><span class="line">  Checking slave recovery environment settings..</span><br><span class="line">    Relay log found at /log/mysql3306/binlog, up to relaylog.3794334</span><br><span class="line">    Temporary relay log file is /log/mysql3306/binlog/relaylog.3794334</span><br><span class="line">    Testing mysql connection and privileges..Warning: Using a password on the command line interface can be insecure.</span><br><span class="line"> done.</span><br><span class="line">    Testing mysqlbinlog output.. done.</span><br><span class="line">    Cleaning up test file(s).. done.</span><br><span class="line">Wed Mar  4 09:13:52 2015 - [info] Slaves settings check done.</span><br><span class="line">Wed Mar  4 09:13:52 2015 - [info] </span><br><span class="line">192.168.19.134(192.168.19.134:3306) (current master)</span><br><span class="line"> +--192.168.19.135(192.168.19.135:3306)</span><br><span class="line"> +--192.168.19.136(192.168.19.136:3306) </span><br><span class="line">Wed Mar  4 09:13:52 2015 - [info] Checking replication health on 192.168.19.135..</span><br><span class="line">Wed Mar  4 09:13:52 2015 - [info]  ok.</span><br><span class="line">Wed Mar  4 09:13:52 2015 - [info] Checking replication health on 192.168.19.136..</span><br><span class="line">Wed Mar  4 09:13:52 2015 - [info]  ok.</span><br><span class="line">Wed Mar  4 09:13:52 2015 - [warning] master_ip_failover_script is not defined.</span><br><span class="line">Wed Mar  4 09:13:52 2015 - [warning] shutdown_script is not defined.</span><br><span class="line">Wed Mar  4 09:13:52 2015 - [info] Got exit code 0 (Not master dead).    </span><br><span class="line">MySQL Replication Health is OK.</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>masterha_manager –conf&#x3D;&#x2F;root&#x2F;mhatest&#x2F;app1.cnf<br>日志：     </p>
 </blockquote>
-<pre><code>Wed Mar  4 09:15:00 2015 - [info] MHA::MasterMonitor version 0.56.
-Wed Mar  4 09:15:01 2015 - [info] GTID failover mode = 0
-Wed Mar  4 09:15:01 2015 - [info] Dead Servers:
-Wed Mar  4 09:15:01 2015 - [info] Alive Servers:
-Wed Mar  4 09:15:01 2015 - [info]   192.168.19.134(192.168.19.134:3306)
-Wed Mar  4 09:15:01 2015 - [info]   192.168.19.135(192.168.19.135:3306)
-Wed Mar  4 09:15:01 2015 - [info]   192.168.19.136(192.168.19.136:3306)
-Wed Mar  4 09:15:01 2015 - [info] Alive Slaves:
-Wed Mar  4 09:15:01 2015 - [info]   192.168.19.135(192.168.19.135:3306)  Version=5.6.19-67.0-log (oldest major version between slaves) log-bin:enabled
-Wed Mar  4 09:15:01 2015 - [info]     Replicating from 192.168.19.134(192.168.19.134:3306)
-Wed Mar  4 09:15:01 2015 - [info]   192.168.19.136(192.168.19.136:3306)  Version=5.6.19-67.0-log (oldest major version between slaves) log-bin:enabled
-Wed Mar  4 09:15:01 2015 - [info]     Replicating from 192.168.19.134(192.168.19.134:3306)
-Wed Mar  4 09:15:01 2015 - [info] Current Alive Master: 192.168.19.134(192.168.19.134:3306)
-Wed Mar  4 09:15:01 2015 - [info] Checking slave configurations..
-Wed Mar  4 09:15:01 2015 - [info] Checking replication filtering settings..
-Wed Mar  4 09:15:01 2015 - [info]  binlog_do_db= , binlog_ignore_db= 
-Wed Mar  4 09:15:01 2015 - [info]  Replication filtering check ok.
-Wed Mar  4 09:15:01 2015 - [info] GTID (with auto-pos) is not supported
-Wed Mar  4 09:15:01 2015 - [info] Starting SSH connection tests..
-Wed Mar  4 09:15:02 2015 - [info] All SSH connection tests passed successfully.
-Wed Mar  4 09:15:02 2015 - [info] Checking MHA Node version..
-Wed Mar  4 09:15:03 2015 - [info]  Version check ok.
-Wed Mar  4 09:15:03 2015 - [info] Checking SSH publickey authentication settings on the current master..
-Wed Mar  4 09:15:03 2015 - [info] HealthCheck: SSH to 192.168.19.134 is reachable.
-Wed Mar  4 09:15:03 2015 - [info] Master MHA Node version is 0.56.
-Wed Mar  4 09:15:03 2015 - [info] Checking recovery script configurations on 192.168.19.134(192.168.19.134:3306)..
-Wed Mar  4 09:15:03 2015 - [info]   Executing command: save_binary_logs --command=test --start_pos=4 --binlog_dir=/log/mysql3306/binlog --output_file=/var/tmp/save_binary_logs_test --manager_version=0.56 --start_file=binlog.000005 
-Wed Mar  4 09:15:03 2015 - [info]   Connecting to root@192.168.19.134(192.168.19.134:22).. 
-  Creating /var/tmp if not exists..    ok.
-  Checking output directory is accessible or not..
-   ok.
-  Binlog found at /log/mysql3306/binlog, up to binlog.000005
-Wed Mar  4 09:15:03 2015 - [info] Binlog setting check done.
-Wed Mar  4 09:15:03 2015 - [info] Checking SSH publickey authentication and checking recovery script configurations on all alive slave servers..
-Wed Mar  4 09:15:03 2015 - [info]   Executing command : apply_diff_relay_logs --command=test --slave_user=&#39;mha_test&#39; --slave_host=192.168.19.135 --slave_ip=192.168.19.135 --slave_port=3306 --workdir=/var/tmp --target_version=5.6.19-67.0-log --manager_version=0.56 --relay_dir=/log/mysql3306/binlog --current_relay_log=relaylog.3794333  --slave_pass=xxx
-Wed Mar  4 09:15:03 2015 - [info]   Connecting to root@192.168.19.135(192.168.19.135:22).. 
-  Checking slave recovery environment settings..
-    Relay log found at /log/mysql3306/binlog, up to relaylog.3794334
-    Temporary relay log file is /log/mysql3306/binlog/relaylog.3794334
-    Testing mysql connection and privileges..Warning: Using a password on the command line interface can be insecure.
- done.
-    Testing mysqlbinlog output.. done.
-    Cleaning up test file(s).. done.
-Wed Mar  4 09:15:03 2015 - [info]   Executing command : apply_diff_relay_logs --command=test --slave_user=&#39;mha_test&#39; --slave_host=192.168.19.136 --slave_ip=192.168.19.136 --slave_port=3306 --workdir=/var/tmp --target_version=5.6.19-67.0-log --manager_version=0.56 --relay_dir=/log/mysql3306/binlog --current_relay_log=relaylog.3794333  --slave_pass=xxx
-Wed Mar  4 09:15:03 2015 - [info]   Connecting to root@192.168.19.136(192.168.19.136:22).. 
-  Checking slave recovery environment settings..
-    Relay log found at /log/mysql3306/binlog, up to relaylog.3794334
-    Temporary relay log file is /log/mysql3306/binlog/relaylog.3794334
-    Testing mysql connection and privileges..Warning: Using a password on the command line interface can be insecure.
- done.
-    Testing mysqlbinlog output.. done.
-    Cleaning up test file(s).. done.
-Wed Mar  4 09:15:04 2015 - [info] Slaves settings check done.
-Wed Mar  4 09:15:04 2015 - [info] 
-192.168.19.134(192.168.19.134:3306) (current master)
- +--192.168.19.135(192.168.19.135:3306)
- +--192.168.19.136(192.168.19.136:3306) 
-Wed Mar  4 09:15:04 2015 - [warning] master_ip_failover_script is not defined.
-Wed Mar  4 09:15:04 2015 - [warning] shutdown_script is not defined.
-Wed Mar  4 09:15:04 2015 - [info] Set master ping interval 2 seconds.
-Wed Mar  4 09:15:04 2015 - [warning] secondary_check_script is not defined. It is highly recommended setting it to check master reachability from two or more routes.
-Wed Mar  4 09:15:04 2015 - [info] Starting ping health check on 192.168.19.134(192.168.19.134:3306)..
-Wed Mar  4 09:15:04 2015 - [info] Ping(SELECT) succeeded, waiting until MySQL doesn&#39;t respond..
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">Wed Mar  4 09:15:00 2015 - [info] MHA::MasterMonitor version 0.56.</span><br><span class="line">Wed Mar  4 09:15:01 2015 - [info] GTID failover mode = 0</span><br><span class="line">Wed Mar  4 09:15:01 2015 - [info] Dead Servers:</span><br><span class="line">Wed Mar  4 09:15:01 2015 - [info] Alive Servers:</span><br><span class="line">Wed Mar  4 09:15:01 2015 - [info]   192.168.19.134(192.168.19.134:3306)</span><br><span class="line">Wed Mar  4 09:15:01 2015 - [info]   192.168.19.135(192.168.19.135:3306)</span><br><span class="line">Wed Mar  4 09:15:01 2015 - [info]   192.168.19.136(192.168.19.136:3306)</span><br><span class="line">Wed Mar  4 09:15:01 2015 - [info] Alive Slaves:</span><br><span class="line">Wed Mar  4 09:15:01 2015 - [info]   192.168.19.135(192.168.19.135:3306)  Version=5.6.19-67.0-log (oldest major version between slaves) log-bin:enabled</span><br><span class="line">Wed Mar  4 09:15:01 2015 - [info]     Replicating from 192.168.19.134(192.168.19.134:3306)</span><br><span class="line">Wed Mar  4 09:15:01 2015 - [info]   192.168.19.136(192.168.19.136:3306)  Version=5.6.19-67.0-log (oldest major version between slaves) log-bin:enabled</span><br><span class="line">Wed Mar  4 09:15:01 2015 - [info]     Replicating from 192.168.19.134(192.168.19.134:3306)</span><br><span class="line">Wed Mar  4 09:15:01 2015 - [info] Current Alive Master: 192.168.19.134(192.168.19.134:3306)</span><br><span class="line">Wed Mar  4 09:15:01 2015 - [info] Checking slave configurations..</span><br><span class="line">Wed Mar  4 09:15:01 2015 - [info] Checking replication filtering settings..</span><br><span class="line">Wed Mar  4 09:15:01 2015 - [info]  binlog_do_db= , binlog_ignore_db= </span><br><span class="line">Wed Mar  4 09:15:01 2015 - [info]  Replication filtering check ok.</span><br><span class="line">Wed Mar  4 09:15:01 2015 - [info] GTID (with auto-pos) is not supported</span><br><span class="line">Wed Mar  4 09:15:01 2015 - [info] Starting SSH connection tests..</span><br><span class="line">Wed Mar  4 09:15:02 2015 - [info] All SSH connection tests passed successfully.</span><br><span class="line">Wed Mar  4 09:15:02 2015 - [info] Checking MHA Node version..</span><br><span class="line">Wed Mar  4 09:15:03 2015 - [info]  Version check ok.</span><br><span class="line">Wed Mar  4 09:15:03 2015 - [info] Checking SSH publickey authentication settings on the current master..</span><br><span class="line">Wed Mar  4 09:15:03 2015 - [info] HealthCheck: SSH to 192.168.19.134 is reachable.</span><br><span class="line">Wed Mar  4 09:15:03 2015 - [info] Master MHA Node version is 0.56.</span><br><span class="line">Wed Mar  4 09:15:03 2015 - [info] Checking recovery script configurations on 192.168.19.134(192.168.19.134:3306)..</span><br><span class="line">Wed Mar  4 09:15:03 2015 - [info]   Executing command: save_binary_logs --command=test --start_pos=4 --binlog_dir=/log/mysql3306/binlog --output_file=/var/tmp/save_binary_logs_test --manager_version=0.56 --start_file=binlog.000005 </span><br><span class="line">Wed Mar  4 09:15:03 2015 - [info]   Connecting to root@192.168.19.134(192.168.19.134:22).. </span><br><span class="line">  Creating /var/tmp if not exists..    ok.</span><br><span class="line">  Checking output directory is accessible or not..</span><br><span class="line">   ok.</span><br><span class="line">  Binlog found at /log/mysql3306/binlog, up to binlog.000005</span><br><span class="line">Wed Mar  4 09:15:03 2015 - [info] Binlog setting check done.</span><br><span class="line">Wed Mar  4 09:15:03 2015 - [info] Checking SSH publickey authentication and checking recovery script configurations on all alive slave servers..</span><br><span class="line">Wed Mar  4 09:15:03 2015 - [info]   Executing command : apply_diff_relay_logs --command=test --slave_user=&#x27;mha_test&#x27; --slave_host=192.168.19.135 --slave_ip=192.168.19.135 --slave_port=3306 --workdir=/var/tmp --target_version=5.6.19-67.0-log --manager_version=0.56 --relay_dir=/log/mysql3306/binlog --current_relay_log=relaylog.3794333  --slave_pass=xxx</span><br><span class="line">Wed Mar  4 09:15:03 2015 - [info]   Connecting to root@192.168.19.135(192.168.19.135:22).. </span><br><span class="line">  Checking slave recovery environment settings..</span><br><span class="line">    Relay log found at /log/mysql3306/binlog, up to relaylog.3794334</span><br><span class="line">    Temporary relay log file is /log/mysql3306/binlog/relaylog.3794334</span><br><span class="line">    Testing mysql connection and privileges..Warning: Using a password on the command line interface can be insecure.</span><br><span class="line"> done.</span><br><span class="line">    Testing mysqlbinlog output.. done.</span><br><span class="line">    Cleaning up test file(s).. done.</span><br><span class="line">Wed Mar  4 09:15:03 2015 - [info]   Executing command : apply_diff_relay_logs --command=test --slave_user=&#x27;mha_test&#x27; --slave_host=192.168.19.136 --slave_ip=192.168.19.136 --slave_port=3306 --workdir=/var/tmp --target_version=5.6.19-67.0-log --manager_version=0.56 --relay_dir=/log/mysql3306/binlog --current_relay_log=relaylog.3794333  --slave_pass=xxx</span><br><span class="line">Wed Mar  4 09:15:03 2015 - [info]   Connecting to root@192.168.19.136(192.168.19.136:22).. </span><br><span class="line">  Checking slave recovery environment settings..</span><br><span class="line">    Relay log found at /log/mysql3306/binlog, up to relaylog.3794334</span><br><span class="line">    Temporary relay log file is /log/mysql3306/binlog/relaylog.3794334</span><br><span class="line">    Testing mysql connection and privileges..Warning: Using a password on the command line interface can be insecure.</span><br><span class="line"> done.</span><br><span class="line">    Testing mysqlbinlog output.. done.</span><br><span class="line">    Cleaning up test file(s).. done.</span><br><span class="line">Wed Mar  4 09:15:04 2015 - [info] Slaves settings check done.</span><br><span class="line">Wed Mar  4 09:15:04 2015 - [info] </span><br><span class="line">192.168.19.134(192.168.19.134:3306) (current master)</span><br><span class="line"> +--192.168.19.135(192.168.19.135:3306)</span><br><span class="line"> +--192.168.19.136(192.168.19.136:3306) </span><br><span class="line">Wed Mar  4 09:15:04 2015 - [warning] master_ip_failover_script is not defined.</span><br><span class="line">Wed Mar  4 09:15:04 2015 - [warning] shutdown_script is not defined.</span><br><span class="line">Wed Mar  4 09:15:04 2015 - [info] Set master ping interval 2 seconds.</span><br><span class="line">Wed Mar  4 09:15:04 2015 - [warning] secondary_check_script is not defined. It is highly recommended setting it to check master reachability from two or more routes.</span><br><span class="line">Wed Mar  4 09:15:04 2015 - [info] Starting ping health check on 192.168.19.134(192.168.19.134:3306)..</span><br><span class="line">Wed Mar  4 09:15:04 2015 - [info] Ping(SELECT) succeeded, waiting until MySQL doesn&#x27;t respond..</span><br></pre></td></tr></table></figure>
+
 <h3 id="问题和总结"><a href="#问题和总结" class="headerlink" title="问题和总结"></a>问题和总结</h3><p>遇到问题：</p>
-<pre><code>1. 使用的虚拟机 其中一台ssh非常慢，后来发现是 反向解析的问题 
-    修改 /etc/ssh/sshd_config 的 UseDNS YES 改为 no 
-2. 本次部署MySQL 环境的时候，进行过一次虚拟机的clone 网络进行了重新设置，db只修改了server_id , 
-没有修改uuid ，导致check——repl 的时候，总是会有问题。
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1. 使用的虚拟机 其中一台ssh非常慢，后来发现是 反向解析的问题 </span><br><span class="line">    修改 /etc/ssh/sshd_config 的 UseDNS YES 改为 no </span><br><span class="line">2. 本次部署MySQL 环境的时候，进行过一次虚拟机的clone 网络进行了重新设置，db只修改了server_id , </span><br><span class="line">没有修改uuid ，导致check——repl 的时候，总是会有问题。</span><br></pre></td></tr></table></figure>
 <p>MHA的配置还是相对比较简单的，接下来会进行相关场景的模拟测试</p>
   
 	</div>
@@ -486,12 +238,6 @@ Wed Mar  4 09:15:04 2015 - [info] Ping(SELECT) succeeded, waiting until MySQL do
 <aside class="clearfix">
 
   
-<div class="github-card">
-<p class="asidetitle">Github 名片</p>
-<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
-<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
-</div>
-
 
 
   
@@ -589,11 +335,11 @@ Wed Mar  4 09:15:04 2015 - [info] Ping(SELECT) succeeded, waiting until MySQL do
 			
 		
 			
-				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
 			
 		
 			
@@ -605,15 +351,15 @@ Wed Mar  4 09:15:04 2015 - [info] Ping(SELECT) succeeded, waiting until MySQL do
 			
 		
 			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
 			
 		
 		</ul>
@@ -626,7 +372,7 @@ Wed Mar  4 09:15:04 2015 - [info] Ping(SELECT) succeeded, waiting until MySQL do
         
           <li>
             
-            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title=" 内核月报">阿里内核月报</a>
             
           </li>
         
@@ -727,14 +473,12 @@ Wed Mar  4 09:15:04 2015 - [info] Ping(SELECT) succeeded, waiting until MySQL do
 	
 	
 	<section class="info">
-		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
-			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。欢迎交流。 <br/>
+			</p>
 	</section>
 	 
 	<div class="social-font" class="clearfix">
 		
-		
-		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
 		
 		
 		

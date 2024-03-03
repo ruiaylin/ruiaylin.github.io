@@ -21,7 +21,7 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/pingcap/docs/master/op-guide/architecture.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/pingcap/tikv/master/images/tikv_stack.png">
 <meta property="article:published_time" content="2016-09-28T08:16:16.000Z">
-<meta property="article:modified_time" content="2024-03-02T09:18:29.302Z">
+<meta property="article:modified_time" content="2024-03-03T02:22:09.688Z">
 <meta property="article:author" content="ruichao.lin">
 <meta property="article:tag" content="Go">
 <meta property="article:tag" content="TiDB">
@@ -181,29 +181,16 @@
 <p>  see also：C++11 ‘yield’ is not a member of ‘std::this_thread’</p>
 </li>
 <li><p>Install GCC 4.8 on Centos 7.x</p>
-<pre><code>  # 48 
-  wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo
-  yum install devtoolset-2-gcc devtoolset-2-binutils devtoolset-2-gcc-c++
-  scl enable devtoolset-2 bash
-</code></pre>
 </li>
 </ul>
 </li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 48 </span><br><span class="line">wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo</span><br><span class="line">yum install devtoolset-2-gcc devtoolset-2-binutils devtoolset-2-gcc-c++</span><br><span class="line">scl enable devtoolset-2 bash</span><br></pre></td></tr></table></figure>
+<ul>
 <li><p>TIKV developed in Rust</p>
-<pre><code>  ## Install rust (nightly)
-  curl -sSf https://static.rust-lang.org/rustup.sh | sh -s -- --channel=nightly  
-  ## or download the tarball 
-  ## dowload the source code
-  git clone https://github.com/pingcap/tikv.git  /root/tikv
-  cd  /root/tikv
-  ## build
-  make &amp;&amp; make install
-</code></pre>
+   <figure class="highlight plaintext"><figcaption><span>Install rust (nightly)</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">curl -sSf https://static.rust-lang.org/rustup.sh | sh -s -- --channel=nightly  </span><br><span class="line">## or download the tarball </span><br><span class="line">## dowload the source code</span><br><span class="line">git clone https://github.com/pingcap/tikv.git  /root/tikv</span><br><span class="line">cd  /root/tikv</span><br><span class="line">## build</span><br><span class="line">make &amp;&amp; make install</span><br></pre></td></tr></table></figure>
 <p>  <code>Careful:</code></p>
-<pre><code>  if you met some error in the first time . when you do it again ,
-  you should do clean first ( cargo clean )
-</code></pre>
-</li>
+  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">if you met some error in the first time . when you do it again ,</span><br><span class="line">you should do clean first ( cargo clean )</span><br></pre></td></tr></table></figure></li>
 </ul>
 <h3 id="Make-a-TiDB-Cluster"><a href="#Make-a-TiDB-Cluster" class="headerlink" title="Make a TiDB Cluster"></a>Make a TiDB Cluster</h3><blockquote>
 <p>After we install the software we needed , Now we will make A cluster with three nodes.</p>
@@ -219,11 +206,7 @@ xx0.x2x.8x.66
 ./tikv-server --config /root/tidb/tikv/etc/tikv.toml --log-file=/tmp/tikv.log  &amp; 
 </code></pre>
 <h4 id="Start-TiDB-Server"><a href="#Start-TiDB-Server" class="headerlink" title="Start TiDB Server"></a>Start TiDB Server</h4><p>Using the following command to start One TiDB server </p>
-<pre><code>## execute
-./tidb-server --store=tikv \
-        --path=&quot;xx0.x2x.8x.64:2379,xx0.x2x.8x.65:2379,xx0.x2x.8x.66:2379?cluster=1&quot;\
-        --log-file=/tmp/tidb.log &amp; 
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">## execute</span><br><span class="line">./tidb-server --store=tikv \</span><br><span class="line">        --path=&quot;xx0.x2x.8x.64:2379,xx0.x2x.8x.65:2379,xx0.x2x.8x.66:2379?cluster=1&quot;\</span><br><span class="line">        --log-file=/tmp/tidb.log &amp; </span><br></pre></td></tr></table></figure>
 <p>you can start one tidb on every node . </p>
 <p>Now you can using TiDB like using MySQL</p>
 <pre><code>mysql -h xx0.x2x.8x.64 -P 4000 -u root -D test 
@@ -303,12 +286,6 @@ xx0.x2x.8x.66
 <aside class="clearfix">
 
   
-<div class="github-card">
-<p class="asidetitle">Github 名片</p>
-<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
-<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
-</div>
-
 
 
   
@@ -406,11 +383,11 @@ xx0.x2x.8x.66
 			
 		
 			
-				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
 			
 		
 			
@@ -422,15 +399,15 @@ xx0.x2x.8x.66
 			
 		
 			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
 			
 		
 		</ul>
@@ -443,7 +420,7 @@ xx0.x2x.8x.66
         
           <li>
             
-            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title=" 内核月报">阿里内核月报</a>
             
           </li>
         
@@ -544,14 +521,12 @@ xx0.x2x.8x.66
 	
 	
 	<section class="info">
-		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
-			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。欢迎交流。 <br/>
+			</p>
 	</section>
 	 
 	<div class="social-font" class="clearfix">
 		
-		
-		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
 		
 		
 		

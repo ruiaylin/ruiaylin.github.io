@@ -11,15 +11,15 @@
     
 
     
-    <meta name="description" content="MySQL 备份压缩加密方案 数据安全性对于任何一个公司都是非常重要的, 特别是互联网公司. 对数据进行加密也是我们提高安全性的重要手段之一, 今天我们谈谈如何对MySQL进行备份加密.xtrabackup热备工具是我们最常用的, 它从 xtrabackup 2.2.1 版本开始提供了加密支持, 现今最新版本是2.4.7.今天我们利用该特性进行备份的加密和压缩  下载安装 XtraBackup1.">
+    <meta name="description" content="MySQL 备份压缩加密方案 数据安全性对于任何一个公司都是非常重要的, 特别是互联网公司. 对数据进行加密也是我们提高安全性的重要手段之一, 今天我们谈谈如何对MySQL进行备份加密.xtrabackup热备工具是我们最常用的, 它从 xtrabackup 2.2.1 版本开始提供了加密支持, 现今最新版本是2.4.7.今天我们利用该特性进行备份的加密和压缩  下载安装 XtraBackup12">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MySQL备份压缩加密解决方案">
 <meta property="og:url" content="http://ruiaylin.github.io/2017/05/13/xtrabackup-for-encrypt-and-compress/index.html">
 <meta property="og:site_name" content="ruiayLin&#39;s Blog">
-<meta property="og:description" content="MySQL 备份压缩加密方案 数据安全性对于任何一个公司都是非常重要的, 特别是互联网公司. 对数据进行加密也是我们提高安全性的重要手段之一, 今天我们谈谈如何对MySQL进行备份加密.xtrabackup热备工具是我们最常用的, 它从 xtrabackup 2.2.1 版本开始提供了加密支持, 现今最新版本是2.4.7.今天我们利用该特性进行备份的加密和压缩  下载安装 XtraBackup1.">
+<meta property="og:description" content="MySQL 备份压缩加密方案 数据安全性对于任何一个公司都是非常重要的, 特别是互联网公司. 对数据进行加密也是我们提高安全性的重要手段之一, 今天我们谈谈如何对MySQL进行备份加密.xtrabackup热备工具是我们最常用的, 它从 xtrabackup 2.2.1 版本开始提供了加密支持, 现今最新版本是2.4.7.今天我们利用该特性进行备份的加密和压缩  下载安装 XtraBackup12">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2017-05-12T20:55:27.000Z">
-<meta property="article:modified_time" content="2024-03-02T09:18:29.305Z">
+<meta property="article:modified_time" content="2024-03-03T02:25:59.526Z">
 <meta property="article:author" content="ruichao.lin">
 <meta property="article:tag" content="Xtrabackup">
 <meta property="article:tag" content="Encrypt">
@@ -108,46 +108,23 @@
 		<h2 id="MySQL-备份压缩加密方案"><a href="#MySQL-备份压缩加密方案" class="headerlink" title="MySQL 备份压缩加密方案"></a>MySQL 备份压缩加密方案</h2><blockquote>
 <p>数据安全性对于任何一个公司都是非常重要的, 特别是互联网公司. 对数据进行加密也是我们提高安全性的重要手段之一, 今天我们谈谈如何对MySQL进行备份加密.<br>xtrabackup热备工具是我们最常用的, 它从 xtrabackup 2.2.1 版本开始提供了加密支持, 现今最新版本是2.4.7.今天我们利用该特性进行备份的加密和压缩</p>
 </blockquote>
-<h3 id="下载安装-XtraBackup"><a href="#下载安装-XtraBackup" class="headerlink" title="下载安装 XtraBackup"></a>下载安装 XtraBackup</h3><pre><code>1.在http://www.percona.com/downloads/XtraBackup/LATEST/   
-2.解压安装，并配置path路径 export PATH=$JAVA_HOME/bin:/usr/local/xxx:$PATH  
-3.我的mysql的配置文件是/xx/my.cnf，如果不指定，XtraBackup默认使用此文
-  件识别mysql安装目录，数据文件目录等信息
-</code></pre>
+<h3 id="下载安装-XtraBackup"><a href="#下载安装-XtraBackup" class="headerlink" title="下载安装 XtraBackup"></a>下载安装 XtraBackup</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1.在http://www.percona.com/downloads/XtraBackup/LATEST/   </span><br><span class="line">2.解压安装，并配置path路径 export PATH=$JAVA_HOME/bin:/usr/local/xxx:$PATH  </span><br><span class="line">3.我的mysql的配置文件是/xx/my.cnf，如果不指定，XtraBackup默认使用此文</span><br><span class="line">  件识别mysql安装目录，数据文件目录等信息</span><br><span class="line"> </span><br></pre></td></tr></table></figure>
 <h3 id="压缩加密备份"><a href="#压缩加密备份" class="headerlink" title="压缩加密备份"></a>压缩加密备份</h3><h4 id="关键参数说明："><a href="#关键参数说明：" class="headerlink" title="关键参数说明："></a>关键参数说明：</h4><blockquote>
 <p>Compress</p>
 </blockquote>
 <p>–compress[&#x3D;name]   </p>
-<pre><code>This option instructs xtrabackup to compress backup
-copies of InnoDB data files. It is passed directly to the
-xtrabackup child process. Try &#39;xtrabackup --help&#39; for
-more details
-</code></pre>
-<p>–compress-threads&#x3D;#</p>
-<pre><code>This option specifies the number of worker threads that
-will be used for parallel compression. It is passed
-directly to the xtrabackup child process. Try &#39;xtrabackup
---help&#39; for more details.
-</code></pre>
-<p>–compress-chunk-size&#x3D;#</p>
-<pre><code>Size of working buffer(s) for compression threads in
-bytes. The default value is 64K.
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">This option instructs xtrabackup to compress backup</span><br><span class="line">copies of InnoDB data files. It is passed directly to the</span><br><span class="line">xtrabackup child process. Try &#x27;xtrabackup --help&#x27; for</span><br><span class="line">more details</span><br></pre></td></tr></table></figure>
+<p>–compress-threads&#x3D;#<br>  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">This option specifies the number of worker threads that</span><br><span class="line">will be used for parallel compression. It is passed</span><br><span class="line">directly to the xtrabackup child process. Try &#x27;xtrabackup</span><br><span class="line">--help&#x27; for more details.</span><br></pre></td></tr></table></figure><br>–compress-chunk-size&#x3D;#</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Size of working buffer(s) for compression threads in</span><br><span class="line">bytes. The default value is 64K.</span><br></pre></td></tr></table></figure>
+
 <blockquote>
 <p>Encryption</p>
 </blockquote>
 <p>–encrypt&#x3D;ALGORITHM </p>
 <pre><code>currently supported algorithms are: AES128, AES192 and AES256
 </code></pre>
-<p>–encrypt-key&#x3D;ENCRYPTION_KEY </p>
-<pre><code>proper length encryption key to use. It is not recommended to use this
-option where there is uncontrolled access to the machine as the command 
-line and thus the key can be viewed as part of the process info.
-</code></pre>
-<p>–encrypt-key-file&#x3D;name</p>
-<pre><code>This option instructs xtrabackup to use the encryption
-key stored in the given ENCRYPTION-KEY-FILE when using
-the --encrypt or --decrypt options.
-</code></pre>
+<p>–encrypt-key&#x3D;ENCRYPTION_KEY<br>    <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">proper length encryption key to use. It is not recommended to use this</span><br><span class="line">option where there is uncontrolled access to the machine as the command </span><br><span class="line">line and thus the key can be viewed as part of the process info.</span><br></pre></td></tr></table></figure><br>–encrypt-key-file&#x3D;name</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">This option instructs xtrabackup to use the encryption</span><br><span class="line">key stored in the given ENCRYPTION-KEY-FILE when using</span><br><span class="line">the --encrypt or --decrypt options.</span><br></pre></td></tr></table></figure>
 <p>–encrypt-threads&#x3D; NUMBER</p>
 <pre><code>the threads number to do encrypt, default 1
 </code></pre>
@@ -161,9 +138,8 @@ the --encrypt or --decrypt options.
 <blockquote>
 <p>备份完成之后会提示日志</p>
 </blockquote>
-<pre><code>xtrabackup: Transaction log of lsn (4669176459) to (4669176459) was copied.
-170427 11:36:02 completed OK!s
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">xtrabackup: Transaction log of lsn (4669176459) to (4669176459) was copied.</span><br><span class="line">170427 11:36:02 completed OK!s</span><br></pre></td></tr></table></figure>
+
 <h3 id="恢复"><a href="#恢复" class="headerlink" title="恢复"></a>恢复</h3><h4 id="解码文件"><a href="#解码文件" class="headerlink" title="解码文件"></a>解码文件</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">xbstream -x &lt; /data/tmp/backup20160101.xbstream -C /data/tmp/test</span><br><span class="line"># ls /data/tmp/test</span><br><span class="line">[root@xxxxx test]# ll</span><br><span class="line">    total 105220</span><br><span class="line">    drwxr-x--- 2 root root     4096 Apr 27 11:37 xxxxx</span><br><span class="line">    -rw-r----- 1 root root      533 Apr 27 11:37 xxxx-my.cnf.qp.xbcrypt</span><br><span class="line">    -rw-r----- 1 root root   445218 Apr 27 11:37 ibdata1.qp.xbcrypt</span><br><span class="line">    drwxr-x--- 2 root root     4096 Apr 27 11:37 mysql </span><br><span class="line">    ...</span><br><span class="line">    ...</span><br><span class="line">    ...</span><br><span class="line">    -rw-r----- 1 root root      617 Apr 27 11:37 xtrabackup_logfile.qp.xbcrypt</span><br><span class="line">    -rw-r----- 1 root root      242 Apr 27 11:37 xtrabackup_slave_info.qp.xbcrypt</span><br></pre></td></tr></table></figure>
 
 <h4 id="先解密"><a href="#先解密" class="headerlink" title="先解密"></a>先解密</h4><p>方案1</p>
@@ -182,17 +158,11 @@ the --encrypt or --decrypt options.
 <pre><code>innobackupex --decompress . 
 </code></pre>
 <p>方案2 </p>
-<pre><code>/data/tmp/test
-for i in `find . -iname &quot;*.qp&quot;`
-do 
-    qpress -d $i  $(dirname $i) &amp;&amp; rm -f $i
-done
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/data/tmp/test</span><br><span class="line">for i in `find . -iname &quot;*.qp&quot;`</span><br><span class="line">do </span><br><span class="line">    qpress -d $i  $(dirname $i) &amp;&amp; rm -f $i</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
 <h4 id="Apply-log"><a href="#Apply-log" class="headerlink" title="Apply log"></a>Apply log</h4><pre><code>innobackupex --apply-log .
 ...
 </code></pre>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><pre><code>数据备份的安全性, 对于互联网公司非常重要, 建议大家都进行加密.
-</code></pre>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>数据备份的安全性, 对于互联网公司非常重要, 建议大家都进行加密.</p>
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -266,12 +236,6 @@ done
 <aside class="clearfix">
 
   
-<div class="github-card">
-<p class="asidetitle">Github 名片</p>
-<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
-<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
-</div>
-
 
 
   
@@ -369,11 +333,11 @@ done
 			
 		
 			
-				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
 			
 		
 			
@@ -385,15 +349,15 @@ done
 			
 		
 			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
 			
 		
 		</ul>
@@ -406,7 +370,7 @@ done
         
           <li>
             
-            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title=" 内核月报">阿里内核月报</a>
             
           </li>
         
@@ -507,14 +471,12 @@ done
 	
 	
 	<section class="info">
-		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
-			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。欢迎交流。 <br/>
+			</p>
 	</section>
 	 
 	<div class="social-font" class="clearfix">
 		
-		
-		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
 		
 		
 		

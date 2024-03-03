@@ -19,7 +19,7 @@
 <meta property="og:description" content="使用Percona XtraBackup搭建slave数据库 下载安装XtraBackup1.在http:&#x2F;&#x2F;www.percona.com&#x2F;downloads&#x2F;XtraBackup&#x2F;LATEST&#x2F;    2.解压安装，并配置path路径 export PATH&#x3D;$JAVA_HOME&#x2F;bin:&#x2F;usr&#x2F;local&#x2F;xxx:$PATH   3.我的mysql的配置文件是&#x2F;xx&#x2F;my.cnf，如果不指">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2014-05-22T20:55:27.000Z">
-<meta property="article:modified_time" content="2024-03-02T09:18:29.304Z">
+<meta property="article:modified_time" content="2024-03-03T02:25:22.687Z">
 <meta property="article:author" content="ruichao.lin">
 <meta property="article:tag" content="Xtrabackup">
 <meta name="twitter:card" content="summary">
@@ -111,30 +111,19 @@
   件识别mysql安装目录，数据文件目录等信息
 </code></pre>
 <h4 id="配置ssh-信任通道"><a href="#配置ssh-信任通道" class="headerlink" title="配置ssh 信任通道"></a>配置ssh 信任通道</h4><h4 id="全量备份并传输到slave机器："><a href="#全量备份并传输到slave机器：" class="headerlink" title="全量备份并传输到slave机器："></a>全量备份并传输到slave机器：</h4><p>备份数据库，直接传输到对应的机器 ，节省空间</p>
-<pre><code>innobackupex --user=root --password=xxxx --stream=tar /data/tmp/ --slave-info | ssh slaveip &quot;tar xfi - -C /data/tmp&quot;
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">innobackupex --user=root --password=xxxx --stream=tar /data/tmp/ --slave-info | ssh slaveip &quot;tar xfi - -C /data/tmp&quot;</span><br></pre></td></tr></table></figure>
+
 <blockquote>
 <p>备份完成之后会提示日志：<br>日志</p>
 </blockquote>
-<pre><code>innobackupex: Backup created in directory &#39;/data/tmp&#39;
-innobackupex: MySQL binlog position: filename &#39;binlog.000755&#39;, position 95778375
-innobackupex: MySQL slave binlog position: master host &#39;10.209.140.22&#39;, filename &#39;binlog.001217&#39;, position 352370216
-innobackupex: You must use -i (--ignore-zeros) option for extraction of the tar stream.
-140313 12:56:53  innobackupex: completed OK!
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">innobackupex: Backup created in directory &#x27;/data/tmp&#x27;</span><br><span class="line">innobackupex: MySQL binlog position: filename &#x27;binlog.000755&#x27;, position 95778375</span><br><span class="line">innobackupex: MySQL slave binlog position: master host &#x27;10.209.140.22&#x27;, filename &#x27;binlog.001217&#x27;, position 352370216</span><br><span class="line">innobackupex: You must use -i (--ignore-zeros) option for extraction of the tar stream.</span><br><span class="line">140313 12:56:53  innobackupex: completed OK!</span><br></pre></td></tr></table></figure>
 <h4 id="登录机器恢复"><a href="#登录机器恢复" class="headerlink" title="登录机器恢复"></a>登录机器恢复</h4><pre><code>innobackupex --apply-log --ibbackup=xtrabackup /data/tmp/
 </code></pre>
 <blockquote>
 <p>日志</p>
 </blockquote>
-<pre><code>140313 13:53:30 InnoDB: Completed initialization of buffer pool
-140313 13:53:30 InnoDB: highest supported file format is Barracuda.
-140313 13:53:34  InnoDB: Waiting for the background threads to start
-140313 13:53:35 Percona XtraDB (http://www.percona.com) 1.1.8-20.1 started; log sequence number 6528792620044
-140313 13:53:35 [Note] Event Scheduler: Loaded 0 events
-140313 13:53:35 [Note] /home/oracle/mysql/bin/mysqld: ready for connections.
-Version: &#39;5.5.18-log&#39;  socket: &#39;/data/mysql3306/run/mysql.sock&#39;  port: 3306  Source distribution
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">140313 13:53:30 InnoDB: Completed initialization of buffer pool</span><br><span class="line">140313 13:53:30 InnoDB: highest supported file format is Barracuda.</span><br><span class="line">140313 13:53:34  InnoDB: Waiting for the background threads to start</span><br><span class="line">140313 13:53:35 Percona XtraDB (http://www.percona.com) 1.1.8-20.1 started; log sequence number 6528792620044</span><br><span class="line">140313 13:53:35 [Note] Event Scheduler: Loaded 0 events</span><br><span class="line">140313 13:53:35 [Note] /home/oracle/mysql/bin/mysqld: ready for connections.</span><br><span class="line">Version: &#x27;5.5.18-log&#x27;  socket: &#x27;/data/mysql3306/run/mysql.sock&#x27;  port: 3306  Source distribution</span><br></pre></td></tr></table></figure>
+
 <blockquote>
 <p>####注 ：innobackupex –copy-back &#x2F;data&#x2F;tmp&#x2F;　目录下面的<br> 可以把 &#x2F;data&#x2F;tmp&#x2F;　目录下面的 ib*  copy 到 日志中的iblog目录下。 &#x2F;data&#x2F;tmp&#x2F;下面的其他文件全部导入到 对于的datadir 目录下面。<br>修改conf文件， 配置service_id&#x3D;xxx </p>
 </blockquote>
@@ -144,19 +133,13 @@ Version: &#39;5.5.18-log&#39;  socket: &#39;/data/mysql3306/run/mysql.sock&#39; 
 <h4 id="登录mysql-设置复制结构"><a href="#登录mysql-设置复制结构" class="headerlink" title="登录mysql 设置复制结构"></a>登录mysql 设置复制结构</h4><blockquote>
 <p> 在 master 上,需要创建一个复制的帐号:</p>
 </blockquote>
-<pre><code>grant replication slave, replication client on *.* to repl@&#39;219.32.22.%&#39; identified by &#39;password&#39;;
-FLUSH PRIVILEGES;
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">grant replication slave, replication client on *.* to repl@&#x27;219.32.22.%&#x27; identified by &#x27;password&#x27;;</span><br><span class="line">FLUSH PRIVILEGES;</span><br></pre></td></tr></table></figure>
+
 <blockquote>
 <p>根据备份的日志<br>innobackupex: MySQL binlog position: filename ‘binlog.000755’, position 95778375</p>
 </blockquote>
-<pre><code>--- reality like this bellow : 
-change master to master_host=&#39;xxx&#39;,master_user=&#39;repl&#39;,
-master_password=&#39;xxxx&#39;, master_port=3306,
-master_connect_retry=60,
-master_log_file=&#39;binlog.000755&#39;,
-master_log_pos=95778375; 
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">--- reality like this bellow : </span><br><span class="line">change master to master_host=&#x27;xxx&#x27;,master_user=&#x27;repl&#x27;,</span><br><span class="line">master_password=&#x27;xxxx&#x27;, master_port=3306,</span><br><span class="line">master_connect_retry=60,</span><br><span class="line">master_log_file=&#x27;binlog.000755&#x27;,</span><br><span class="line">master_log_pos=95778375; </span><br></pre></td></tr></table></figure>
+
 <h4 id="启动恢复"><a href="#启动恢复" class="headerlink" title="启动恢复"></a>启动恢复</h4><pre><code>start slave ; 
 show slave status \G
 </code></pre>
@@ -239,12 +222,6 @@ show slave status \G
 <aside class="clearfix">
 
   
-<div class="github-card">
-<p class="asidetitle">Github 名片</p>
-<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
-<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
-</div>
-
 
 
   
@@ -342,11 +319,11 @@ show slave status \G
 			
 		
 			
-				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
 			
 		
 			
@@ -358,15 +335,15 @@ show slave status \G
 			
 		
 			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
 			
 		
 		</ul>
@@ -379,7 +356,7 @@ show slave status \G
         
           <li>
             
-            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title=" 内核月报">阿里内核月报</a>
             
           </li>
         
@@ -480,14 +457,12 @@ show slave status \G
 	
 	
 	<section class="info">
-		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
-			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。欢迎交流。 <br/>
+			</p>
 	</section>
 	 
 	<div class="social-font" class="clearfix">
 		
-		
-		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
 		
 		
 		

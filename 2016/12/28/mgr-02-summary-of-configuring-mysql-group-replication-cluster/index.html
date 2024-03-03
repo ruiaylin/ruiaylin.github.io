@@ -19,7 +19,7 @@
 <meta property="og:description" content="Introduction This is second post in the series. In this post, i will share something tricky.   相关历史链接: Mgr 01 - Build a MGR cluster in ten minutesMac Pro上面使用Xcode调试MySQL代码 本文讲述MGR两个比较诡异的地方:  加载 MGR pl">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2016-12-28T09:20:00.000Z">
-<meta property="article:modified_time" content="2024-03-02T09:18:29.290Z">
+<meta property="article:modified_time" content="2024-03-03T01:58:31.661Z">
 <meta property="article:author" content="ruichao.lin">
 <meta property="article:tag" content="Docker">
 <meta property="article:tag" content="MySQL">
@@ -158,7 +158,7 @@ b9cc57bc41f3
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CHANGE MASTER TO FOR CHANNEL &#x27;group_replication_recovery&#x27; executed&#x27;. </span><br><span class="line">Previous state master_host=&#x27;b9cc57bc41f3&#x27;, master_port= 3306, master_log_file=&#x27;&#x27;, master_log_pos= 4, master_bind=&#x27;&#x27; .</span><br><span class="line">New state master_host=&#x27;b9cc57bc41f3&#x27;, master_port= 3306, master_log_file=&#x27;&#x27;, master_log_pos= 4, master_bind=&#x27;&#x27;</span><br></pre></td></tr></table></figure>
 
 <p>从而导致了无法正常连接到 donor, 最终导致恢复失败, replication_group_members 信息中 MEMBER_STATE 一直是 RECOVERING状态. </p>
-<p><code>There was an error when connecting to the donor server.  Check group replication recovery&#39;s connection credentials.</code> </p>
+<p><code>There was an error when connecting to the donor server. </code><br><code>Check group replication recovery&#39;s connection credentials.</code> </p>
 <p>当recovery恢复尝试一定次数之后, 会退出MGR Cluster: </p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">2016-12-29T02:32:29.568996-00:00 13 [ERROR] Plugin group_replication </span><br><span class="line">reported: &#x27;Fatal error during the Recovery process of Group Replication. The server will leave the group.&#x27;</span><br></pre></td></tr></table></figure>
 
@@ -268,12 +268,6 @@ b9cc57bc41f3
 <aside class="clearfix">
 
   
-<div class="github-card">
-<p class="asidetitle">Github 名片</p>
-<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
-<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
-</div>
-
 
 
   
@@ -371,11 +365,11 @@ b9cc57bc41f3
 			
 		
 			
-				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
 			
 		
 			
@@ -387,15 +381,15 @@ b9cc57bc41f3
 			
 		
 			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
 			
 		
 		</ul>
@@ -408,7 +402,7 @@ b9cc57bc41f3
         
           <li>
             
-            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title=" 内核月报">阿里内核月报</a>
             
           </li>
         
@@ -509,14 +503,12 @@ b9cc57bc41f3
 	
 	
 	<section class="info">
-		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
-			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。欢迎交流。 <br/>
+			</p>
 	</section>
 	 
 	<div class="social-font" class="clearfix">
 		
-		
-		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
 		
 		
 		

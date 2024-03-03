@@ -19,7 +19,7 @@
 <meta property="og:description" content="Python 程序员的演化对同一个问题，不同层次的Python程序员的代码，呵呵。你是哪一种？？？ 编程新手def factorial(x): if x &#x3D;&#x3D; 0:     return 1 else:     return x * factorial(x - 1) &#x2F;&#x2F;递归！不简单啊！ print factorial(6)  一年编程经验(学Pascal的)def factorial(x):">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2014-03-22T08:39:15.000Z">
-<meta property="article:modified_time" content="2024-03-02T09:18:29.299Z">
+<meta property="article:modified_time" content="2024-03-03T02:20:40.966Z">
 <meta property="article:author" content="ruichao.lin">
 <meta property="article:tag" content="Python">
 <meta name="twitter:card" content="summary">
@@ -151,85 +151,9 @@ print fact(6)
 <h4 id="大英帝国程序员"><a href="#大英帝国程序员" class="headerlink" title="大英帝国程序员"></a>大英帝国程序员</h4><pre><code>from c_maths import fact
 print fact(6)
 </code></pre>
-<h4 id="Web-设计人员"><a href="#Web-设计人员" class="headerlink" title="Web 设计人员"></a>Web 设计人员</h4><pre><code>def factorial(x):
-    #-------------------------------------------------
-    #--- Code snippet from The Math Vault          ---
-    #--- Calculate factorial (C) Arthur Smith 1999 ---
-    #-------------------------------------------------
-    result = str(1)
-    i = 1 #Thanks Adam
-    while i &lt;= x:
-        #result = result * i  #It&#39;s faster to use *=
-        #result = str(result * result + i)
-           #result = int(result *= i) #??????
-        result = str(int(result) * i)  //不断优化！
-        #result = int(str(result) * i)
-        i = i + 1
-    return result
-print factorial(6)
-</code></pre>
-<h4 id="Unix-程序员"><a href="#Unix-程序员" class="headerlink" title="Unix 程序员"></a>Unix 程序员</h4><pre><code>import os
-def fact(x):
-    os.system(&#39;factorial &#39; + str(x)) //代码量少！
-fact(6)
---- Windows 程序员
-NULL = None
-def CalculateAndPrintFactorialEx(dwNumber,
-                                 hOutputDevice,
-                                 lpLparam,
-                                 lpWparam,
-                                 lpsscSecurity,
-                                 *dwReserved):
-    if lpsscSecurity != NULL:
-        return NULL #Not implemented
-    dwResult = dwCounter = 1
-    while dwCounter &lt;= dwNumber:
-        dwResult *= dwCounter
-        dwCounter += 1
-    hOutputDevice.write(str(dwResult))
-    hOutputDevice.write(&#39;\n&#39;)
-    return 1
-import sys
-CalculateAndPrintFactorialEx(6, sys.stdout, NULL, NULL, NULL, //自个都晕！
- NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)
-</code></pre>
-<h4 id="企业级程序员"><a href="#企业级程序员" class="headerlink" title="企业级程序员"></a>企业级程序员</h4><pre><code>def new(cls, *args, **kwargs):
-    return cls(*args, **kwargs)
-class Number(object):
-    pass
-class IntegralNumber(int, Number):
-    def toInt(self):
-        return new (int, self)
-class InternalBase(object):
-    def __init__(self, base):
-        self.base = base.toInt()
-    def getBase(self):
-        return new (IntegralNumber, self.base)
-class MathematicsSystem(object):
-    def __init__(self, ibase):
-        Abstract
-    @classmethod
-    def getInstance(cls, ibase):
-        try:
-            cls.__instance
-        except AttributeError:
-            cls.__instance = new (cls, ibase)
-        return cls.__instance
-class StandardMathematicsSystem(MathematicsSystem):
-    def __init__(self, ibase):
-        if ibase.getBase() != new (IntegralNumber, 2):
-            raise NotImplementedError
-        self.base = ibase.getBase()
-    def calculateFactorial(self, target):
-        result = new (IntegralNumber, 1)
-        i = new (IntegralNumber, 2)
-        while i &lt;= target:
-            result = result * i
-            i = i + new (IntegralNumber, 1)
-        return result
-print StandardMathematicsSystem.getInstance(new (InternalBase,
-new (IntegralNumber, 2))).calculateFactorial(new (IntegralNumber, 6))   //面向对象！
-</code></pre>
+<h4 id="Web-设计人员"><a href="#Web-设计人员" class="headerlink" title="Web 设计人员"></a>Web 设计人员</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">def factorial(x):</span><br><span class="line">    #-------------------------------------------------</span><br><span class="line">    #--- Code snippet from The Math Vault          ---</span><br><span class="line">    #--- Calculate factorial (C) Arthur Smith 1999 ---</span><br><span class="line">    #-------------------------------------------------</span><br><span class="line">    result = str(1)</span><br><span class="line">    i = 1 #Thanks Adam</span><br><span class="line">    while i &lt;= x:</span><br><span class="line">        #result = result * i  #It&#x27;s faster to use *=</span><br><span class="line">        #result = str(result * result + i)</span><br><span class="line">           #result = int(result *= i) #??????</span><br><span class="line">        result = str(int(result) * i)  //不断优化！</span><br><span class="line">        #result = int(str(result) * i)</span><br><span class="line">        i = i + 1</span><br><span class="line">    return result</span><br><span class="line">print factorial(6)</span><br></pre></td></tr></table></figure>
+<h4 id="Unix-程序员"><a href="#Unix-程序员" class="headerlink" title="Unix 程序员"></a>Unix 程序员</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">import os</span><br><span class="line">def fact(x):</span><br><span class="line">    os.system(&#x27;factorial &#x27; + str(x)) //代码量少！</span><br><span class="line">fact(6)</span><br><span class="line">--- Windows 程序员</span><br><span class="line">NULL = None</span><br><span class="line">def CalculateAndPrintFactorialEx(dwNumber,</span><br><span class="line">                                 hOutputDevice,</span><br><span class="line">                                 lpLparam,</span><br><span class="line">                                 lpWparam,</span><br><span class="line">                                 lpsscSecurity,</span><br><span class="line">                                 *dwReserved):</span><br><span class="line">    if lpsscSecurity != NULL:</span><br><span class="line">        return NULL #Not implemented</span><br><span class="line">    dwResult = dwCounter = 1</span><br><span class="line">    while dwCounter &lt;= dwNumber:</span><br><span class="line">        dwResult *= dwCounter</span><br><span class="line">        dwCounter += 1</span><br><span class="line">    hOutputDevice.write(str(dwResult))</span><br><span class="line">    hOutputDevice.write(&#x27;\n&#x27;)</span><br><span class="line">    return 1</span><br><span class="line">import sys</span><br><span class="line">CalculateAndPrintFactorialEx(6, sys.stdout, NULL, NULL, NULL, //自个都晕！</span><br><span class="line"> NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)</span><br></pre></td></tr></table></figure>
+<h4 id="企业级程序员"><a href="#企业级程序员" class="headerlink" title="企业级程序员"></a>企业级程序员</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">def new(cls, *args, **kwargs):</span><br><span class="line">    return cls(*args, **kwargs)</span><br><span class="line">class Number(object):</span><br><span class="line">    pass</span><br><span class="line">class IntegralNumber(int, Number):</span><br><span class="line">    def toInt(self):</span><br><span class="line">        return new (int, self)</span><br><span class="line">class InternalBase(object):</span><br><span class="line">    def __init__(self, base):</span><br><span class="line">        self.base = base.toInt()</span><br><span class="line">    def getBase(self):</span><br><span class="line">        return new (IntegralNumber, self.base)</span><br><span class="line">class MathematicsSystem(object):</span><br><span class="line">    def __init__(self, ibase):</span><br><span class="line">        Abstract</span><br><span class="line">    @classmethod</span><br><span class="line">    def getInstance(cls, ibase):</span><br><span class="line">        try:</span><br><span class="line">            cls.__instance</span><br><span class="line">        except AttributeError:</span><br><span class="line">            cls.__instance = new (cls, ibase)</span><br><span class="line">        return cls.__instance</span><br><span class="line">class StandardMathematicsSystem(MathematicsSystem):</span><br><span class="line">    def __init__(self, ibase):</span><br><span class="line">        if ibase.getBase() != new (IntegralNumber, 2):</span><br><span class="line">            raise NotImplementedError</span><br><span class="line">        self.base = ibase.getBase()</span><br><span class="line">    def calculateFactorial(self, target):</span><br><span class="line">        result = new (IntegralNumber, 1)</span><br><span class="line">        i = new (IntegralNumber, 2)</span><br><span class="line">        while i &lt;= target:</span><br><span class="line">            result = result * i</span><br><span class="line">            i = i + new (IntegralNumber, 1)</span><br><span class="line">        return result</span><br><span class="line">print StandardMathematicsSystem.getInstance(new (InternalBase,</span><br><span class="line">new (IntegralNumber, 2))).calculateFactorial(new (IntegralNumber, 6))   //面向对象！</span><br></pre></td></tr></table></figure>
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><pre><code>我好像是第三种程序员哦 ！使用一种语言完成基本的功能，这个相信大家都可以完成，并且完成的都很好，不过程序写的漂亮不漂亮还是另外一回事， 加油， to be beautiful  ... 
 </code></pre>
   
@@ -305,12 +229,6 @@ new (IntegralNumber, 2))).calculateFactorial(new (IntegralNumber, 6))   //面向
 <aside class="clearfix">
 
   
-<div class="github-card">
-<p class="asidetitle">Github 名片</p>
-<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
-<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
-</div>
-
 
 
   
@@ -408,11 +326,11 @@ new (IntegralNumber, 2))).calculateFactorial(new (IntegralNumber, 6))   //面向
 			
 		
 			
-				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
 			
 		
 			
@@ -424,15 +342,15 @@ new (IntegralNumber, 2))).calculateFactorial(new (IntegralNumber, 6))   //面向
 			
 		
 			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
 			
 		
 		</ul>
@@ -445,7 +363,7 @@ new (IntegralNumber, 2))).calculateFactorial(new (IntegralNumber, 6))   //面向
         
           <li>
             
-            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title=" 内核月报">阿里内核月报</a>
             
           </li>
         
@@ -546,14 +464,12 @@ new (IntegralNumber, 2))).calculateFactorial(new (IntegralNumber, 6))   //面向
 	
 	
 	<section class="info">
-		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
-			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。欢迎交流。 <br/>
+			</p>
 	</section>
 	 
 	<div class="social-font" class="clearfix">
 		
-		
-		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
 		
 		
 		

@@ -11,15 +11,15 @@
     
 
     
-    <meta name="description" content="Load Data 作为数据库工程师，跟数据打交道是常见的事情，数据导入导出也是常遇到的事情。下面对mysql的load data 作一些学习和总结。通过对5.1官方文档学习，并记录一下  工具使用语法LOAD DATA [LOW_PRIORITY | CONCURRENT] [LOCAL] INFILE &#39;file_name.txt&#39; [REPLACE | IGNORE] INT">
+    <meta name="description" content="Load Data 作为数据库工程师，跟数据打交道是常见的事情，数据导入导出也是常遇到的事情。下面对mysql的load data 作一些学习和总结。通过对5.1官方文档学习，并记录一下  工具使用语法123456789101112131415LOAD DATA [LOW_PRIORITY | CONCURRENT] [LOCAL] INFILE &#x27;file_name.txt&#x27;">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MySQL load data 操纵数据">
 <meta property="og:url" content="http://ruiaylin.github.io/2014/02/17/mysql-load-data/index.html">
 <meta property="og:site_name" content="ruiayLin&#39;s Blog">
-<meta property="og:description" content="Load Data 作为数据库工程师，跟数据打交道是常见的事情，数据导入导出也是常遇到的事情。下面对mysql的load data 作一些学习和总结。通过对5.1官方文档学习，并记录一下  工具使用语法LOAD DATA [LOW_PRIORITY | CONCURRENT] [LOCAL] INFILE &#39;file_name.txt&#39; [REPLACE | IGNORE] INT">
+<meta property="og:description" content="Load Data 作为数据库工程师，跟数据打交道是常见的事情，数据导入导出也是常遇到的事情。下面对mysql的load data 作一些学习和总结。通过对5.1官方文档学习，并记录一下  工具使用语法123456789101112131415LOAD DATA [LOW_PRIORITY | CONCURRENT] [LOCAL] INFILE &#x27;file_name.txt&#x27;">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2014-02-16T22:34:52.000Z">
-<meta property="article:modified_time" content="2024-03-02T09:18:29.295Z">
+<meta property="article:modified_time" content="2024-03-03T02:16:22.512Z">
 <meta property="article:author" content="ruichao.lin">
 <meta property="article:tag" content="load-data">
 <meta property="article:tag" content="Load">
@@ -108,22 +108,7 @@
 		<h4 id="Load-Data"><a href="#Load-Data" class="headerlink" title="Load Data"></a>Load Data</h4><blockquote>
 <p>作为数据库工程师，跟数据打交道是常见的事情，数据导入导出<br>也是常遇到的事情。下面对mysql的load data 作一些学习和总结。<br>通过对5.1官方文档学习，并记录一下</p>
 </blockquote>
-<h4 id="工具使用语法"><a href="#工具使用语法" class="headerlink" title="工具使用语法"></a>工具使用语法</h4><pre><code>LOAD DATA [LOW_PRIORITY | CONCURRENT] [LOCAL] INFILE &#39;file_name.txt&#39;
-[REPLACE | IGNORE]
-INTO TABLE tbl_name
-[FIELDS
-    [TERMINATED BY &#39;string&#39;]
-    [[OPTIONALLY] ENCLOSED BY &#39;char&#39;]
-    [ESCAPED BY &#39;char&#39; ]
-]
-[LINES
-    [STARTING BY &#39;string&#39;]
-    [TERMINATED BY &#39;string&#39;]
-]
-[IGNORE number LINES]
-[(col_name_or_user_var,...)]
-[SET col_name = expr,...)]
-</code></pre>
+<h4 id="工具使用语法"><a href="#工具使用语法" class="headerlink" title="工具使用语法"></a>工具使用语法</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">LOAD DATA [LOW_PRIORITY | CONCURRENT] [LOCAL] INFILE &#x27;file_name.txt&#x27;</span><br><span class="line">[REPLACE | IGNORE]</span><br><span class="line">INTO TABLE tbl_name</span><br><span class="line">[FIELDS</span><br><span class="line">    [TERMINATED BY &#x27;string&#x27;]</span><br><span class="line">    [[OPTIONALLY] ENCLOSED BY &#x27;char&#x27;]</span><br><span class="line">    [ESCAPED BY &#x27;char&#x27; ]</span><br><span class="line">]</span><br><span class="line">[LINES</span><br><span class="line">    [STARTING BY &#x27;string&#x27;]</span><br><span class="line">    [TERMINATED BY &#x27;string&#x27;]</span><br><span class="line">]</span><br><span class="line">[IGNORE number LINES]</span><br><span class="line">[(col_name_or_user_var,...)]</span><br><span class="line">[SET col_name = expr,...)]</span><br></pre></td></tr></table></figure>
 <p>LOAD DATA INFILE语句用于高速地从一个文本文件中读取行，并装入一个表中。文件名称必须为一个文字字符串</p>
 <h4 id="LOW-PRIORITY-CONCURRENT"><a href="#LOW-PRIORITY-CONCURRENT" class="headerlink" title="LOW_PRIORITY &amp; CONCURRENT"></a>LOW_PRIORITY &amp; CONCURRENT</h4><blockquote>
 <p>LOW_PRIORITY:  LOAD DATA语句的执行被延迟，直到没有其它的客户端从表中读取为止.<br>CONCURRENT  :如果一个MyISAM表满足同时插入的条件（即该表在中间有空闲块），LOAD<br>DATA正在执行时，其它线程会从表中重新获取数据。即使没有其它线程在同时使用本表格<br>使用本选项也会略微影响LOAD DATA的性能</p>
@@ -131,10 +116,7 @@ INTO TABLE tbl_name
 <blockquote>
 <p>LOCAL : 如果指定了LOCAL，则被认为与连接的客户端有关,如果指定了LOCAL，则文件会被客户主机上的客户端读取，并被发送到服务器。文件会被给予一个完整的路径名称，以指定确切的位置。如果给定的是一个相对的路径名称，则此名称会被理解为相对于启动客户端时所在的目录<br> 如果LOCAL没有被指定，则文件必须位于服务器主机上，并且被服务器直接读取。<br>当在服务器主机上为文件定位时，服务器使用以下规则：</p>
 </blockquote>
-<pre><code>1. 如果给定了一个绝对的路径名称，则服务器使用此路径名称。
-2. 如果给定了带有一个或多个引导组件的相对路径名称，则服务器会搜索相对于服务器数据目录的文件。 
-3. 如果给定了一个不带引导组件的文件名称，则服务器会在默认数据库的数据库目录中寻找文件。
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1. 如果给定了一个绝对的路径名称，则服务器使用此路径名称。</span><br><span class="line">2. 如果给定了带有一个或多个引导组件的相对路径名称，则服务器会搜索相对于服务器数据目录的文件。 </span><br><span class="line">3. 如果给定了一个不带引导组件的文件名称，则服务器会在默认数据库的数据库目录中寻找文件。</span><br></pre></td></tr></table></figure>
 <blockquote>
 <h5 id="注释"><a href="#注释" class="headerlink" title="注释"></a>注释</h5><p>如果使用了LOCAL 参数，其实会比直接操作数据库文件慢，毕竟每次都会通过mysql客户<br>端来处理文件，再发送给sever 处理。</p>
 </blockquote>
@@ -150,29 +132,23 @@ INTO TABLE tbl_name
 </blockquote>
 <blockquote>
 <h4 id="如果您希望在载入运行过程中忽略外键的限制，您可以在执行LOAD-DATA前发送一个SET-FOREIGN-KEY-CHECKS-0语句"><a href="#如果您希望在载入运行过程中忽略外键的限制，您可以在执行LOAD-DATA前发送一个SET-FOREIGN-KEY-CHECKS-0语句" class="headerlink" title="如果您希望在载入运行过程中忽略外键的限制，您可以在执行LOAD DATA前发送一个SET FOREIGN_KEY_CHECKS&#x3D;0语句"></a>如果您希望在载入运行过程中忽略外键的限制，您可以在执行LOAD DATA前发送一个SET FOREIGN_KEY_CHECKS&#x3D;0语句</h4></blockquote>
-<h5 id="注释-1"><a href="#注释-1" class="headerlink" title="注释"></a>注释</h5><pre><code>当您有许多索引时，这通常会使LOAD DATA INFILE大大加快。通常，LOAD DATA INFILE的速度会非常快，但是在某些极端情况下，您可以在把文件载入到表中之前使用ALTER TABLE...DISABLE KEYS关闭LOAD DATA INFILE，或者在载入文件之后使用ALTER TABLE...ENABLE KEYS再次创建索引，使创建索引的速度更快
-</code></pre>
+<h5 id="注释-1"><a href="#注释-1" class="headerlink" title="注释"></a>注释</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">当您有许多索引时，这通常会使LOAD DATA INFILE大大加快。通常，LOAD DATA INFILE的速度会非常快，但是在某些极端情况下，您可以在把文件载入到表中之前使用ALTER TABLE...DISABLE KEYS关闭LOAD DATA INFILE，或者在载入文件之后使用ALTER TABLE...ENABLE KEYS再次创建索引，使创建索引的速度更快</span><br></pre></td></tr></table></figure>
+
 <h4 id="LOAD-DATA-INFILE-SELECT…INTO-OUTFILE"><a href="#LOAD-DATA-INFILE-SELECT…INTO-OUTFILE" class="headerlink" title="LOAD DATA INFILE &amp;SELECT…INTO OUTFILE"></a>LOAD DATA INFILE &amp;SELECT…INTO OUTFILE</h4><blockquote>
 <p>LOAD DATA INFILE是SELECT…INTO OUTFILE的补语,要从一个表中把数据<br>写入一个文件中，应使用SELECT…INTO OUTFILE。要读取文件，放回到表中，<br>应使用LOAD DATA INFILE。FIELDS和LINES子句的语法对于两个语句是一样的。<br>两个子句都是自选的，但是如果两个都被指定了，FIELDS必须位于LINES的前面。</p>
 </blockquote>
 <p>如果您指定了一个FIELDS子句，则每个亚子句（TERMINATED BY, [OPTIONALLY] ENCLOSED BY和ESCAPED BY）也是自选的。不过，您必须指定其中至少一个。如果您不指定FIELDS<br>子句，则默认值为假设您写下如下语句时的值：</p>
-<pre><code>FIELDS TERMINATED BY &#39;\t&#39; ENCLOSED BY &#39;&#39; ESCAPED BY &#39;\\&#39;
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">FIELDS TERMINATED BY &#x27;\t&#x27; ENCLOSED BY &#x27;&#x27; ESCAPED BY &#x27;\\&#x27;</span><br></pre></td></tr></table></figure>
+
 <p>如果您不指定LINES子句，则默认值为假设您写下如下语句时的值：</p>
-<pre><code>LINES TERMINATED BY &#39;\n&#39; STARTING BY &#39;
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LINES TERMINATED BY &#x27;\n&#x27; STARTING BY &#x27;</span><br></pre></td></tr></table></figure>
 <p>换句话说，当读取输入值时，默认值会使LOAD DATA INFILE按如下方式运行：</p>
 <h4 id="用例如下："><a href="#用例如下：" class="headerlink" title="用例如下："></a>用例如下：</h4><blockquote>
 <p>示例１：</p>
 </blockquote>
-<pre><code>mysql&gt; LOAD DATA INFILE &#39;/tmp/test.txt&#39;
-     -&gt; INTO TABLE test LINES STARTING BY &quot;xxx&quot;;
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; LOAD DATA INFILE &#x27;/tmp/test.txt&#x27;</span><br><span class="line">     -&gt; INTO TABLE test LINES STARTING BY &quot;xxx&quot;;</span><br></pre></td></tr></table></figure>
 <p>使用此语句，您可以读入包含有如下内容的文件：</p>
-<pre><code>xxx&quot;row&quot;,1
-something xxx&quot;row&quot;,2
-并只得到数据(&quot;row&quot;,1)和(&quot;row&quot;,2)。
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">xxx&quot;row&quot;,1</span><br><span class="line">something xxx&quot;row&quot;,2</span><br><span class="line">并只得到数据(&quot;row&quot;,1)和(&quot;row&quot;,2)。</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>示例 2 ：<br> IGNORE number LINES选项可以被用于在文件的开始处忽略行。例如，您可以使用IGNORE 1 LINES来跳过一个包含列名称的起始标题行<br>    mysql&gt; LOAD DATA INFILE ‘&#x2F;tmp&#x2F;test.txt’<br>        -&gt; INTO TABLE test IGNORE 1 LINES;</p>
 </blockquote>
@@ -198,10 +174,7 @@ something xxx&quot;row&quot;,2
 <blockquote>
 <p>示例 4 ：一个dBASE格式的文件具有以逗号分隔并且包含在双引号中的字段。如果文件中的各行以新行为结尾，则此处所示的语句描述了您可以用于载入文件的field-和line-handling选项：</p>
 </blockquote>
-<pre><code>mysql&gt; LOAD DATA INFILE &#39;data.txt&#39; INTO TABLE tbl_name
-    -&gt;           FIELDS TERMINATED BY &#39;,&#39; ENCLOSED BY &#39;&quot;&#39;
-    -&gt;           LINES TERMINATED BY &#39;\n&#39;;
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; LOAD DATA INFILE &#x27;data.txt&#x27; INTO TABLE tbl_name</span><br><span class="line">    -&gt;           FIELDS TERMINATED BY &#x27;,&#x27; ENCLOSED BY &#x27;&quot;&#x27;</span><br><span class="line">    -&gt;           LINES TERMINATED BY &#x27;\n&#x27;;</span><br></pre></td></tr></table></figure>
 <p>所有field-或line-handling选项都可以指定一个空字符串(‘’) 如果字符串不是空的，<br>则FIELDS [OPTIONALLY] ENCLOSED BY和FIELDS ESCAPED BY值必须为单一字符。FIELDS TERMINATED BY, LINES STARTING BY和LINES TERMINATED BY值可以超过一个字符。例如，要编写由回车&#x2F;换行成对字符作为结尾的行，或读取包含这类行的文件，则应指定一个LINES TERMINATED BY ‘\r\n’子句。</p>
 <blockquote>
 <p>FIELDS [OPTIONALLY] ENCLOSED BY用于控制字段的引号。对于（SELECT…INTO OUTFILE），如果您忽略了词语OPTIONALLY，则所有的字段都被包含在ENCLOSED BY字符串中。此处展示了此类输出的一个示例（使用逗号作为字段分隔符）：</p>
@@ -219,11 +192,9 @@ something xxx&quot;row&quot;,2
 
 ...
 </code></pre>
-<h4 id="实际生产中用到-的和字段对应关系"><a href="#实际生产中用到-的和字段对应关系" class="headerlink" title="实际生产中用到 的和字段对应关系"></a>实际生产中用到 的和字段对应关系</h4><pre><code>load data infile &#39;/data/tmp/load/test.vp&#39; replace into table mdm_biz_list_interface fields terminated by &#39;,&#39; LINES TERMINATED BY &#39;\n&#39;  ( $cols ) ;
-</code></pre>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><pre><code>load data 对于mysql 来讲 就相当于oracle的 sql loader ，这些都是作为一个DBA
-的基本工作技能。 mark一下，记做笔记  ... 
-</code></pre>
+<h4 id="实际生产中用到-的和字段对应关系"><a href="#实际生产中用到-的和字段对应关系" class="headerlink" title="实际生产中用到 的和字段对应关系"></a>实际生产中用到 的和字段对应关系</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">load data infile &#x27;/data/tmp/load/test.vp&#x27; replace into table mdm_biz_list_interface fields terminated by &#x27;,&#x27; LINES TERMINATED BY &#x27;\n&#x27;  ( $cols ) ;</span><br></pre></td></tr></table></figure>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">load data 对于mysql 来讲 就相当于oracle的 sql loader ，这些都是作为一个DBA</span><br><span class="line">的基本工作技能。 mark一下，记做笔记  ... </span><br></pre></td></tr></table></figure>
+
   
 	</div>
 		<footer class="article-footer clearfix">
@@ -297,12 +268,6 @@ something xxx&quot;row&quot;,2
 <aside class="clearfix">
 
   
-<div class="github-card">
-<p class="asidetitle">Github 名片</p>
-<div class="github-card" data-github="ruiaylin" data-theme="medium"></div>
-<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
-</div>
-
 
 
   
@@ -400,11 +365,11 @@ something xxx&quot;row&quot;,2
 			
 		
 			
-				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
 			
 		
 			
-				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
 			
 		
 			
@@ -416,15 +381,15 @@ something xxx&quot;row&quot;,2
 			
 		
 			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+			
 				<li><a href="/tags/gh-ost/" title="gh-ost">gh-ost<sup>1</sup></a></li>
 			
 		
 			
 				<li><a href="/tags/DDL/" title="DDL">DDL<sup>1</sup></a></li>
-			
-		
-			
-				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
 			
 		
 		</ul>
@@ -437,7 +402,7 @@ something xxx&quot;row&quot;,2
         
           <li>
             
-            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title="阿里内核月报">阿里内核月报</a>
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title=" 内核月报">阿里内核月报</a>
             
           </li>
         
@@ -538,14 +503,12 @@ something xxx&quot;row&quot;,2
 	
 	
 	<section class="info">
-		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。曾在支付宝、汽车之家、百度就职， <br/>
-			有十多年运维、平台开发、架构设计经验，对分布式技术、内核源码、可观测技术应用感兴趣，欢迎交流。</p>
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。欢迎交流。 <br/>
+			</p>
 	</section>
 	 
 	<div class="social-font" class="clearfix">
 		
-		
-		<a href="https://github.com/ruiaylin" target="_blank" class="icon-github" title="github"></a>
 		
 		
 		
