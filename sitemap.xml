@@ -2,6 +2,24 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://ruiaylin.github.io/2024/03/13/sourcecode-2-debug-with-vscode/</loc>
+    
+    <lastmod>2024-03-17</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/2024/03/12/thinking-about-the-meaning-of-writting/</loc>
+    
+    <lastmod>2024-03-17</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://ruiaylin.github.io/about/index.html</loc>
     
     <lastmod>2024-03-03</lastmod>
@@ -299,7 +317,7 @@
   </url>
   
   <url>
-    <loc>http://ruiaylin.github.io/2015/06/03/mysql%20source%20code%20debug%20xcode/</loc>
+    <loc>http://ruiaylin.github.io/2015/06/03/sourcecode-1-debug-with-xcode/</loc>
     
     <lastmod>2024-03-02</lastmod>
     
@@ -373,7 +391,7 @@
 
   <url>
     <loc>http://ruiaylin.github.io/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -381,245 +399,259 @@
   
   <url>
     <loc>http://ruiaylin.github.io/tags/Kernel/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/OPS/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/Docker/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/MySQL/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/PowerDNS/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/DNS/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/Fabric/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/Discourse/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/Forum/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/Go/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/%E8%BD%AC%E8%BD%BD/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/gh-ost/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/DDL/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/BIND/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/Shell/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/Group-Replicaiton/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/MGR/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/Replicaiton/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/MHA/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/Multi-Instance/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/%E5%A4%9A%E5%AE%9E%E4%BE%8B/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/%E6%BA%90%E7%A0%81/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/Code/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/Autofailover/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/Sharding/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/load-data/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/Load/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/Tool/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/Optimization/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/Pssh/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/Python/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/Thread/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/TiDB/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/Xtrabackup/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/tags/Encrypt/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/%E5%BF%83%E5%BE%97%EF%BC%8C%E6%80%BB%E7%BB%93%EF%BC%8CThinking/</loc>
+    <lastmod>2024-03-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/tags/VSCode/</loc>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
@@ -628,49 +660,56 @@
   
   <url>
     <loc>http://ruiaylin.github.io/categories/Linux/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/categories/MySQL/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/categories/Docker/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/categories/Python/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/categories/Go/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/categories/Oracle/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://ruiaylin.github.io/categories/NewSQL/</loc>
-    <lastmod>2024-03-03</lastmod>
+    <lastmod>2024-03-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://ruiaylin.github.io/categories/%E5%BF%83%E5%BE%97/</loc>
+    <lastmod>2024-03-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>

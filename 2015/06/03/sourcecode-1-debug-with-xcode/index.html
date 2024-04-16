@@ -1,0 +1,753 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>MySQL源码之--调试环境Xcode | ruiayLin&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="ruichao.lin">
+    
+
+    
+    <meta name="description" content="MySQL源码分析导读  为了更好的使用MySQL数据库，从而在数据库架构设计与应用时给出最好的解决方案,从今天开始对MySQL源码进行一些初步的学习和分析。 当然，首先推荐几本书：Pro MySQL , Expert MySQL , mariadb的设计和实现。 另外就是构建阅读和调试环境，今天我们就主要从环境的 构建说起，MAC 下面最完备的IDE就是 Xcode了，接下来我们看一下，如何使用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL源码之--调试环境Xcode">
+<meta property="og:url" content="http://ruiaylin.github.io/2015/06/03/sourcecode-1-debug-with-xcode/index.html">
+<meta property="og:site_name" content="ruiayLin&#39;s Blog">
+<meta property="og:description" content="MySQL源码分析导读  为了更好的使用MySQL数据库，从而在数据库架构设计与应用时给出最好的解决方案,从今天开始对MySQL源码进行一些初步的学习和分析。 当然，首先推荐几本书：Pro MySQL , Expert MySQL , mariadb的设计和实现。 另外就是构建阅读和调试环境，今天我们就主要从环境的 构建说起，MAC 下面最完备的IDE就是 Xcode了，接下来我们看一下，如何使用">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://ruiaylin.github.io/img/xcode-schema.png">
+<meta property="og:image" content="http://ruiaylin.github.io/img/xcode-schema1.png">
+<meta property="article:published_time" content="2015-06-03T00:50:53.000Z">
+<meta property="article:modified_time" content="2024-03-02T09:18:29.293Z">
+<meta property="article:author" content="ruichao.lin">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="源码">
+<meta property="article:tag" content="Code">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://ruiaylin.github.io/img/xcode-schema.png">
+
+    
+    <link rel="alternative" href="/atom.xml" title="ruiayLin&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.jpeg" alt="ruiayLin&#39;s Blog" title="ruiayLin&#39;s Blog"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="ruiayLin&#39;s Blog">ruiayLin&#39;s Blog</a></h1>
+				<h2 class="blog-motto">蹈之而弗悔 , 慎思而笃行 ...</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:ruiaylin.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2015/06/03/sourcecode-1-debug-with-xcode/" title="MySQL源码之--调试环境Xcode" itemprop="url">MySQL源码之--调试环境Xcode</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="ruichao.lin" target="_blank" itemprop="author">ruichao.lin</a>
+		
+  <p class="article-time">
+    <time datetime="2015-06-03T00:50:53.000Z" itemprop="datePublished"> 发表于 2015-06-03</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#MySQL%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E5%AF%BC%E8%AF%BB"><span class="toc-number">1.</span> <span class="toc-text">MySQL源码分析导读</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E5%BF%85%E8%A6%81%E7%9A%84%E8%BD%AF%E4%BB%B6%E5%92%8C%E8%B0%83%E8%AF%95%E5%B7%A5%E5%85%B7"><span class="toc-number">2.</span> <span class="toc-text">安装必要的软件和调试工具</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Xcode-IDE%E5%AE%89%E8%A3%85"><span class="toc-number">2.1.</span> <span class="toc-text">Xcode IDE安装</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E8%A3%85gdb-%E8%B0%83%E8%AF%95%E5%99%A8"><span class="toc-number">2.2.</span> <span class="toc-text">安装gdb 调试器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-cmake-%E5%B7%A5%E5%85%B7"><span class="toc-number">2.3.</span> <span class="toc-text">安装 cmake 工具</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%87%86%E5%A4%87MySQL%E6%BA%90%E7%A0%81"><span class="toc-number">3.</span> <span class="toc-text">准备MySQL源码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9E%84%E5%BB%BA-Xcode-%E5%B7%A5%E7%A8%8B%E6%96%87%E4%BB%B6%EF%BC%8C%E5%B9%B6%E8%BF%9B%E8%A1%8C%E9%A2%84%E7%BC%96%E8%AF%91"><span class="toc-number">4.</span> <span class="toc-text">构建 Xcode 工程文件，并进行预编译</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%96%E8%AF%91MySQL%E6%BA%90%E7%A0%81"><span class="toc-number">5.</span> <span class="toc-text">编译MySQL源码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-number">6.</span> <span class="toc-text">初始化数据库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Xcode-%E8%B0%83%E8%AF%95"><span class="toc-number">7.</span> <span class="toc-text">Xcode 调试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">8.</span> <span class="toc-text">总结</span></a></li></ol>
+		
+		</div>
+		
+		<h3 id="MySQL源码分析导读"><a href="#MySQL源码分析导读" class="headerlink" title="MySQL源码分析导读"></a>MySQL源码分析导读</h3><blockquote>
+<p> 为了更好的使用MySQL数据库，从而在数据库架构设计与应用时给出最好的解决方案,从今天开始对MySQL源码进行一些初步的学习和分析。<br> 当然，首先推荐几本书：Pro MySQL , Expert MySQL , mariadb的设计和实现。 另外就是构建阅读和调试环境，今天我们就主要从环境的<br> 构建说起，MAC 下面最完备的IDE就是 Xcode了，接下来我们看一下，如何使用Xcode来进行MySQL的代码阅读和调试工作。</p>
+</blockquote>
+<h3 id="安装必要的软件和调试工具"><a href="#安装必要的软件和调试工具" class="headerlink" title="安装必要的软件和调试工具"></a>安装必要的软件和调试工具</h3><h4 id="Xcode-IDE安装"><a href="#Xcode-IDE安装" class="headerlink" title="Xcode IDE安装"></a>Xcode IDE安装</h4><p>AppStore上面搜索 Xcode，然后下载安装即可。 </p>
+<h4 id="安装gdb-调试器"><a href="#安装gdb-调试器" class="headerlink" title="安装gdb 调试器"></a>安装gdb 调试器</h4><ol>
+<li><p>安装 homebrew </p>
+<p> 官方文档： <a target="_blank" rel="noopener" href="http://brew.sh/">http://brew.sh/</a></p>
+</li>
+<li><p>安装 gdb 并签名，具体步骤可以baidu或者google ，附上一个教程</p>
+<p> <a target="_blank" rel="noopener" href="http://ntraft.com/installing-gdb-on-os-x-mavericks/">http://ntraft.com/installing-gdb-on-os-x-mavericks/</a></p>
+</li>
+</ol>
+<h4 id="安装-cmake-工具"><a href="#安装-cmake-工具" class="headerlink" title="安装 cmake 工具"></a>安装 cmake 工具</h4><p>mysql的编译是采用的cmake ，官网直接下载安装即可：<br>cmake <a target="_blank" rel="noopener" href="http://www.macupdate.com/app/mac/49301/cmake2014-5-3CMake">官网下载</a></p>
+<h3 id="准备MySQL源码"><a href="#准备MySQL源码" class="headerlink" title="准备MySQL源码"></a>准备MySQL源码</h3><p>推荐Percona 版本或者Mariadb<br>Percona 源码 <a target="_blank" rel="noopener" href="https://www.percona.com/downloads/Percona-Server-5.6/">下载链接</a>.<br>Mariadb 源码 <a target="_blank" rel="noopener" href="https://downloads.mariadb.org/">下载链接</a> .</p>
+<h3 id="构建-Xcode-工程文件，并进行预编译"><a href="#构建-Xcode-工程文件，并进行预编译" class="headerlink" title="构建 Xcode 工程文件，并进行预编译"></a>构建 Xcode 工程文件，并进行预编译</h3><p>我们以percona-server-5.6.24为例：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cd  percona-server-5.6.24</span><br><span class="line">   mkdir work </span><br><span class="line">   // 源码目录执行,由于tokudb目前无法支持mac，所以要关闭编译</span><br><span class="line">  	cmake . -G &quot;Xcode&quot; -DWITH_DEBUG=1  -DWITH_TOKUDB_STORAGE_ENGINE=OFF -DWITHOUT_TOKUDB_STORAGE_ENGINE=ON -DCMAKE_INSTALL_PREFIX=/Users/ruiaylin/Documents/MySQL/percona-server-5.6.24/work</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>5.7 需要下载 boost 库, 可以在 cmake 的时候添加如下选项 </p>
+</blockquote>
+<pre><code><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#  -DDOWNLOAD_BOOST=1 -DWITH_BOOST=~/Application/libs/boost</span><br><span class="line">cmake . -G &quot;Xcode&quot; -DWITH_DEBUG=1  -DWITH_TOKUDB_STORAGE_ENGINE=OFF -DWITHOUT_TOKUDB_STORAGE_ENGINE=ON -DCMAKE_INSTALL_PREFIX=/Users/ruiaylin/Documents/MySQL/percona-server-5.7.14/work   -DDOWNLOAD_BOOST=1 -DWITH_BOOST=~/Applications/libs/boost_1_59_0</span><br></pre></td></tr></table></figure>
+</code></pre>
+<p>注意: 5.7.19 版本需要将RocksDB引擎排除, 否则无法正常build. </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cmake . -G &quot;Xcode&quot; -DWITH_DEBUG=1  -DWITH_TOKUDB_STORAGE_ENGINE=OFF -DWITHOUT_TOKUDB_STORAGE_ENGINE=ON -DWITH_ROCKSDB_STORAGE_ENGINE=OFF -DWITHOUT_ROCKSDB_STORAGE_ENGINE=ON  -DCMAKE_INSTALL_PREFIX=/Users/ruiaylin/Development/c/percona5719/work   -DDOWNLOAD_BOOST=1 -DWITH_BOOST=~/Applications/libs/boost_1_59_0</span><br></pre></td></tr></table></figure>
+
+<p>cmake 之后，会生成一个 xcode的工程文件， 使用xcode 打开就可以把mysql工程加入到 xcode了。 </p>
+<blockquote>
+<p>5.7 问题</p>
+</blockquote>
+<p>工程文件加入到 Xcode 之后, 自动创建schema 进行编译会失败. 会报如下错误: </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang: error: no such file or directory: &#x27;/Users/ruiaylin/Documents/Source/mysql/percona-server-5.7.15-9/libevent/Debug/libevent.a&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>是因为系统中不存在对应的路径 , 错误原因应该是由于 加入到xcode的时候导致路径改版 , 编译的时候报错. </p>
+<p>解决办法很简单: 手动创建目录,并进行编译libevent</p>
+<pre><code>./autogen.sh
+./configure
+make 
+cp ./.libs/libevent.a  Debug/
+</code></pre>
+<p>然后在进行下一步编译 ^_^</p>
+<h3 id="编译MySQL源码"><a href="#编译MySQL源码" class="headerlink" title="编译MySQL源码"></a>编译MySQL源码</h3><p>在加入了xcode之后，直接点击xcode的编译按钮就可以进行编译和build了，等完成之后会生成对应的二进制可执行文件。<br>这个过程其实就是手工执行 make ， make install的过程。但是 编译完成需要自己手工进行可执行文件的copy工作。</p>
+<pre><code>cd work ; mkdir &#123;bin,share,scripts,data&#125; 
+cp sql/Debug/mysqld work/bin/
+cp client/Debug/mysql* work/bin/
+cp extra/Debug/my_print_defaults work/bin/
+cp -r sql/share/* work/share/
+cp -r scripts/* work/scripts/
+chmod +x work/scripts/*
+cp scripts/*.sql  work/share/
+cp support-files/*.cnf work/share/ 
+</code></pre>
+<h3 id="初始化数据库"><a href="#初始化数据库" class="headerlink" title="初始化数据库"></a>初始化数据库</h3><p>5.6 :</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./scripts/mysql_install_db --user=ruiaylin --basedir=/Users/ruiaylin/Documents/MySQL/percona-server-5.6.24/work --datadir=/Users/ruiaylin/Documents/MySQL/percona-server-5.6.24/work/data  --force</span><br></pre></td></tr></table></figure>
+
+<p>5.7 : </p>
+<pre><code>mysqld --initialize-insecure --user=mysql
+</code></pre>
+<h3 id="Xcode-调试"><a href="#Xcode-调试" class="headerlink" title="Xcode 调试"></a>Xcode 调试</h3><p>Xcode中调试 MySQL ， 配置三个三个环节变量：</p>
+<p>Set the active schema选项[build右侧第二个选项,如图中 mysqld的位置]中选择 mysqld, 然后在同一个列表里面选择编辑schema,<br>会弹出一个窗口, 点击 RUN , 然后 Arguments Passed On launch 添加三个变量.</p>
+<p><img src="/img/xcode-schema.png" alt="active schema"></p>
+<pre><code>--user=ruiaylin 
+--basedir=/Users/ruiaylin/Documents/MySQL/percona-server-5.6.24/work 
+--datadir=/Users/ruiaylin/Documents/MySQL/percona-server-5.6.24/work/data
+</code></pre>
+<p><img src="/img/xcode-schema1.png" alt="active schema"></p>
+<p>如图所示</p>
+<p>   my.cnf 放到 &#x2F;etc下面。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>   尽情享受吧</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/MySQL/">MySQL</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/MySQL/">MySQL</a><a href="/tags/源码/">源码</a><a href="/tags/Code/">Code</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://ruiaylin.github.io/2015/06/03/sourcecode-1-debug-with-xcode/" data-title="MySQL源码之--调试环境Xcode | ruiayLin&#39;s Blog" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/04/12/singleton-pattern/" title="Singleton Pattern in Go [转载]">
+  <strong>上一篇：</strong><br/>
+  <span>
+  Singleton Pattern in Go [转载]</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2015/05/04/install-docker-on-centos-6x/"  title="Install docker on CentOs">
+ <strong>下一篇：</strong><br/> 
+ <span>Install docker on CentOs
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#MySQL%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E5%AF%BC%E8%AF%BB"><span class="toc-number">1.</span> <span class="toc-text">MySQL源码分析导读</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E5%BF%85%E8%A6%81%E7%9A%84%E8%BD%AF%E4%BB%B6%E5%92%8C%E8%B0%83%E8%AF%95%E5%B7%A5%E5%85%B7"><span class="toc-number">2.</span> <span class="toc-text">安装必要的软件和调试工具</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Xcode-IDE%E5%AE%89%E8%A3%85"><span class="toc-number">2.1.</span> <span class="toc-text">Xcode IDE安装</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E8%A3%85gdb-%E8%B0%83%E8%AF%95%E5%99%A8"><span class="toc-number">2.2.</span> <span class="toc-text">安装gdb 调试器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-cmake-%E5%B7%A5%E5%85%B7"><span class="toc-number">2.3.</span> <span class="toc-text">安装 cmake 工具</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%87%86%E5%A4%87MySQL%E6%BA%90%E7%A0%81"><span class="toc-number">3.</span> <span class="toc-text">准备MySQL源码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9E%84%E5%BB%BA-Xcode-%E5%B7%A5%E7%A8%8B%E6%96%87%E4%BB%B6%EF%BC%8C%E5%B9%B6%E8%BF%9B%E8%A1%8C%E9%A2%84%E7%BC%96%E8%AF%91"><span class="toc-number">4.</span> <span class="toc-text">构建 Xcode 工程文件，并进行预编译</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%96%E8%AF%91MySQL%E6%BA%90%E7%A0%81"><span class="toc-number">5.</span> <span class="toc-text">编译MySQL源码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-number">6.</span> <span class="toc-text">初始化数据库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Xcode-%E8%B0%83%E8%AF%95"><span class="toc-number">7.</span> <span class="toc-text">Xcode 调试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">8.</span> <span class="toc-text">总结</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Docker/" title="Docker">Docker<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Go/" title="Go">Go<sup>3</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Linux/" title="Linux">Linux<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/MySQL/" title="MySQL">MySQL<sup>19</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/NewSQL/" title="NewSQL">NewSQL<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Oracle/" title="Oracle">Oracle<sup>2</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Python/" title="Python">Python<sup>7</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/心得/" title="心得">心得<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/MySQL/" title="MySQL">MySQL<sup>12</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OPS/" title="OPS">OPS<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Docker/" title="Docker">Docker<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Fabric/" title="Fabric">Fabric<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Go/" title="Go">Go<sup>4</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Group-Replicaiton/" title="Group Replicaiton">Group Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MGR/" title="MGR">MGR<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Replicaiton/" title="Replicaiton">Replicaiton<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/MHA/" title="MHA">MHA<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Python/" title="Python">Python<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Xtrabackup/" title="Xtrabackup">Xtrabackup<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/DNS/" title="DNS">DNS<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/源码/" title="源码">源码<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Code/" title="Code">Code<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Sharding/" title="Sharding">Sharding<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kernel/" title="Kernel">Kernel<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/PowerDNS/" title="PowerDNS">PowerDNS<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Discourse/" title="Discourse">Discourse<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forum/" title="Forum">Forum<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/转载/" title="转载">转载<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">知识链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://mysql.taobao.org/monthly/" target="_blank" title=" 内核月报">阿里内核月报</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/org/polardb-x" target="_blank" title="PloarDB-X专栏">PloarDB-X专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://cn.pingcap.com/blog/" target="_blank" title="TiDB 博客">TiDB 博客</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/doc/refman/8.0/en/" target="_blank" title="MySQL 8.0 Docs">MySQL 8.0 Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://dev.mysql.com/blog-archive/" target="_blank" title="MySQL Server Blog">MySQL Server Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://lefred.be/" target="_blank" title="Lefred&#39;s blog">Lefred&#39;s blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.zhihu.com/people/wen-zheng-hu" target="_blank" title="温正湖专栏">温正湖专栏</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.percona.com/blog/" target="_blank" title="Percona Blog">Percona Blog</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://engineering.fb.com/" target="_blank" title="Meta Engineering">Meta Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://www.uber.com/en-US/blog/engineering/" target="_blank" title="Uber Engineering">Uber Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.blog/category/engineering/" target="_blank" title="Github Engineering">Github Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://medium.com/pinterest-engineering" target="_blank" title="Pinterest Engineering">Pinterest Engineering</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://flask.palletsprojects.com/" target="_blank" title="Flask Docs">Flask Docs</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://tympanus.net/codrops/" target="_blank" title="Codrops front">Codrops front</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 我是瑞超，美团到店DBA负责人、数据库架构师。欢迎交流。 <br/>
+			</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2024 
+		
+		<a href="/about" target="_blank" title="ruichao.lin">ruichao.lin</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+        getSize();
+        if (myWidth >= 1024) {
+          c.click();
+        }
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?e6d1f421bbc9962127a50488f9ed37d1";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
