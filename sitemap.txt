@@ -1,5 +1,6 @@
 http://ruiaylin.github.io/2024/03/13/sourcecode-2-debug-with-vscode/
 http://ruiaylin.github.io/2024/03/12/thinking-about-the-meaning-of-writting/
+http://ruiaylin.github.io/2015/06/03/sourcecode-1-debug-with-xcode/
 http://ruiaylin.github.io/about/index.html
 http://ruiaylin.github.io/2014/01/01/hello-world/
 http://ruiaylin.github.io/2014/05/22/xtrabackup-for-mysql/
@@ -33,7 +34,6 @@ http://ruiaylin.github.io/2016/04/12/singleton-pattern/
 http://ruiaylin.github.io/2014/04/22/python-change-privs-and-profile/
 http://ruiaylin.github.io/2014/03/22/oracle-plan-stablilty/
 http://ruiaylin.github.io/2014/03/15/oracle-colquery/
-http://ruiaylin.github.io/2015/06/03/sourcecode-1-debug-with-xcode/
 http://ruiaylin.github.io/2018/03/15/mha-a-litte-tricky/
 http://ruiaylin.github.io/2016/12/22/mgr-01-build-a-mysql-group-replication-cluster-in-10-minutes/
 http://ruiaylin.github.io/2014/01/01/fabric/
@@ -79,6 +79,7 @@ http://ruiaylin.github.io/tags/Xtrabackup/
 http://ruiaylin.github.io/tags/Encrypt/
 http://ruiaylin.github.io/tags/%E5%BF%83%E5%BE%97%EF%BC%8C%E6%80%BB%E7%BB%93%EF%BC%8CThinking/
 http://ruiaylin.github.io/tags/VSCode/
+http://ruiaylin.github.io/tags/Xcode/
 http://ruiaylin.github.io/categories/Linux/
 http://ruiaylin.github.io/categories/MySQL/
 http://ruiaylin.github.io/categories/Docker/

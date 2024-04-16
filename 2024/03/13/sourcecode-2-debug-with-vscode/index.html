@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   
-    <title>MySQL源码之-调试环境VSCode | ruiayLin&#39;s Blog</title>
+    <title>MySQL源码之-调试环境VSCode-WIP | ruiayLin&#39;s Blog</title>
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
     
     <meta name="author" content="ruichao.lin">
@@ -13,22 +13,19 @@
     
     <meta name="description" content="MySQL源码分析导读  为了更好的使用MySQL数据库，从而在数据库架构设计与应用时给出最好的解决方案,从今天开始对MySQL源码进行一些初步的学习和分析。 当然，首先推荐几本书：Pro MySQL , Expert MySQL , mariadb的设计和实现。 另外就是构建阅读和调试环境，今天我们就主要从环境的 构建说起，MAC 下面最完备的IDE就是 Xcode了，接下来我们看一下，如何使用">
 <meta property="og:type" content="article">
-<meta property="og:title" content="MySQL源码之-调试环境VSCode">
+<meta property="og:title" content="MySQL源码之-调试环境VSCode-WIP">
 <meta property="og:url" content="http://ruiaylin.github.io/2024/03/13/sourcecode-2-debug-with-vscode/index.html">
 <meta property="og:site_name" content="ruiayLin&#39;s Blog">
 <meta property="og:description" content="MySQL源码分析导读  为了更好的使用MySQL数据库，从而在数据库架构设计与应用时给出最好的解决方案,从今天开始对MySQL源码进行一些初步的学习和分析。 当然，首先推荐几本书：Pro MySQL , Expert MySQL , mariadb的设计和实现。 另外就是构建阅读和调试环境，今天我们就主要从环境的 构建说起，MAC 下面最完备的IDE就是 Xcode了，接下来我们看一下，如何使用">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://ruiaylin.github.io/img/xcode-schema.png">
-<meta property="og:image" content="http://ruiaylin.github.io/img/xcode-schema1.png">
 <meta property="article:published_time" content="2024-03-13T00:50:53.000Z">
-<meta property="article:modified_time" content="2024-03-17T04:02:44.735Z">
+<meta property="article:modified_time" content="2024-04-16T00:31:09.952Z">
 <meta property="article:author" content="ruichao.lin">
 <meta property="article:tag" content="MySQL">
 <meta property="article:tag" content="源码">
 <meta property="article:tag" content="Code">
 <meta property="article:tag" content="VSCode">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://ruiaylin.github.io/img/xcode-schema.png">
 
     
     <link rel="alternative" href="/atom.xml" title="ruiayLin&#39;s Blog" type="application/atom+xml">
@@ -90,7 +87,7 @@
 		<header class="article-info clearfix">
   <h1 itemprop="name">
     
-      <a href="/2024/03/13/sourcecode-2-debug-with-vscode/" title="MySQL源码之-调试环境VSCode" itemprop="url">MySQL源码之-调试环境VSCode</a>
+      <a href="/2024/03/13/sourcecode-2-debug-with-vscode/" title="MySQL源码之-调试环境VSCode-WIP" itemprop="url">MySQL源码之-调试环境VSCode-WIP</a>
   </h1>
   <p class="article-author">By
        
@@ -106,14 +103,14 @@
 		<div id="toc" class="toc-article">
 			<strong class="toc-title">文章目录</strong>
 		
-			<ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#MySQL%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E5%AF%BC%E8%AF%BB"><span class="toc-number">1.</span> <span class="toc-text">MySQL源码分析导读</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E5%BF%85%E8%A6%81%E7%9A%84%E8%BD%AF%E4%BB%B6%E5%92%8C%E8%B0%83%E8%AF%95%E5%B7%A5%E5%85%B7"><span class="toc-number">2.</span> <span class="toc-text">安装必要的软件和调试工具</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Xcode-IDE%E5%AE%89%E8%A3%85"><span class="toc-number">2.1.</span> <span class="toc-text">Xcode IDE安装</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E8%A3%85gdb-%E8%B0%83%E8%AF%95%E5%99%A8"><span class="toc-number">2.2.</span> <span class="toc-text">安装gdb 调试器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-cmake-%E5%B7%A5%E5%85%B7"><span class="toc-number">2.3.</span> <span class="toc-text">安装 cmake 工具</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%87%86%E5%A4%87MySQL%E6%BA%90%E7%A0%81"><span class="toc-number">3.</span> <span class="toc-text">准备MySQL源码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9E%84%E5%BB%BA-Xc"><span class="toc-number">4.</span> <span class="toc-text">构建 Xc</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Xcode-%E8%B0%83%E8%AF%95"><span class="toc-number">5.</span> <span class="toc-text">Xcode 调试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li></ol>
+			<ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#MySQL%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E5%AF%BC%E8%AF%BB"><span class="toc-number">1.</span> <span class="toc-text">MySQL源码分析导读</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E5%BF%85%E8%A6%81%E7%9A%84%E8%BD%AF%E4%BB%B6%E5%92%8C%E8%B0%83%E8%AF%95%E5%B7%A5%E5%85%B7"><span class="toc-number">2.</span> <span class="toc-text">安装必要的软件和调试工具</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#VSCode-IDE%E5%AE%89%E8%A3%85"><span class="toc-number">2.1.</span> <span class="toc-text">VSCode IDE安装</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E8%A3%85gdb-%E8%B0%83%E8%AF%95%E5%99%A8"><span class="toc-number">2.2.</span> <span class="toc-text">安装gdb 调试器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-cmake-make-%E5%B7%A5%E5%85%B7"><span class="toc-number">2.3.</span> <span class="toc-text">安装 cmake &amp; make 工具</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%87%86%E5%A4%87MySQL%E6%BA%90%E7%A0%81"><span class="toc-number">3.</span> <span class="toc-text">准备MySQL源码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-cmake-tools-%E6%8F%92%E4%BB%B6"><span class="toc-number">4.</span> <span class="toc-text">安装 cmake tools 插件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B0%83%E8%AF%95%E9%85%8D%E7%BD%AE"><span class="toc-number">5.</span> <span class="toc-text">调试配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li></ol>
 		
 		</div>
 		
 		<h3 id="MySQL源码分析导读"><a href="#MySQL源码分析导读" class="headerlink" title="MySQL源码分析导读"></a>MySQL源码分析导读</h3><blockquote>
 <p> 为了更好的使用MySQL数据库，从而在数据库架构设计与应用时给出最好的解决方案,从今天开始对MySQL源码进行一些初步的学习和分析。<br> 当然，首先推荐几本书：Pro MySQL , Expert MySQL , mariadb的设计和实现。 另外就是构建阅读和调试环境，今天我们就主要从环境的<br> 构建说起，MAC 下面最完备的IDE就是 Xcode了，接下来我们看一下，如何使用Xcode来进行MySQL的代码阅读和调试工作。</p>
 </blockquote>
-<h3 id="安装必要的软件和调试工具"><a href="#安装必要的软件和调试工具" class="headerlink" title="安装必要的软件和调试工具"></a>安装必要的软件和调试工具</h3><h4 id="Xcode-IDE安装"><a href="#Xcode-IDE安装" class="headerlink" title="Xcode IDE安装"></a>Xcode IDE安装</h4><p>AppStore上面搜索 Xcode，然后下载安装即可。 </p>
+<h3 id="安装必要的软件和调试工具"><a href="#安装必要的软件和调试工具" class="headerlink" title="安装必要的软件和调试工具"></a>安装必要的软件和调试工具</h3><h4 id="VSCode-IDE安装"><a href="#VSCode-IDE安装" class="headerlink" title="VSCode IDE安装"></a>VSCode IDE安装</h4><p>在官网下载合适的版本：<a target="_blank" rel="noopener" href="https://code.visualstudio.com/">https://code.visualstudio.com/</a> </p>
 <h4 id="安装gdb-调试器"><a href="#安装gdb-调试器" class="headerlink" title="安装gdb 调试器"></a>安装gdb 调试器</h4><ol>
 <li><p>安装 homebrew </p>
 <p> 官方文档： <a target="_blank" rel="noopener" href="http://brew.sh/">http://brew.sh/</a></p>
@@ -122,20 +119,17 @@
 <p> <a target="_blank" rel="noopener" href="http://ntraft.com/installing-gdb-on-os-x-mavericks/">http://ntraft.com/installing-gdb-on-os-x-mavericks/</a></p>
 </li>
 </ol>
-<h4 id="安装-cmake-工具"><a href="#安装-cmake-工具" class="headerlink" title="安装 cmake 工具"></a>安装 cmake 工具</h4><p>mysql的编译是采用的cmake ，官网直接下载安装即可：<br>cmake <a target="_blank" rel="noopener" href="http://www.macupdate.com/app/mac/49301/cmake2014-5-3CMake">官网下载</a></p>
-<h3 id="准备MySQL源码"><a href="#准备MySQL源码" class="headerlink" title="准备MySQL源码"></a>准备MySQL源码</h3><p>推荐Percona 版本或者Mariadb<br>Percona 源码 <a target="_blank" rel="noopener" href="https://www.percona.com/downloads/Percona-Server-5.6/">下载链接</a>.<br>Mariadb 源码 <a target="_blank" rel="noopener" href="https://downloads.mariadb.org/">下载链接</a> .</p>
-<h3 id="构建-Xc"><a href="#构建-Xc" class="headerlink" title="构建 Xc"></a>构建 Xc</h3><h3 id="Xcode-调试"><a href="#Xcode-调试" class="headerlink" title="Xcode 调试"></a>Xcode 调试</h3><p>Xcode中调试 MySQL ， 配置三个三个环节变量：</p>
-<p>Set the active schema选项[build右侧第二个选项,如图中 mysqld的位置]中选择 mysqld, 然后在同一个列表里面选择编辑schema,<br>会弹出一个窗口, 点击 RUN , 然后 Arguments Passed On launch 添加三个变量.</p>
-<p><img src="/img/xcode-schema.png" alt="active schema"></p>
-<pre><code>--user=ruiaylin 
---basedir=/Users/ruiaylin/Documents/MySQL/percona-server-5.6.24/work 
---datadir=/Users/ruiaylin/Documents/MySQL/percona-server-5.6.24/work/data
-</code></pre>
-<p><img src="/img/xcode-schema1.png" alt="active schema"></p>
-<p>如图所示</p>
-<p>   my.cnf 放到 &#x2F;etc下面。</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>   尽情享受吧</p>
-  
+<h4 id="安装-cmake-make-工具"><a href="#安装-cmake-make-工具" class="headerlink" title="安装 cmake &amp; make 工具"></a>安装 cmake &amp; make 工具</h4><p>MySQL的编译是采用的cmake ，官网直接下载安装即可：<br>cmake <a target="_blank" rel="noopener" href="http://www.macupdate.com/app/mac/49301/cmake2014-5-3CMake">官网下载</a></p>
+<p>也可以直接通过brew来安装</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brew install cmake</span><br></pre></td></tr></table></figure>
+
+<p>正常情况安装了xcode的基础开发套件make会安装进来。</p>
+<blockquote>
+<p>我在用的版本。</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">➜  cpp cmake --version</span><br><span class="line">cmake version 3.26.4</span><br><span class="line"></span><br><span class="line">CMake suite maintained and supported by Kitware (kitware.com/cmake).</span><br><span class="line">➜  cpp make -version</span><br><span class="line">GNU Make 3.81</span><br><span class="line">Copyright (C) 2006  Free Software Foundation, Inc.</span><br><span class="line">This is free software; see the source for copying conditions.</span><br><span class="line">There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A</span><br><span class="line">PARTICULAR PURPOSE.</span><br><span class="line"></span><br><span class="line">This program built for i386-apple-darwin11.3.0</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="准备MySQL源码"><a href="#准备MySQL源码" class="headerlink" title="准备MySQL源码"></a>准备MySQL源码</h3><p>根据需要下载所需要的版本的源码。推荐最新版或者你们公司在用的版本，该方法同样适用Xtrabackup工具。<br>Percona 分支下载 源码 <a target="_blank" rel="noopener" href="https://www.percona.com/downloads">下载链接</a>.  </p>
+<h3 id="安装-cmake-tools-插件"><a href="#安装-cmake-tools-插件" class="headerlink" title="安装 cmake tools 插件"></a>安装 cmake tools 插件</h3><h3 id="调试配置"><a href="#调试配置" class="headerlink" title="调试配置"></a>调试配置</h3><h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3>  
 	</div>
 		<footer class="article-footer clearfix">
 <div class="article-catetags">
@@ -157,7 +151,7 @@
 
 	<div class="article-share" id="share">
 	
-	  <div data-url="http://ruiaylin.github.io/2024/03/13/sourcecode-2-debug-with-vscode/" data-title="MySQL源码之-调试环境VSCode | ruiayLin&#39;s Blog" data-tsina="" class="share clearfix">
+	  <div data-url="http://ruiaylin.github.io/2024/03/13/sourcecode-2-debug-with-vscode/" data-title="MySQL源码之-调试环境VSCode-WIP | ruiayLin&#39;s Blog" data-tsina="" class="share clearfix">
 	  </div>
 	
 	</div>
@@ -191,7 +185,7 @@
   <div id="toc" class="toc-aside">
   <strong class="toc-title">文章目录</strong>
  
- <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#MySQL%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E5%AF%BC%E8%AF%BB"><span class="toc-number">1.</span> <span class="toc-text">MySQL源码分析导读</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E5%BF%85%E8%A6%81%E7%9A%84%E8%BD%AF%E4%BB%B6%E5%92%8C%E8%B0%83%E8%AF%95%E5%B7%A5%E5%85%B7"><span class="toc-number">2.</span> <span class="toc-text">安装必要的软件和调试工具</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Xcode-IDE%E5%AE%89%E8%A3%85"><span class="toc-number">2.1.</span> <span class="toc-text">Xcode IDE安装</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E8%A3%85gdb-%E8%B0%83%E8%AF%95%E5%99%A8"><span class="toc-number">2.2.</span> <span class="toc-text">安装gdb 调试器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-cmake-%E5%B7%A5%E5%85%B7"><span class="toc-number">2.3.</span> <span class="toc-text">安装 cmake 工具</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%87%86%E5%A4%87MySQL%E6%BA%90%E7%A0%81"><span class="toc-number">3.</span> <span class="toc-text">准备MySQL源码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9E%84%E5%BB%BA-Xc"><span class="toc-number">4.</span> <span class="toc-text">构建 Xc</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Xcode-%E8%B0%83%E8%AF%95"><span class="toc-number">5.</span> <span class="toc-text">Xcode 调试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li></ol>
+ <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#MySQL%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E5%AF%BC%E8%AF%BB"><span class="toc-number">1.</span> <span class="toc-text">MySQL源码分析导读</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E5%BF%85%E8%A6%81%E7%9A%84%E8%BD%AF%E4%BB%B6%E5%92%8C%E8%B0%83%E8%AF%95%E5%B7%A5%E5%85%B7"><span class="toc-number">2.</span> <span class="toc-text">安装必要的软件和调试工具</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#VSCode-IDE%E5%AE%89%E8%A3%85"><span class="toc-number">2.1.</span> <span class="toc-text">VSCode IDE安装</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E8%A3%85gdb-%E8%B0%83%E8%AF%95%E5%99%A8"><span class="toc-number">2.2.</span> <span class="toc-text">安装gdb 调试器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-cmake-make-%E5%B7%A5%E5%85%B7"><span class="toc-number">2.3.</span> <span class="toc-text">安装 cmake &amp; make 工具</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%87%86%E5%A4%87MySQL%E6%BA%90%E7%A0%81"><span class="toc-number">3.</span> <span class="toc-text">准备MySQL源码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-cmake-tools-%E6%8F%92%E4%BB%B6"><span class="toc-number">4.</span> <span class="toc-text">安装 cmake tools 插件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B0%83%E8%AF%95%E9%85%8D%E7%BD%AE"><span class="toc-number">5.</span> <span class="toc-text">调试配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li></ol>
  
   </div>
 
